@@ -1,0 +1,32 @@
+<%- include('header') %>
+    <div class="card mt-3">
+        <div class="card-body">
+            <div class="card-title">Product Type</div>
+            <div class="mt-3">
+                <a class="btn btn-info mt-3 " href="/addGroupProduct">+Add</a>
+                <table class="table table-bordered table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th width="170px"></th>
+                            <th>Name of Product</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% groupProducts.forEach((groupProduct)=> { %>
+                            <tr>
+                                <td class="text-center">
+                                    <a class="btn btn-info" href="/editgroupProduct/<%= groupProduct.id %>">Edit</a>
+                                    <a class="btn btn-danger" href="deletegroupProduct/<%= groupProduct.id %>"
+                                        onclick="return confirm('Are you sure to delete ?')">Delete</a>
+                                </td>
+                                <td>
+                                    <%= groupProduct.name %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <%- include('footer') %>
