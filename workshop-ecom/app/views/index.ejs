@@ -1,0 +1,24 @@
+<%- include('page_header') %>
+  <div class="container mt-3">
+    <div class="row">
+      <% products.forEach((product)=> { %>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-xs-12"></div>
+        <div class="card">
+          <img src="images/<%= product.img%>" class="card-img-top" />
+          <div class="card-body">
+            <div class="text-center">
+              <%= product.name %>
+            </div>
+            <div class="text-center text-bold text-info">
+              <%= product.price %>
+            </div>
+            <div class="text-center"> <a class="btn btn-info mt-2" href="/addToCart/<%= product.id %>"><span
+                  class="material-icons material-symbols-outlined">
+                  shopping_cart
+                </span>Add to cart</a></div>
+          </div>
+        </div>
+        <% }) %>
+    </div>
+  </div>
+  <%- include('page_footer') %>
