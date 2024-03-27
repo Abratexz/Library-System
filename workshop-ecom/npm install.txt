@@ -1,7 +1,0 @@
-express-session
-nodemon
-mysql
-dayjs
-jsonwebtoken
-formidable
-mysql2
