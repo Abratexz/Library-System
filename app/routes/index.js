@@ -38,7 +38,7 @@ function isLogin(req, res, next) {
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
-  res.render("login");
+  res.render("index");
 });
 
 router.get("/home", isLogin, (req, res) => {
@@ -68,6 +68,8 @@ router.post("/login", (req, res) => {
       let token = jwt.sign({ id: id, name: name }, secretCode);
       req.session.token = token;
       req.session.name = name;
+      req.session.usr = result[0].usr;
+      req.session.img = result[0].img;
 
       res.redirect("/home");
     } else {
@@ -94,6 +96,64 @@ router.post("/register", (req, res) => {
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
     res.redirect("/login");
+  });
+});
+
+router.get("/profile/", isLogin, (req, res) => {
+  let data = jwt.verify(req.session.token, secretCode);
+  let sql = "SELECT * FROM tb_user WHERE id = ?";
+  let params = [data.id];
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.render("profile", { user: result[0] });
+  });
+});
+
+router.get("/editProfile/:id", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_user WHERE id = ?";
+  let params = req.params.id;
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.render("editProfile", { user: result[0] });
+  });
+});
+
+router.post("/editProfile/:id", isLogin, (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.parse(req, (error, fields, file) => {
+    let filePath = file.img[0].filepath;
+    let newPath = "C://Users/nemo_/Desktop/Library-System/app/public/images/";
+    let pathUpload = newPath + file.img[0].originalFilename;
+
+    fs.copyFile(filePath, pathUpload, () => {
+      let sqlSelect = "SELECT img FROM tb_user WHERE id = ?";
+      let paramSelect = req.params.id;
+
+      conn.query(sqlSelect, paramSelect, (err, oldImg) => {
+        if (err) throw err;
+        let newImg = oldImg[0];
+        fs.unlink(newPath + newImg.img, (err) => {
+          if (err) {
+            console.log(err);
+          }
+          // insert to database
+          let sql =
+            "UPDATE tb_user SET name = ? , usr = ?, pwd = ? , img = ? WHERE id = ?";
+          let params = [
+            fields["name"],
+            fields["usr"],
+            fields["pwd"],
+            file.img[0].originalFilename,
+            req.params.id,
+          ];
+          conn.query(sql, params, (err, result) => {
+            if (err) throw err;
+            res.redirect("/profile");
+          });
+        });
+      });
+    });
   });
 });
 
