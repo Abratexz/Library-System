@@ -13,12 +13,38 @@
 </head>
 <body class="bg-light">
     <!-- Fixed Menu Bar -->
-      <nav class="navbar navbar-expand-lg navbar-light border border-start-0 border-top-0 border-end-0 border-dark border-ๅ">
+      <nav class="navbar navbar-expand-lg navbar-light border border-start-0 border-top-0 border-end-0 border-dark border-1">
         <div class="container-fluid">
             <a class="navbar-brand special-elite-regular text-success " style="padding-left: 20px;" href="#">LIBRARY</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            <div>
+                <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" tabindex="-1" aria-disabled="true">HOME</a>
+                    </li>
+                    <!-- Dropdown Menu || Category menu-->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            CATEGORY
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
+                            <!-- type for book change later -->
+                            <li><a class="dropdown-item" href="#">Generalities</a></li>
+                            <li><a class="dropdown-item" href="#">Philosophy</a></li>
+                            <li><a class="dropdown-item" href="#">Religion</a></li>
+                            <li><a class="dropdown-item" href="#">Socialstudies</a></li>
+                            <li><a class="dropdown-item" href="#">Languages</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" tabindex="-1" aria-disabled="true">HISTORY</a>
+                    </li>
+                </ul>
+            </div>
             <!-- Search Bar -->
             <div class="collapse navbar-collapse justify-content-center" id="navbarScroll">
                 <form class="d-flex">
@@ -27,21 +53,21 @@
             </div>
             <div class="justify-content-end padding-right">
                 <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
-                    <!-- Dropdown Menu -->
+                    <!-- Dropdown Menu || User Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Username
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
                             <li><a class="dropdown-item" href="#">Account</a></li>
                             <li><a class="dropdown-item" href="#">Log Out</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><a class="dropdown-item" href="#">Support</a></li>
                         </ul>
                     </li>
                     <!-- User Profile -->
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                    <li class="nav-item" style="padding-left: 10px;">
+                        <img class="rounded-circle" src="background.jpeg" class="img-thumbnail" alt="..." style="width: 45px; height: 45px;">
                     </li>
                 </ul>
             </div>
