@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="index.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -11,9 +12,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Edu+NSW+ACT+Foundation&family=Luckiest+Guy&family=Protest+Revolution&family=Special+Elite&display=swap');
     </style>
 </head>
-<body class="bg-light">
+<body>
     <!-- Fixed Menu Bar -->
-      <nav class="navbar navbar-expand-lg navbar-light shadow border border-start-0 border-top-0 border-end-0 border-light border-1">
+    <nav class="navbar navbar-expand-lg navbar-light shadow border border-start-0 border-top-0 border-end-0 border-light border-1">
         <div class="container-fluid">
             <a class="navbar-brand special-elite-regular text-success ps-2" href="#">LIBRARY</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,14 +68,67 @@
                     </li>
                     <!-- User Profile -->
                     <li class="nav-item ps-2">
-                        <img class="rounded-circle" src="background.jpeg" class="img-thumbnail" style="width: 45px; height: 45px;">
+                        <img src="background.jpeg" class="img-thumbnail rounded-circle" style="width: 45px; height: 45px;">
                     </li>
                 </ul>
             </div>
         </div>
-      </nav>
+    </nav>
+
+    <!-- Main -->
+    <main class="py-6 bg-surface-secondary mt-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-6 mx-auto">
+                    <!-- Profile Pictuer -->
+                    <div class="card shadow border-0 mt-4 mb-10" >
+                        <div class="card-body text-center">
+                            <div class="align-items-center">
+                                    <div> 
+                                        <a href="#" class="avatar avatar-lg rounded-circle">
+                                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTHyh-cy7l596itqu9bgVP0pAdQ7N7CXfMa-o84wBC4g&s">
+                                            <button class="btn btn-link text-dark" style="position: absolute; top: 10px; right: 10px;">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                        </a>
+                                    </div>
+                                    <div class="mt-4">
+                                        <span class="h4 d-block mb-0">USER TEST</span>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Form Setting -->
+                    <form class="mt-3 mb-6 ">
+                        <div class="card shadow">
+                            <div class="card-body fs-5 ">
+                                <div class="">
+                                    <label class="form-label ps-2" for="first_name">Name</label>
+                                    <input type="text" class="form-control rounded-pill ps-3" id="first_name">
+                                </div>
+                                <div class="">
+                                    <label class="form-label ps-2 mt-3" for="first_name">Username</label>
+                                    <input type="text" class="form-control rounded-pill ps-3" id="first_name">
+                                </div>
+                                <div class="">
+                                    <label class="form-label ps-2 mt-3" for="first_name">Password</label>
+                                    <input type="text" class="form-control rounded-pill ps-3" id="first_name">
+                                </div>
+
+                                <div class="text-end ">
+                                    <button type="button" class="btn btn-md btn-neutral rounded-pill mt-3 me-2">Cancel</button>
+                                    <button type="submit" class="btn btn-md btn-primary rounded-pill mt-3 ">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    
 </body>
 </html>
