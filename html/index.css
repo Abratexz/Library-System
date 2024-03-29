@@ -1,6 +1,6 @@
 /* Login / Register Image Background */
 .background-img{
-    background-image: url('background.jpeg'); /* กำหนด URL ของรูปภาพ */
+    background-image: url('pic/background.jpeg'); /* กำหนด URL ของรูปภาพ */
     background-size: cover; /* กำหนดให้รูปภาพขยายและปรับขนาดให้เต็มพื้นที่ */
     background-position: center; /* กำหนดตำแหน่งของรูปภาพที่จะแสดงตรงกลาง */
     height: 100vh; /* กำหนดความสูงของพื้นหลังให้เต็มหน้าจอ */
