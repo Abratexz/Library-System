@@ -70,7 +70,7 @@ router.post("/login", (req, res) => {
       req.session.name = name;
       req.session.usr = result[0].usr;
       req.session.img = result[0].img;
-
+      req.session.level = result[0].level;
       res.redirect("/home");
     } else {
       res.send("Username Or Password Invalid");
@@ -154,6 +154,116 @@ router.post("/editProfile/:id", isLogin, (req, res) => {
         });
       });
     });
+  });
+});
+
+router.get("/user", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_user ORDER BY id DESC";
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+    res.render("user", { users: result });
+  });
+});
+
+router.get("/addUser", isLogin, (req, res) => {
+  res.render("addUser", { user: {} });
+});
+
+router.post("/addUser", isLogin, (req, res) => {
+  let sql = "INSERT INTO tb_user SET ?";
+  let params = req.body;
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/user");
+  });
+});
+
+router.get("/editUser/:id", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_user WHERE id = ?";
+  let params = req.params.id;
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.render("addUser", { user: result[0] });
+  });
+});
+
+router.post("/editUser/:id", isLogin, (req, res) => {
+  let sql =
+    "UPDATE tb_user SET name = ?, usr = ?, pwd = ?, phone = ?, level = ? WHERE id = ? ";
+  let params = [
+    req.body["name"],
+    req.body["usr"],
+    req.body["pwd"],
+    req.body["phone"],
+    req.body["level"],
+    req.params.id,
+  ];
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/user");
+  });
+});
+
+router.get("/deleteUser/:id", isLogin, (req, res) => {
+  let sql = "DELETE FROM tb_user WHERE id = ?";
+  let params = req.params.id;
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/user");
+  });
+});
+
+router.get("/groupBook", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_group_book ORDER BY id DESC";
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+    res.render("groupBook", { groupBooks: result });
+  });
+});
+
+router.get("/addGroupBook", isLogin, (req, res) => {
+  res.render("addGroupBook", { groupBook: {} });
+});
+
+router.post("/addGroupBook", isLogin, (req, res) => {
+  let sql = "INSERT INTO tb_group_book SET ?";
+  let params = req.body;
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/groupBook");
+  });
+});
+
+router.get("/editGroupBook/:id", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_group_book WHERE id = ?";
+  let params = req.params.id;
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.render("addGroupBook", { groupBook: result[0] });
+  });
+});
+
+router.post("/editGroupBook/:id", isLogin, (req, res) => {
+  let sql = "UPDATE tb_group_book SET name_tag = ? WHERE id = ? ";
+  let params = [req.body["name_tag"], req.params.id];
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/groupBook");
+  });
+});
+
+router.get("/deleteGroupBook/:id", isLogin, (req, res) => {
+  let sql = "DELETE FROM tb_group_book WHERE id = ?";
+  let params = req.params.id;
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/groupBook");
   });
 });
 
