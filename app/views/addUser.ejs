@@ -1,0 +1,43 @@
+<%- include('header') %>
+    <%- include('navbar') %>
+        <div class="container mt-5">
+            <form method="post">
+                <div class="card ">
+                    <div class="card-body fs-5 ">
+                        <div class="">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" value="<%= user.name %>">
+                        </div>
+                        <div class="">
+                            <label class="form-label mt-3">Username</label>
+                            <input type="text" class="form-control" name="usr" value="<%= user.usr %>">
+                        </div>
+                        <div class="">
+                            <label class="form-label mt-3">Password</label>
+                            <input type="password" class="form-control" name="pwd" value="<%= user.pwd %>">
+                        </div>
+                        <div class="">
+                            <label class="form-label mt-3">Phone/label>
+                                <input type="text" class="form-control" name="phone" value="<%= user.phone %>">
+                        </div>
+                        <div class=" mt-3">
+                            <label>Level</label>
+                            <div>
+                                <input type="radio" name="level" value="user" <% if (user.level=='user' ) { %>checked
+                                <%} %>
+                                    /> User
+                                    <input type="radio" name="level" value="admin" <% if (user.level=='admin' ) {
+                                        %>checked
+                                    <%} %>/> Admin
+                            </div>
+                        </div>
+                        <div class="text-end ">
+                            <a type="button" class="btn btn-md btn-neutral mt-3 me-2" href="/user">Cancel</a>
+                            <button type="submit" class="btn btn-md btn-primary mt-3 ">Save</button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+        <%- include('footer') %>

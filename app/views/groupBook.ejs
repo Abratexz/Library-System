@@ -1,0 +1,32 @@
+<%- include('header') %>
+    <%- include('navbar') %>
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="card-title">User</div>
+                <a class="btn btn-primary mt-3 " href="/addGroupBook">+Add</a>
+                <table class="table table-bordered table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th width="170px"></th>
+                            <th>Tag of Book</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <% groupBooks.forEach((groupBook)=> { %>
+                                <td>
+                                    <a class="btn btn-primary" href="/editGroupBook/<%= groupBook.id %>">Edit</a>
+                                    <a class="btn btn-danger" href="/deleteGroupBook/<%= groupBook.id %>"
+                                        onclick="return confirm('Are you sure to delete ?')">Delete</a>
+                                </td>
+                                <td>
+                                    <%= (groupBook.name_tag) %>
+                                </td>
+
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <%- include('footer') %>
