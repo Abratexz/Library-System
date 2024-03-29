@@ -267,4 +267,133 @@ router.get("/deleteGroupBook/:id", isLogin, (req, res) => {
   });
 });
 
+router.get("/book", isLogin, (req, res) => {
+  let sql =
+    "SELECT tb_book.* , tb_group_book.name_tag AS group_book_name_tag FROM tb_book " +
+    "LEFT JOIN tb_group_book ON tb_group_book.id = tb_book.group_book_id " +
+    "ORDER BY tb_book.id DESC";
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+    res.render("book", { books: result });
+  });
+});
+
+router.get("/addBook", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+    res.render("addBook", { book: {}, groupBooks: result });
+  });
+});
+
+router.post("/addBook", isLogin, (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.parse(req, (err, fields, file) => {
+    if (!file || !file.img) {
+      req.session.message = "You must upload images!!!";
+      res.redirect("/book");
+    } else {
+      let filePath = file.img[0].filepath;
+      let newPath = "C://Users/nemo_/Desktop/Library-System/app/public/images/";
+      newPath += file.img[0].originalFilename;
+      fs.copyFile(filePath, newPath, () => {
+        let sql =
+          "INSERT INTO tb_book(group_book_id, isbn, name, detail, img) VALUES(?, ?, ?, ?, ?)";
+        let params = [
+          fields["group_book_id"],
+          fields["isbn"],
+          fields["name"],
+          fields["detail"],
+          file.img[0].originalFilename,
+        ];
+        conn.query(sql, params, (err, result) => {
+          if (err) throw err;
+          res.redirect("/book");
+        });
+      });
+    }
+  });
+});
+
+router.get("/editBook/:id", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_book WHERE id = ?";
+  let params = req.params.id;
+
+  conn.query(sql, params, (err, book) => {
+    if (err) throw err;
+
+    sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
+    conn.query(sql, (err, groupBooks) => {
+      if (err) throw err;
+      console.log(book[0]);
+      console.log(groupBooks);
+      res.render("addBook", { book: book[0], groupBooks: groupBooks });
+    });
+  });
+});
+
+router.post("/editBook/:id", isLogin, (req, res) => {
+  let form = new formidable.IncomingForm();
+  form.parse(req, (err, fields, file) => {
+    let filePath = file.img[0].filepath;
+    let newPath = "C://Users/nemo_/Desktop/Library-System/app/public/images/";
+    let pathUpload = newPath + file.img[0].originalFilename;
+
+    fs.copyFile(filePath, pathUpload, () => {
+      let sqlSelect = "SELECT img FROM tb_book WHERE id = ?";
+      let paramSelect = req.params.id;
+
+      conn.query(sqlSelect, paramSelect, (err, oldBook) => {
+        if (err) throw err;
+        let Book = oldBook[0];
+        let oldImages = newPath + Book.img;
+        if (oldImages != pathUpload) {
+          fs.unlink(newPath + Book.img, (err) => {
+            if (err) {
+              console.log(err);
+            }
+
+            let sql =
+              "UPDATE tb_book SET group_book_id = ?, isbn = ?, name = ?, detail = ?, img = ? WHERE id = ?";
+            let params = [
+              fields["group_book_id"],
+              fields["isbn"],
+              fields["name"],
+              fields["detail"],
+              file.img[0].originalFilename,
+              req.params.id,
+            ];
+            console.log(params);
+
+            conn.query(sql, params, (err, result) => {
+              if (err) throw err;
+              res.redirect("/book");
+            });
+          });
+        } else {
+          req.session.message = "You can't upload same images!!!";
+          res.redirect("/book");
+        }
+      });
+    });
+  });
+});
+
+router.get("/deleteBook/:id/:img", isLogin, (req, res) => {
+  let newPath = "C://Users/nemo_/Desktop/Library-System/app/public/images/";
+
+  newPath += req.params.img;
+
+  fs.unlink(newPath, (err) => {
+    if (err) throw err;
+
+    let sql = "DELETE FROM tb_book WHERE id = ?";
+    let params = req.params.id;
+
+    conn.query(sql, params, (err, results) => {
+      if (err) throw err;
+      res.redirect("/book");
+    });
+  });
+});
 module.exports = router;
