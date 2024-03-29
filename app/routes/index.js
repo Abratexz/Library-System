@@ -8,7 +8,7 @@ let formidable = require("formidable");
 let fs = require("fs");
 let dayjs = require("dayjs");
 let numeral = require("numeral");
-let dayFormat = "DD/MM/YYYY";
+let dayFormat = "DD/MM/YYYY HH:mm:ss";
 router.use(
   session({
     secret: "sessionformylibraryprojectkey",
@@ -41,8 +41,44 @@ router.get("/", function (req, res, next) {
   res.render("index");
 });
 
-router.get("/home", isLogin, (req, res) => {
-  res.render("home");
+router.get("/home", isLogin, async (req, res) => {
+  try {
+    let conn = require("./connect2");
+    let page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    let BooksPerPage = parseInt(req.query.BooksPerPage) || 10; // Default to 10 Books per page if not provided
+    let offset = (page - 1) * BooksPerPage;
+    let params = [];
+    let sql = "SELECT COUNT(*) AS total FROM tb_book"; // Count total number of books
+
+    if (req.query.search) {
+      sql += " WHERE name LIKE ?";
+      params.push("%" + req.query.search + "%");
+    }
+
+    let [countResult] = await conn.query(sql, params);
+    let totalBooks = countResult[0].total;
+    let totalPages = Math.ceil(totalBooks / BooksPerPage);
+
+    // Now fetch the books for the current page
+    sql = "SELECT * FROM tb_book";
+    if (req.query.search) {
+      sql += " WHERE name LIKE ?";
+      params.push("%" + req.query.search + "%");
+    }
+    sql += " ORDER BY id DESC LIMIT ? OFFSET ?";
+    params.push(BooksPerPage, offset);
+
+    let [books, fields] = await conn.query(sql, params);
+
+    res.render("home", {
+      books: books,
+      currentPage: page,
+      BooksPerPage: BooksPerPage,
+      totalPages: totalPages,
+    });
+  } catch (error) {
+    res.send("Error: " + error);
+  }
 });
 
 router.get("/logout", isLogin, (req, res) => {
@@ -99,11 +135,10 @@ router.post("/register", (req, res) => {
   });
 });
 
-router.get("/profile/", isLogin, (req, res) => {
+router.get("/profile", isLogin, (req, res) => {
   let data = jwt.verify(req.session.token, secretCode);
   let sql = "SELECT * FROM tb_user WHERE id = ?";
   let params = [data.id];
-
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
     res.render("profile", { user: result[0] });
@@ -298,12 +333,14 @@ router.post("/addBook", isLogin, (req, res) => {
       newPath += file.img[0].originalFilename;
       fs.copyFile(filePath, newPath, () => {
         let sql =
-          "INSERT INTO tb_book(group_book_id, isbn, name, detail, img) VALUES(?, ?, ?, ?, ?)";
+          "INSERT INTO tb_book(group_book_id, isbn, author, book_name, detail,status, img) VALUES(?, ?, ?, ?, ?, ?, ?)";
         let params = [
           fields["group_book_id"],
           fields["isbn"],
-          fields["name"],
+          fields["author"],
+          fields["book_name"],
           fields["detail"],
+          fields["status"],
           file.img[0].originalFilename,
         ];
         conn.query(sql, params, (err, result) => {
@@ -325,8 +362,6 @@ router.get("/editBook/:id", isLogin, (req, res) => {
     sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
     conn.query(sql, (err, groupBooks) => {
       if (err) throw err;
-      console.log(book[0]);
-      console.log(groupBooks);
       res.render("addBook", { book: book[0], groupBooks: groupBooks });
     });
   });
@@ -335,45 +370,47 @@ router.get("/editBook/:id", isLogin, (req, res) => {
 router.post("/editBook/:id", isLogin, (req, res) => {
   let form = new formidable.IncomingForm();
   form.parse(req, (err, fields, file) => {
-    let filePath = file.img[0].filepath;
-    let newPath = "C://Users/nemo_/Desktop/Library-System/app/public/images/";
-    let pathUpload = newPath + file.img[0].originalFilename;
+    let sqlSelect = "SELECT img FROM tb_book WHERE id = ?";
+    let paramSelect = req.params.id;
+    conn.query(sqlSelect, paramSelect, (err, oldBook) => {
+      if (err) throw err;
+      let Book = oldBook[0];
 
-    fs.copyFile(filePath, pathUpload, () => {
-      let sqlSelect = "SELECT img FROM tb_book WHERE id = ?";
-      let paramSelect = req.params.id;
+      let imgFileName = Book.img; // ค่าปกติของ Img ทื่มีอยู่ใน Data aka  รูปเก่า
+      if (file.img && file.img.length > 0) {
+        // ถ้ามีรูปใหม่อัปโหลดเข้ามา
+        let filePath = file.img[0].filepath;
+        let newPath =
+          "C://Users/nemo_/Desktop/Library-System/app/public/images/";
+        imgFileName = file.img[0].originalFilename; // ใช้รูปใหม่
 
-      conn.query(sqlSelect, paramSelect, (err, oldBook) => {
-        if (err) throw err;
-        let Book = oldBook[0];
-        let oldImages = newPath + Book.img;
-        if (oldImages != pathUpload) {
-          fs.unlink(newPath + Book.img, (err) => {
-            if (err) {
-              console.log(err);
-            }
-
-            let sql =
-              "UPDATE tb_book SET group_book_id = ?, isbn = ?, name = ?, detail = ?, img = ? WHERE id = ?";
-            let params = [
-              fields["group_book_id"],
-              fields["isbn"],
-              fields["name"],
-              fields["detail"],
-              file.img[0].originalFilename,
-              req.params.id,
-            ];
-            console.log(params);
-
-            conn.query(sql, params, (err, result) => {
-              if (err) throw err;
-              res.redirect("/book");
+        fs.copyFile(filePath, newPath + imgFileName, () => {
+          if (err) throw err;
+          if (Book.img !== imgFileName) {
+            // ถ้ารูปใหม่ต่างจากรูปเก่า
+            fs.unlink(newPath + Book.img, (err) => {
+              if (err) {
+                console.log(err);
+              }
             });
-          });
-        } else {
-          req.session.message = "You can't upload same images!!!";
-          res.redirect("/book");
-        }
+          }
+        });
+      }
+      let sql =
+        "UPDATE tb_book SET group_book_id = ?, isbn = ?, author = ?, book_name = ?, detail = ?,status = ?, img = ? WHERE id = ?";
+      let params = [
+        fields["group_book_id"],
+        fields["isbn"],
+        fields["author"],
+        fields["book_name"],
+        fields["detail"],
+        fields["status"],
+        imgFileName, // ใช้รูปใหม่ หรือรูปเก่าที่มี
+        req.params.id,
+      ];
+      conn.query(sql, params, (err, result) => {
+        if (err) throw err;
+        res.redirect("/book");
       });
     });
   });
@@ -393,6 +430,115 @@ router.get("/deleteBook/:id/:img", isLogin, (req, res) => {
     conn.query(sql, params, (err, results) => {
       if (err) throw err;
       res.redirect("/book");
+    });
+  });
+});
+
+router.get("/borrow/:id", isLogin, (req, res) => {
+  let sql = "SELECT * FROM tb_book WHERE id = ?";
+  let params = req.params.id;
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
+    conn.query(sql, (err, groupBooks) => {
+      if (err) throw err;
+      res.render("borrow", {
+        book: result[0],
+        groupBooks: groupBooks,
+      });
+    });
+  });
+});
+
+router.post("/borrow/:id", isLogin, async (req, res) => {
+  let data = jwt.verify(req.session.token, secretCode);
+  let conn = require("./connect2");
+  let bookId = req.params.id;
+  let id = data.id;
+  let bookStatusQuery = "SELECT status FROM tb_book WHERE id = ?";
+  let [bookStatusRow] = await conn.query(bookStatusQuery, [bookId]);
+  let bookStatus = bookStatusRow[0].status;
+
+  if (bookStatus === "Borrowed") {
+    req.session.message = "FAILED TO BORROW";
+    res.redirect("/home");
+  } else {
+    let duration = req.body["duration"];
+    let currentTime = dayjs().format(dayFormat);
+    let returnDate = dayjs().add(duration, "day").format(dayFormat);
+
+    let borrowSql = "INSERT INTO tb_borrow SET ?";
+    let borrowParams = {
+      user_id: data.id,
+      book_id: bookId,
+      borrow_date: currentTime,
+      return_date: returnDate,
+      duration: req.body["duration"],
+      borrow_status: "Borrowed",
+    };
+
+    // Insert into tb_borrow
+    let [borrowResult] = await conn.query(borrowSql, borrowParams);
+    let borrowId = borrowResult.insertId; // Get the auto-generated borrow_id
+
+    let updateBookSql = "UPDATE tb_book SET status = 'Borrowed' WHERE id = ? ";
+    await conn.query(updateBookSql, bookId);
+    // Insert into tb_history with borrow_id
+    let historySql = "INSERT INTO tb_history SET ?";
+    let historyParams = {
+      user_id: data.id,
+      book_id: bookId,
+      borrow_id: borrowId, // Use the borrow_id obtained from tb_borrow
+      borrow_history_date: currentTime,
+      return_history_date: returnDate,
+    };
+    await conn.query(historySql, historyParams);
+
+    req.session.message = "Book Borrowed Successfully !!";
+    res.redirect("/home");
+  }
+});
+
+router.get("/history", isLogin, async (req, res) => {
+  let conn = require("./connect2");
+  let data = jwt.verify(req.session.token, secretCode);
+
+  // Query to retrieve history data including book details
+  let sql =
+    "SELECT tb_book.*, tb_borrow.borrow_date, tb_history.return_history_date " +
+    "FROM tb_book " +
+    "JOIN tb_borrow ON tb_book.id = tb_borrow.book_id " +
+    "JOIN tb_history ON tb_borrow.id = tb_history.borrow_id " +
+    "WHERE tb_borrow.user_id = ?";
+
+  let params = [data.id];
+
+  try {
+    let [results] = await conn.query(sql, params);
+    res.render("history", { books: results });
+    console.log(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.get("/deleteHistory", isLogin, (req, res) => {
+  let deleteHistorySql = "DELETE FROM tb_history WHERE user_id = ?";
+  let deleteBorrowSql = "DELETE FROM tb_borrow WHERE user_id = ?";
+  let data = jwt.verify(req.session.token, secretCode);
+  let params = [data.id];
+  conn.query(deleteHistorySql, params, (err, result) => {
+    if (err) throw err;
+    conn.query(deleteBorrowSql, params, (err, result) => {
+      if (err) throw err;
+      // Fetch the updated history (empty after deletion)
+      let fetchSql = "SELECT * FROM tb_history WHERE user_id = ?";
+      conn.query(fetchSql, params, (err, history) => {
+        if (err) throw err;
+        res.render("history", { books: history });
+      });
     });
   });
 });

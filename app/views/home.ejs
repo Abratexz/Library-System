@@ -1,5 +1,86 @@
 <%- include('header') %>
 
     <%- include('navbar') %>
+        <% if (session.message !=undefined) {%>
+            <div
+                class="alert text-center mt-3 <%= session.message === 'Book Borrowed Successfully !!' ? 'text-success alert-success' : 'text-danger alert-danger' %> ">
+                <%= session.message %>
+                    <% if (session.message !=='Book Borrowed Successfully !!' ) { %><span>!! Book Status could be
+                            Already
+                            Borrowed or Lost !!</span>
+                        <% } %>
+                            <% session.message=undefined %>
+            </div>
+            <% } %>
+                <div class="container mt-2">
+                    <main class="card m-4 mt-10 bg-white shadow" style="height: 100%;">
+                        <div class="card-body">
+                            <h2 class="mt-2 text-dark text-center">- BOOKS -</h2>
+                            <div class="container mt-5">
+                                <div class="row justify-content-center"> <!-- Center the row -->
+                                    <% let count=0; %>
+                                        <% books.forEach((book)=> { %>
+                                            <% if (count % 5===0) { %> <!-- Start a new row for every 5 cards -->
+                                </div>
+                                <div class="row justify-content-center"> <!-- Close and open new row -->
+                                    <% } %>
+                                        <div class="col-xl-2 col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                                            <!-- Adjusted column sizes -->
+                                            <div class="card mb-3 shadow">
+                                                <img src="./images/<%= book.img %>" class="card-img-top"
+                                                    height="250px" />
+                                                <div class="card-body">
+                                                    <div class="h4 fw-bolder fs-6 text-center card-title">
+                                                        <%= book.book_name %>
+                                                    </div>
+                                                    <div class="text-center fw-normal text-secondary"
+                                                        style="font-size: 14px;">
+                                                        Author: <%= book.author %>
+                                                    </div>
 
-        <%- include('footer') %>
+                                                    <div class="text-center fw-normal <%= book.status === 'Available' ? 'text-success' : 'text-danger' %>"
+                                                        style="font-size: 14px;">
+                                                        Status: <%= book.status %>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <a class="btn btn-primary mt-2 text-sm"
+                                                            href="/borrow/<%= book.id %>">Borrow</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% count++; %>
+                                            <% }) %>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+
+
+
+                <!-- Pagination -->
+                <div class="container mt-3 text-center">
+                    <ul class="pagination justify-content-center">
+                        <% if (currentPage> 1) { %>
+                            <li class="page-item"><a class="page-link"
+                                    href="/home?page=<%= currentPage - 1 %>">Previous</a>
+                            </li>
+                            <% } %>
+                                <!-- Render pagination links dynamically -->
+                                <% for (let i=1; i <=totalPages; i++) { %>
+                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                        <a class=" page-link" href="/home?page=<%= i %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                    <% } %>
+                                        <% if (currentPage < totalPages) { %>
+                                            <li class="page-item"><a class="page-link"
+                                                    href="/home?page=<%= currentPage + 1 %>">Next</a></li>
+                                            <% } %>
+                    </ul>
+                </div>
+
+
+                <%- include('footer') %>

@@ -1,0 +1,72 @@
+<%- include('header') %>
+    <%- include('navbar') %>
+        <div class="container mt-2">
+            <form method="post">
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <div class="card-title">Add Book</div>
+                        <div class="mt-3 text-center">
+                            <label>Book</label>
+                            <% if (book.img !=undefined) { %>
+                                <div class="mt-2"><img src="../images/<%= book.img %>" width="200px"></div>
+                                <% } %>
+                        </div>
+                        <div class="card border-primary shadow mt-3">
+                            <div class="card-body">
+                                <div class="mt-3">
+                                    <label>Borrow Day</label>
+                                    <select name="duration" class="form-select">
+                                        <option value="1">1</option>
+                                        <option value="3">3</option>
+                                        <option value="5">5</option>
+                                        <option value="7">7</option>
+                                        <option value="14">14</option>
+                                    </select>
+
+                                </div>
+                                <div class="mt-3">
+                                    <label>Book Tag: <span class="text-primary">
+                                            <% groupBooks.forEach((group)=> { %>
+                                                <% if (group.id===book.group_book_id) { %>
+                                                    <%= group.name_tag %>
+                                                        <% } %>
+                                                            <% }) %>
+                                        </span></label>
+                                </div>
+                                <div class="mt-3">
+                                    <label>ISBN: <span class="text-primary">
+                                            <%= book.isbn %>
+                                        </span></label>
+                                </div>
+                                <div class="mt-3">
+                                    <label>Author: <span class="text-primary">
+                                            <%= book.author %>
+                                        </span></label>
+                                </div>
+                                <div class="mt-3">
+                                    <label>Book Name: <span class="text-primary">
+                                            <%= book.book_name %>
+                                        </span></label>
+
+                                </div>
+                                <div class="mt-3">
+                                    <label>Book Detail: <span class="text-primary">
+                                            <%= book.detail %>
+                                        </span></label>
+                                </div>
+                                <div class="mt-3">
+                                    <label>Book Status: <span class="text-primary">
+                                            <%= book.status %>
+                                        </span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a type="button" class="btn btn-md btn-neutral" href="/home">Cancel</a>
+                            <button type="submit" class="btn btn-info">Borrow</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <%- include('footer') %>

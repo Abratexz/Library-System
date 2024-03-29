@@ -1,64 +1,79 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="index.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <title></title>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Edu+NSW+ACT+Foundation&family=Luckiest+Guy&family=Protest+Revolution&family=Special+Elite&display=swap');
     </style>
 </head>
+
 <body class="bg-light">
     <!-- Fixed Menu Bar -->
     <nav class="navbar navbar-expand-lg navbar-light shadow light-green">
         <div class="container-fluid">
             <a class="navbar-brand special-elite-regular mt-1 ms-3 text-success" href="#">LIBRARY</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll"
+                aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div>
-                <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 ms-3 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 ms-3 navbar-nav-scroll"
+                    style="--bs-scroll-height: 100px;">
                     <!-- Home page link -->
                     <li class="nav-item p-1">
-                        <a class="nav-link active text-success" href="index.html" tabindex="-1" aria-disabled="true">HOME</a>
+                        <a class="nav-link active text-success" href="index.html" tabindex="-1"
+                            aria-disabled="true">HOME</a>
                     </li>
                     <!-- Category page link -->
                     <li class="nav-item p-1">
-                        <a class="nav-link active text-success" href="category.html" tabindex="-1" aria-disabled="true">CATEGORY</a>
+                        <a class="nav-link active text-success" href="category.html" tabindex="-1"
+                            aria-disabled="true">CATEGORY</a>
                     </li>
                     <!-- History page link -->
                     <li class="nav-item ms-2 p-1">
-                        <a class="nav-link active text-success" href="history.html" tabindex="-1" aria-disabled="true">HISTORY</a>
+                        <a class="nav-link active text-success" href="history.html" tabindex="-1"
+                            aria-disabled="true">HISTORY</a>
                     </li>
                 </ul>
             </div>
             <!-- Search Bar -->
             <div class="collapse navbar-collapse justify-content-center" id="navbarScroll">
                 <form class="d-flex">
-                <input class="custom-search-bar form-control form-control-sm me-2 rounded-pill" type="search" placeholder="Search" aria-label="Search">
+                    <input class="custom-search-bar form-control form-control-sm me-2 rounded-pill" type="search"
+                        placeholder="Search" aria-label="Search">
                 </form>
             </div>
             <div class="justify-content-end padding-right">
-                <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 navbar-nav-scroll"
+                    style="--bs-scroll-height: 100px;">
                     <!-- Dropdown Menu || User Menu -->
                     <li class="nav-item dropdown p-1 me-2">
-                        <a class="nav-link dropdown-toggle text-success" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle text-success" href="#" id="navbarScrollingDropdown"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Username
                         </a>
                         <ul class="dropdown-menu light-green" aria-labelledby="navbarScrollingDropdown">
                             <li><a class="dropdown-item text-success" href="account.html">Account</a></li>
                             <li><a class="dropdown-item text-success" href="login.html">Log Out</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="#">Support</a></li>
                         </ul>
                     </li>
                     <!-- User Profile -->
                     <li class="nav-item ps-2 me-2">
-                        <img src="background.jpeg" class="img-thumbnail rounded-circle" style="width: 45px; height: 45px;">
+                        <img src="background.jpeg" class="img-thumbnail rounded-circle"
+                            style="width: 45px; height: 45px;">
                     </li>
                 </ul>
             </div>
@@ -70,43 +85,50 @@
             <h2 class="special-elite-regular mt-2 text-success text-center">- HISTORY -</h2>
             <table class="table">
                 <thead class="text-success">
-                  <tr>
-                    <th scope="col" style="width: 100px;"></th>
-                    <th scope="col">Book</th>
-                    <th scope="col">Status</th>
-                    <th scope="col"></th>
-                    <th scope="col">Return</th>
-                    <th scope="col">Late fee</th>
-                  </tr>
+                    <tr>
+                        <th scope="col" style="width: 100px;"></th>
+                        <th scope="col">Book</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"></th>
+                        <th scope="col">Return</th>
+                        <th scope="col">Late fee</th>
+                    </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <th scope="row"><img class="rounded shadow-sm border border-2 border-white" src="pic/Abstractbar.jpg" width="100px"></th>
-                    <td>
-                        <h4>Abstract Bar</h6>
-                        <p>Description....</p>
-                    </td>
-                    <td>Borrow</td>
-                    <td>19 July 2024</td>
-                    <td>24 July 2024</td>
-                    <td>none</td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><img class="rounded shadow-sm border border-2 border-white" src="pic/Wakeupwiththekiss.jpg" width="100px"></th>
-                    <td>
-                        <h4>Wake Up With The Kiss</h6>
-                        <p>Description....</p>
-                    </td>
-                    <td>Reserve</td>
-                    <td>17 Febuary 2024</td>
-                    <td>20 Febuary 2024</td>
-                    <td>none</td>
-                  </tr>
-              </table>
+                    <tr>
+                        <th scope="row"><img class="rounded shadow-sm border border-2 border-white"
+                                src="pic/Abstractbar.jpg" width="100px"></th>
+                        <td>
+                            <h4>Abstract Bar</h6>
+                                <p>Description....</p>
+                        </td>
+                        <td>Borrow</td>
+                        <td>19 July 2024</td>
+                        <td>24 July 2024</td>
+                        <td>none</td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><img class="rounded shadow-sm border border-2 border-white"
+                                src="pic/Wakeupwiththekiss.jpg" width="100px"></th>
+                        <td>
+                            <h4>Wake Up With The Kiss</h6>
+                                <p>Description....</p>
+                        </td>
+                        <td>Reserve</td>
+                        <td>17 Febuary 2024</td>
+                        <td>20 Febuary 2024</td>
+                        <td>none</td>
+                    </tr>
+            </table>
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
