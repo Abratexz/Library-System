@@ -11,12 +11,16 @@
 }
 
 /* Main Home Page CSS Code*/
-
 .custom-search-bar {
     width: 500px; /* กำหนดความยาวของ Search bar */
     padding-left: 20px; /* กำหนดระยะห่างระหว่างตัวหนังสือและขอบของ Search bar (ข้างใน Search bar)*/
 }
 
+.light-green {
+    background-color: #DCF3DE;
+}
+
+/* Font Style*/
 .special-elite-regular {
     font-family: "Special Elite", system-ui;
     font-weight: 400;
