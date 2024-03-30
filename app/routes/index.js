@@ -71,8 +71,13 @@ router.get("/home", isLogin, async (req, res) => {
     }
     if (req.query.groupBookId) {
       if (whereClause) whereClause += " AND ";
-      whereClause += "group_book_id = ?";
-      params.push(req.query.groupBookId);
+      if (req.query.groupBookId === "All") {
+        // If groupBookId is 'All', include all group book names
+        whereClause += "1"; // True condition to include all group book names
+      } else {
+        whereClause += "group_book_id = ?";
+        params.push(req.query.groupBookId);
+      }
     }
     if (whereClause) {
       sql += " WHERE " + whereClause;
