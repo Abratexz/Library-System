@@ -1,0 +1,66 @@
+<%- include('header') %>
+
+    <%- include('navbar') %>
+
+        <main class="card m-4 mt-10 bg-white shadow" style="height: 100%;">
+            <div class="card-body">
+                <a class="btn btn-danger" href="#" onclick="return confirm('Are you sure to delete ?')">CLEAR BORROW
+                    HISTORY</a>
+                <h2 class="special-elite-regular mt-2 text-dark text-center">- BORROW HISTORY -</h2>
+                <table class="table">
+                    <thead class="text-dark">
+                        <tr>
+                            <th width="90px" scope="col"></th>
+                            <th scope="col" style="width: 150px;">Book</th>
+                            <th width="200px" scope="col">Book name</th>
+                            <th width="300px" scope="col">Status</th>
+                            <th width="300px" scope="col">Borrow By</th>
+                            <th width="400px" scope="col">Borrow Date</th>
+                            <th width="400px" scope="col">Return Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(borrowHistory !==undefined){ %>
+                            <% borrowHistory.forEach((borrow)=> { %>
+                                <tr>
+                                    <td>
+                                        <a class="btn btn-danger" href="/deleteborrowHistory/<%= borrow.id%>"
+                                            onclick="return confirm('Are you sure to delete ?')">Delete</a>
+                                    </td>
+                                    <td scope="row"><img class="rounded shadow-sm border border-2 border-white"
+                                            src="./images/books/<%= borrow.img %>" width="200px"></td>
+                                    <td>
+                                        <h4>
+                                            <%= borrow.book_name %>
+                                        </h4>
+                                        <p>
+                                            <%= borrow.detail %>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <%= borrow.status %>
+                                    </td>
+                                    <td>
+                                        <p>
+                                            ID: <%= borrow.tb_user_account_id %> & Username: <%= borrow.usr %>
+                                        </p>
+                                        <p>
+                                            Phone: <%= borrow.phone %>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <%= borrow.borrow_date %>
+                                    </td>
+
+                                    <td>
+                                        <%= borrow.return_date %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <%- include('footer') %>

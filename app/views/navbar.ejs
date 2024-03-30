@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow" style="height: 80px;">
     <div class="container-fluid">
-        <a class="navbar-brand special-elite-regular  ps-2" href="/home">LIBRARY</a>
+        <a class="navbar-brand special-elite-regular  ps-2" href="/home">LIBRARY HOME</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -37,6 +37,7 @@
                             <li><a class="dropdown-item" href="/user">Users in system</a></li>
                             <li><a class="dropdown-item" href="/groupBook">Tag Book</a></li>
                             <li><a class="dropdown-item" href="/book">Book</a></li>
+                            <li><a class="dropdown-item" href="/borrowHistory">Borrow History</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -45,17 +46,19 @@
                     </li>
                 </ul>
                 <% } %>
-                    <div class="collapse navbar-collapse" id="navbarScroll">
-                        <form>
-                            <div class="input-group ps-5">
+                    <div class="collapse navbar-collapse justify-content-center mt-3" style="padding-right: 180px;"
+                        id="navbarScroll">
+                        <form action="/home" method="GET">
+                            <div class="input-group mb-3">
                                 <input type="text" name="search" class="form-control" placeholder="Search">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-secondary" type="submit">
-                                        <span class="material-symbols-outlined material-icons">
-                                            search
-                                        </span>
-                                    </button>
-                                </div>
+                                <select class="form-control" name="groupBookId">
+                                    <% groupBooks.forEach((item)=> { %>
+                                        <option value="<%= item.id %>">
+                                            <%= item.name_tag %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                                <button class="btn btn-secondary" type="submit">Search</button>
                             </div>
                         </form>
                     </div>
@@ -83,8 +86,8 @@
                                 </li>
                                 <!-- User Profile -->
                                 <li class="nav-item" style="padding-left: 30px; padding-right: 10px;">
-                                    <img class="rounded-circle" src="../images/<%= session.img %>" class="img-thumbnail"
-                                        alt="..." style="width: 60px; height: 60px;">
+                                    <img class="rounded-circle" src="../images/users/<%= session.img %>"
+                                        class="img-thumbnail" alt="..." style="width: 60px; height: 60px;">
                                 </li>
                         </ul>
                     </div>

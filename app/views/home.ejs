@@ -6,18 +6,20 @@
                 class="alert text-center mt-3 <%= session.message === 'Book Borrowed Successfully !!' ? 'text-success alert-success' : 'text-danger alert-danger' %> ">
                 <%= session.message %>
                     <% if (session.message !=='Book Borrowed Successfully !!' ) { %><span>!! Book Status could be
-                            Already
+
                             Borrowed or Lost !!</span>
                         <% } %>
                             <% session.message=undefined %>
             </div>
             <% } %>
+
                 <div class="container mt-2">
                     <main class="card m-4 mt-10 bg-white shadow" style="height: 100%;">
                         <div class="card-body">
                             <h2 class="mt-2 text-dark text-center">- BOOKS -</h2>
                             <div class="container mt-5">
-                                <div class="row justify-content-center"> <!-- Center the row -->
+                                <div class="row justify-content-center">
+                                    <!-- Center the row -->
                                     <% let count=0; %>
                                         <% books.forEach((book)=> { %>
                                             <% if (count % 5===0) { %> <!-- Start a new row for every 5 cards -->
@@ -27,7 +29,7 @@
                                         <div class="col-xl-2 col-lg-3 col-md-3 col-sm-4 col-xs-6">
                                             <!-- Adjusted column sizes -->
                                             <div class="card mb-3 shadow">
-                                                <img src="./images/<%= book.img %>" class="card-img-top"
+                                                <img src="./images/books/<%= book.img %>" class="card-img-top"
                                                     height="250px" />
                                                 <div class="card-body">
                                                     <div class="h4 fw-bolder fs-6 text-center card-title">

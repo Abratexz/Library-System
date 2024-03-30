@@ -4,11 +4,13 @@
 
         <main class="card m-4 mt-10 bg-white shadow" style="height: 100%;">
             <div class="card-body">
-                <a class="btn btn-danger" href="/deleteHistory">CLEAR HISTORY</a>
-                <h2 class="special-elite-regular mt-2 text-success text-center">- HISTORY -</h2>
+                <a class="btn btn-danger" href="/deleteHistory"
+                    onclick="return confirm('Are you sure to delete ?')">CLEAR HISTORY</a>
+                <h2 class="special-elite-regular mt-2 text-dark text-center">- HISTORY -</h2>
                 <table class="table">
-                    <thead class="text-success">
+                    <thead class="text-dark">
                         <tr>
+                            <th width="90px" scope="col"></th>
                             <th scope="col" style="width: 150px;">Book</th>
                             <th width="200px" scope="col">Book name</th>
                             <th width="300px" scope="col">Status</th>
@@ -17,11 +19,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% if(books !==undefined){ %>
+                        <% if(books && books.length> 0){ %>
                             <% books.forEach((book)=> { %>
                                 <tr>
+                                    <td>
+                                        <a class="btn btn-danger" href="/deleteHistory/<%= book.id%>"
+                                            onclick="return confirm('Are you sure to delete ?')">Delete</a>
+                                    </td>
                                     <td scope="row"><img class="rounded shadow-sm border border-2 border-white"
-                                            src="./images/<%= book.img %>" width="200px"></td>
+                                            src="./images/books/<%= book.img %>" width="200px"></td>
                                     <td>
                                         <h4>
                                             <%= book.name %>
@@ -41,7 +47,12 @@
                                     </td>
                                 </tr>
                                 <% }); %>
-                                    <% } %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="6">No history available</td>
+                                        </tr>
+                                        <% } %>
+
                     </tbody>
                 </table>
             </div>

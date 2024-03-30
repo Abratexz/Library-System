@@ -15,6 +15,14 @@
                             <a class="btn btn-primary" href="/addBook">
                                 +Add
                             </a>
+                            <a class="btn btn-success" href="/setAllBookAvailable"
+                                onclick="return confirm('Do you want to SET ALL BOOK Available ?')">
+                                SET ALL BOOK TO Available
+                            </a>
+                            <a class="btn btn-danger" href="/deleteAllBook"
+                                onclick="return confirm('Are you sure to delete ?')">
+                                Delete All Book
+                            </a>
                         </div>
                         <div class="mt-3">
                             <table class="table table-bordered table-striped shadow">
@@ -38,7 +46,7 @@
                                                     href="/deleteBook/<%= book.id %>/<%= book.img %>"
                                                     onclick="return confirm('Are you sure to delete ?')">Delete</a>
                                             </td>
-                                            <td><img src="../images/<%= book.img %>" width="100px" /></td>
+                                            <td><img src="../images/books/<%= book.img %>" width="100px" /></td>
                                             <td>
                                                 <%= book.group_book_name_tag %>
                                             </td>
