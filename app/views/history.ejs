@@ -23,14 +23,14 @@
                             <% books.forEach((book)=> { %>
                                 <tr>
                                     <td>
-                                        <a class="btn btn-danger" href="/deleteHistory/<%= book.id%>"
+                                        <a class="btn btn-danger" href="/deleteHistory/<%= book.history_id%>"
                                             onclick="return confirm('Are you sure to delete ?')">Delete</a>
                                     </td>
                                     <td scope="row"><img class="rounded shadow-sm border border-2 border-white"
                                             src="./images/books/<%= book.img %>" width="200px"></td>
                                     <td>
                                         <h4>
-                                            <%= book.name %>
+                                            <%= book.book_name %>
                                         </h4>
                                         <p>
                                             <%= book.detail %>
@@ -40,7 +40,7 @@
                                         <%= book.status %>
                                     </td>
                                     <td>
-                                        <%= book.borrow_date %>
+                                        <%= book.borrow_history_date %>
                                     </td>
                                     <td>
                                         <%= book.return_history_date %>

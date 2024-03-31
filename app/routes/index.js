@@ -592,11 +592,10 @@ router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
 
   // Query to retrieve history data including book details
   let sql =
-    "SELECT tb_book.*, tb_borrow.borrow_date, tb_history.return_history_date " +
+    "SELECT tb_book.*, tb_history.borrow_history_date, tb_history.return_history_date, tb_history.id AS history_id " +
     "FROM tb_book " +
-    "JOIN tb_borrow ON tb_book.id = tb_borrow.book_id " +
-    "JOIN tb_history ON tb_borrow.id = tb_history.borrow_id " +
-    "WHERE tb_borrow.user_id = ?";
+    "JOIN tb_history ON tb_book.id = tb_history.book_id " +
+    "WHERE tb_history.user_id = ?";
 
   let params = [data.id];
 
@@ -625,7 +624,7 @@ router.get("/deleteHistory", isLogin, fetchGroupBooks, (req, res) => {
 });
 
 router.get("/deleteHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
-  let sql = "DELETE FROM tb_history WHERE user_id = ? AND book_id = ?";
+  let sql = "DELETE FROM tb_history WHERE user_id = ? AND id = ?";
   let data = jwt.verify(req.session.token, secretCode);
   let params = [data.id, req.params.id];
   console.log(params);
