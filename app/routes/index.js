@@ -349,9 +349,19 @@ router.get("/deleteGroupBook/:id", isLogin, (req, res) => {
 router.get("/book", isLogin, fetchGroupBooks, (req, res) => {
   let sql =
     "SELECT tb_book.* , tb_group_book.name_tag AS group_book_name_tag FROM tb_book " +
-    "LEFT JOIN tb_group_book ON tb_group_book.id = tb_book.group_book_id " +
-    "ORDER BY tb_book.id DESC";
-  conn.query(sql, (err, result) => {
+    "LEFT JOIN tb_group_book ON tb_group_book.id = tb_book.group_book_id ";
+
+  const searchISBN = req.query.search;
+  const sqlParams = [];
+
+  if (searchISBN) {
+    sql += "WHERE tb_book.isbn LIKE ? ";
+    sqlParams.push("%" + searchISBN + "%");
+  }
+
+  sql += "ORDER BY tb_book.id DESC";
+
+  conn.query(sql, sqlParams, (err, result) => {
     if (err) throw err;
     res.render("book", { books: result, groupBooks: req.groupBooks });
   });
@@ -546,7 +556,11 @@ router.post("/borrow/:id", isLogin, async (req, res) => {
   let [bookStatusRow] = await conn.query(bookStatusQuery, [bookId]);
   let bookStatus = bookStatusRow[0].status;
 
-  if (bookStatus === "Borrowed" || bookStatus === "Lost") {
+  if (
+    bookStatus === "Borrowed" ||
+    bookStatus === "Lost" ||
+    bookStatus === "Reserved"
+  ) {
     req.session.message = "FAILED TO BORROW";
     res.redirect("/home");
   } else {
@@ -561,7 +575,6 @@ router.post("/borrow/:id", isLogin, async (req, res) => {
       borrow_date: currentTime,
       return_date: returnDate,
       duration: req.body["duration"],
-      borrow_status: "Borrowed",
     };
 
     // Insert into tb_borrow
@@ -586,13 +599,82 @@ router.post("/borrow/:id", isLogin, async (req, res) => {
   }
 });
 
+router.get("/reserve/:id", isLogin, fetchGroupBooks, (req, res) => {
+  let sql = "SELECT * FROM tb_book WHERE id = ?";
+  let params = req.params.id;
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
+    conn.query(sql, (err, groupBooks) => {
+      if (err) throw err;
+      res.render("reserve", {
+        book: result[0],
+        groupBooks: groupBooks,
+      });
+    });
+  });
+});
+
+router.post("/reserve/:id", isLogin, async (req, res) => {
+  let data = jwt.verify(req.session.token, secretCode);
+  let conn = require("./connect2");
+  let bookId = req.params.id;
+  let id = data.id;
+  let bookStatusQuery = "SELECT status FROM tb_book WHERE id = ?";
+  let [bookStatusRow] = await conn.query(bookStatusQuery, [bookId]);
+  let bookStatus = bookStatusRow[0].status;
+
+  if (
+    bookStatus === "Borrowed" ||
+    bookStatus === "Lost" ||
+    bookStatus === "Reserved"
+  ) {
+    req.session.message = "FAILED TO RESERVE";
+    res.redirect("/home");
+  } else {
+    let duration = req.body["duration"];
+    let currentTime = dayjs().format(dayFormat);
+    let pickupDate = dayjs().add(duration, "day").format(dayFormat);
+
+    let reserveSql = "INSERT INTO tb_reserve SET ?";
+    let reserveParams = {
+      user_id: data.id,
+      book_id: bookId,
+      reserve_date: currentTime,
+      pickup_date: pickupDate,
+      duration: req.body["duration"],
+    };
+
+    // Insert into tb_reserve
+    let [reserveResult] = await conn.query(reserveSql, reserveParams);
+    let reserveId = reserveResult.insertId; // Get the auto-generated reserve_id
+
+    let updateBookSql = "UPDATE tb_book SET status = 'Reserved' WHERE id = ? ";
+    await conn.query(updateBookSql, bookId);
+    // Insert into tb_history with borrow_id
+    let historySql = "INSERT INTO tb_history SET ?";
+    let historyParams = {
+      user_id: data.id,
+      book_id: bookId,
+      reserve_id: reserveId, // Use the reserve_id obtained from tb_reserve
+      reserve_history_date: currentTime,
+      pickup_history_date: pickupDate,
+    };
+    await conn.query(historySql, historyParams);
+
+    req.session.message = "Book Reserve Successfully !!";
+    res.redirect("/home");
+  }
+});
+
 router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
   let conn = require("./connect2");
   let data = jwt.verify(req.session.token, secretCode);
 
   // Query to retrieve history data including book details
   let sql =
-    "SELECT tb_book.*, tb_history.borrow_history_date, tb_history.return_history_date, tb_history.id AS history_id " +
+    "SELECT tb_book.*, tb_history.borrow_history_date, tb_history.return_history_date, tb_history.reserve_history_date,tb_history.pickup_history_date,tb_history.id AS history_id " +
     "FROM tb_book " +
     "JOIN tb_history ON tb_book.id = tb_history.book_id " +
     "WHERE tb_history.user_id = ?";
@@ -669,4 +751,44 @@ router.get("/deleteborrowHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
     res.redirect("/borrowHistory");
   });
 });
+
+router.get("/reserveHistory", isLogin, fetchGroupBooks, (req, res) => {
+  let sql =
+    "SELECT tb_book.*, tb_reserve.id, tb_reserve.reserve_date, tb_reserve.pickup_date, tb_user.usr, tb_user.phone, tb_user.id AS tb_user_account_id " +
+    "FROM tb_reserve " +
+    "JOIN tb_book ON tb_reserve.book_id = tb_book.id " +
+    "JOIN tb_user ON tb_reserve.user_id = tb_user.id " +
+    "ORDER BY tb_reserve.id DESC";
+
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+    console.log(result);
+    res.render("reserveHistory", {
+      reserveHistory: result,
+      groupBooks: req.groupBooks,
+    });
+  });
+});
+
+router.get("/deletereserveHistory", isLogin, (req, res) => {
+  let sql = "DELETE FROM tb_reserve";
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+    res.redirect("/reserveHistory");
+  });
+});
+
+router.get(
+  "/deletereserveHistory/:id",
+  isLogin,
+  fetchGroupBooks,
+  (req, res) => {
+    let sql = "DELETE FROM tb_reserve WHERE id = ?";
+    let params = req.params.id;
+    conn.query(sql, params, (err, result) => {
+      if (err) throw err;
+      res.redirect("/reserveHistory");
+    });
+  }
+);
 module.exports = router;

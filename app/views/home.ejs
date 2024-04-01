@@ -3,11 +3,11 @@
     <%- include('navbar') %>
         <% if (session.message !=undefined) {%>
             <div
-                class="alert text-center mt-3 <%= session.message === 'Book Borrowed Successfully !!' ? 'text-success alert-success' : 'text-danger alert-danger' %> ">
+                class="alert text-center mt-3 <%= session.message === 'Book Borrowed Successfully !!' ? 'text-success alert-success' : (session.message === 'Book Reserve Successfully !!' ? 'text-success alert-success' : 'text-danger alert-danger') %> ">
                 <%= session.message %>
-                    <% if (session.message !=='Book Borrowed Successfully !!' ) { %><span>!! Book Status could be
-
-                            Borrowed or Lost !!</span>
+                    <% if (session.message !=='Book Borrowed Successfully !!' && session.message
+                        !=='Book Reserve Successfully !!' ) { %>
+                        <span>!! Book Status could be Borrowed,Reserved or Lost !!</span>
                         <% } %>
                             <% session.message=undefined %>
             </div>
@@ -40,13 +40,15 @@
                                                         Author: <%= book.author %>
                                                     </div>
 
-                                                    <div class="text-center fw-normal <%= book.status === 'Available' ? 'text-success' : 'text-danger' %>"
+                                                    <div class="text-center fw-normal <%= book.status === 'Available' ? 'text-success' : (book.status === 'Reserved' ? 'text-warning' : 'text-danger') %>"
                                                         style="font-size: 14px;">
                                                         Status: <%= book.status %>
                                                     </div>
                                                     <div class="text-center">
-                                                        <a class="btn btn-primary mt-2 text-sm"
+                                                        <a class="btn btn-primary mt-2 text-sm btn-sm"
                                                             href="/borrow/<%= book.id %>">Borrow</a>
+                                                        <a class="btn btn-warning mt-2 text-sm btn-sm"
+                                                            href="/reserve/<%= book.id %>">Reserve</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -83,6 +85,5 @@
                                             <% } %>
                     </ul>
                 </div>
-
 
                 <%- include('footer') %>

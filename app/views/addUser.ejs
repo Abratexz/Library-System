@@ -26,9 +26,12 @@
                                 <input type="radio" name="level" value="user" <% if (user.level=='user' ) { %>checked
                                 <%} %>
                                     /> User
-                                    <input type="radio" name="level" value="admin" <% if (user.level=='admin' ) {
-                                        %>checked
-                                    <%} %>/> Admin
+                                    <input type="radio" name="level" value="librarian" <% if (user.level=='librarian' )
+                                        { %>checked
+                                    <%} %>/> Librarian
+                                        <input type="radio" name="level" value="admin" <% if (user.level=='admin' ) {
+                                            %>checked
+                                        <%} %>/> Admin
                             </div>
                         </div>
                         <div class="text-end ">

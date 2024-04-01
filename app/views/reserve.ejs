@@ -4,7 +4,7 @@
             <form method="post">
                 <div class="card mt-3">
                     <div class="card-body">
-                        <div class="card-title">Borrow Book</div>
+                        <div class="card-title">Reserve Book</div>
                         <div class="mt-3 text-center">
                             <label>Book</label>
                             <% if (book.img !=undefined) { %>
@@ -14,13 +14,11 @@
                         <div class="card border-primary shadow mt-3">
                             <div class="card-body">
                                 <div class="mt-3">
-                                    <label>Borrow Day</label>
+                                    <label>Hold Book Day</label>
                                     <select name="duration" class="form-select">
                                         <option value="1">1</option>
+                                        <option value="2">2</option>
                                         <option value="3">3</option>
-                                        <option value="5">5</option>
-                                        <option value="7">7</option>
-                                        <option value="14">14</option>
                                     </select>
 
                                 </div>
@@ -63,7 +61,7 @@
                         </div>
                         <div class="mt-3">
                             <a type="button" class="btn btn-md btn-neutral" href="/home">Cancel</a>
-                            <button type="submit" class="btn btn-info">Borrow</button>
+                            <button type="submit" class="btn btn-info">Reserve</button>
                         </div>
                     </div>
                 </div>

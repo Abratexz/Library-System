@@ -25,7 +25,7 @@
             </ul>
             </li>
             </ul>
-            <% if (session.level=="admin" ) { %>
+            <% if (session.level=="admin" || session.level=="librarian" ) { %>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -33,14 +33,13 @@
                             Admin Command
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="/user">Users in system</a></li>
-                            <li><a class="dropdown-item" href="/groupBook">Tag Book</a></li>
-                            <li><a class="dropdown-item" href="/book">Book</a></li>
-                            <li><a class="dropdown-item" href="/borrowHistory">Borrow History</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <% if (session.level=="admin" ) { %>
+                                <li><a class="dropdown-item" href="/user">Users in system</a></li>
+                                <% } %>
+                                    <li><a class="dropdown-item" href="/groupBook">Tag Book</a></li>
+                                    <li><a class="dropdown-item" href="/book">Book</a></li>
+                                    <li><a class="dropdown-item" href="/borrowHistory">Borrow History</a></li>
+                                    <li><a class="dropdown-item" href="/reserveHistory">Reserve History</a></li>
                         </ul>
                     </li>
                 </ul>

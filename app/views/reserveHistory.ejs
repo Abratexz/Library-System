@@ -4,13 +4,13 @@
 
         <main class="card m-4 mt-10 bg-white shadow" style="height: 100%;">
             <div class="card-body">
-                <div class="card-title fs-3">Borrow Book History</div>
+                <div class="card-title fs-3">Reserve Book History</div>
                 <div>
-                    <a class="btn btn-danger" href="/deleteborrowHistory"
-                        onclick="return confirm('Are you sure to delete ?')">CLEAR BORROW
+                    <a class="btn btn-danger" href="/deletereserveHistory"
+                        onclick="return confirm('Are you sure to delete ?')">CLEAR RESERVE
                         HISTORY</a>
                 </div>
-                <h2 class="special-elite-regular mt-2 text-dark text-center">- BORROW HISTORY -</h2>
+                <h2 class="special-elite-regular mt-2 text-dark text-center">- RESERVE HISTORY -</h2>
                 <table class="table">
                     <thead class="text-dark">
                         <tr>
@@ -18,46 +18,46 @@
                             <th scope="col" style="width: 150px;">Book</th>
                             <th width="300px" scope="col">Book name</th>
                             <th width="200px" scope="col">Status</th>
-                            <th width="300px" scope="col">Borrow By</th>
-                            <th width="300px" scope="col">Borrow Date</th>
-                            <th width="300px" scope="col">Return Date</th>
+                            <th width="300px" scope="col">Reserve By</th>
+                            <th width="300px" scope="col">Reserve Date</th>
+                            <th width="300px" scope="col">PickUp Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <% if(borrowHistory !==undefined){ %>
-                            <% borrowHistory.forEach((borrow)=> { %>
+                        <% if(reserveHistory !==undefined){ %>
+                            <% reserveHistory.forEach((reserve)=> { %>
                                 <tr>
                                     <td>
-                                        <a class="btn btn-danger" href="/deleteborrowHistory/<%= borrow.id%>"
+                                        <a class="btn btn-danger" href="/deletereserveHistory/<%= reserve.id%>"
                                             onclick="return confirm('Are you sure to delete ?')">Delete</a>
                                     </td>
                                     <td scope="row"><img class="rounded shadow-sm border border-2 border-white"
-                                            src="./images/books/<%= borrow.img %>" width="200px"></td>
+                                            src="./images/books/<%= reserve.img %>" width="200px"></td>
                                     <td>
                                         <h4>
-                                            <%= borrow.book_name %>
+                                            <%= reserve.book_name %>
                                         </h4>
                                         <p>
-                                            <%= borrow.detail %>
+                                            <%= reserve.detail %>
                                         </p>
                                     </td>
                                     <td>
-                                        <%= borrow.status %>
+                                        <%= reserve.status %>
                                     </td>
                                     <td>
                                         <p>
-                                            ID: <%= borrow.tb_user_account_id %> & Username: <%= borrow.usr %>
+                                            ID: <%= reserve.tb_user_account_id %> & Username: <%= reserve.usr %>
                                         </p>
                                         <p>
-                                            Phone: <%= borrow.phone %>
+                                            Phone: <%= reserve.phone %>
                                         </p>
                                     </td>
                                     <td>
-                                        <%= borrow.borrow_date %>
+                                        <%= reserve.reserve_date %>
                                     </td>
 
                                     <td>
-                                        <%= borrow.return_date %>
+                                        <%= reserve.pickup_date %>
                                     </td>
                                 </tr>
                                 <% }); %>
