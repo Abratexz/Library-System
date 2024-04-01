@@ -161,25 +161,31 @@ router.post("/register", (req, res) => {
     !req.body["usr"] ||
     !req.body["pwd"] ||
     !req.body["level"] ||
-    !req.body["phone"]
+    !req.body["phone"] ||
+    !req.body["citizencard"]
   ) {
     req.session.message = "Please provide all information";
     return res.redirect("/register");
   }
 
-  let checkUsrSql = "SELECT * FROM tb_user WHERE usr = ? OR phone = ?";
-  let checkParam = [req.body["usr"], req.body["phone"]];
+  let checkUsrSql =
+    "SELECT * FROM tb_user WHERE usr = ? OR phone = ? OR citizencard = ?";
+  let checkParam = [
+    req.body["usr"],
+    req.body["phone"],
+    req.body["citizencard"],
+  ];
 
   conn.query(checkUsrSql, checkParam, (err, ExistResult) => {
     if (err) throw err;
     if (ExistResult.length > 0) {
       req.session.message =
-        "Username or phone number already exists. Please try a different one.";
+        "Username Phone number or Citizen ID  already exists. Please try a different one.";
       return res.redirect("/register");
     }
 
     let sql =
-      "INSERT INTO tb_user SET name = ?, usr =?, pwd = ?, level = ?, phone = ?";
+      "INSERT INTO tb_user SET name = ?, usr =?, pwd = ?, level = ?, phone = ? ,citizencard = ?";
 
     let params = [
       req.body["name"],
@@ -187,6 +193,7 @@ router.post("/register", (req, res) => {
       req.body["pwd"],
       req.body["level"],
       req.body["phone"],
+      req.body["citizencard"],
     ];
 
     conn.query(sql, params);
@@ -243,11 +250,13 @@ router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
         });
       }
       let sql =
-        "UPDATE tb_user SET name = ? , usr = ?, pwd = ? , img = ? WHERE id = ?";
+        "UPDATE tb_user SET name = ? , usr = ?, pwd = ? ,phone = ?,citizencard = ?, img = ? WHERE id = ?";
       let params = [
         fields["name"],
         fields["usr"],
         fields["pwd"],
+        fields["phone"],
+        fields["citizencard"],
         imgFileName,
         req.params.id,
       ];
@@ -296,13 +305,14 @@ router.get("/editUser/:id", isLogin, fetchGroupBooks, (req, res) => {
 
 router.post("/editUser/:id", isLogin, (req, res) => {
   let sql =
-    "UPDATE tb_user SET name = ?, usr = ?, pwd = ?, phone = ?, level = ? WHERE id = ? ";
+    "UPDATE tb_user SET name = ?, usr = ?, pwd = ?, phone = ?, level = ? ,citizencard = ? WHERE id = ? ";
   let params = [
     req.body["name"],
     req.body["usr"],
     req.body["pwd"],
     req.body["phone"],
     req.body["level"],
+    req.body["citizencard"],
     req.params.id,
   ];
 
