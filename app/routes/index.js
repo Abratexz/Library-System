@@ -579,7 +579,7 @@ router.post("/borrow/:id", isLogin, async (req, res) => {
 
     // Insert into tb_borrow
     let [borrowResult] = await conn.query(borrowSql, borrowParams);
-    let borrowId = borrowResult.insertId; // Get the auto-generated borrow_id
+    let borrowId = borrowResult.insertId; // Get the auto-increment of borrow_id
 
     let updateBookSql = "UPDATE tb_book SET status = 'Borrowed' WHERE id = ? ";
     await conn.query(updateBookSql, bookId);
@@ -648,11 +648,11 @@ router.post("/reserve/:id", isLogin, async (req, res) => {
 
     // Insert into tb_reserve
     let [reserveResult] = await conn.query(reserveSql, reserveParams);
-    let reserveId = reserveResult.insertId; // Get the auto-generated reserve_id
+    let reserveId = reserveResult.insertId; // Get the auto-increment of reserve_id
 
     let updateBookSql = "UPDATE tb_book SET status = 'Reserved' WHERE id = ? ";
     await conn.query(updateBookSql, bookId);
-    // Insert into tb_history with borrow_id
+    // Insert into tb_history with reserve_id
     let historySql = "INSERT INTO tb_history SET ?";
     let historyParams = {
       user_id: data.id,
@@ -672,7 +672,6 @@ router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
   let conn = require("./connect2");
   let data = jwt.verify(req.session.token, secretCode);
 
-  // Query to retrieve history data including book details
   let sql =
     "SELECT tb_book.*, tb_history.borrow_history_date, tb_history.return_history_date, tb_history.reserve_history_date,tb_history.pickup_history_date,tb_history.id AS history_id " +
     "FROM tb_book " +
