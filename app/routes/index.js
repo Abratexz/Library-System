@@ -202,6 +202,58 @@ router.post("/register", (req, res) => {
   });
 });
 
+router.get("/forgotPassword", (req, res) => {
+  res.render("forgotPassword");
+});
+
+router.post("/forgotPassword", (req, res) => {
+  let checkUsrSql = "SELECT * FROM tb_user WHERE usr = ?";
+  let username = req.body["usr"];
+  let checkParam = [username];
+
+  conn.query(checkUsrSql, checkParam, (err, ExistResult) => {
+    if (err) throw err;
+
+    if (ExistResult.length === 0) {
+      req.session.message = "Username does not exist. Please try again";
+      return res.redirect("/forgotPassword");
+    }
+
+    let token = jwt.sign({ username }, secretCode, { expiresIn: "1h" });
+    res.render("passwordResetLink", { token });
+  });
+});
+router.get("/passwordReset/:token", (req, res) => {
+  let { token } = req.params;
+
+  res.render("passwordReset", { token });
+});
+
+router.post("/passwordReset/:token", (req, res) => {
+  let { token } = req.params;
+  let newPassword = req.body["pwd"];
+
+  jwt.verify(token, secretCode, (err, decoded) => {
+    if (err) {
+      return res.redirect("/login");
+    } else {
+      let { username } = decoded;
+      console.log({ newPassword });
+      console.log({ username });
+
+      let pwdUpdateSql = "UPDATE tb_user SET pwd = ? WHERE usr = ?";
+      let updatePwdParams = [newPassword, username];
+
+      conn.query(pwdUpdateSql, updatePwdParams, (err, result) => {
+        console.log(result);
+        if (err) throw err;
+      });
+    }
+  });
+  req.session.message = "Reset Password Success!!";
+  res.redirect("/login");
+});
+
 router.get("/profile", isLogin, fetchGroupBooks, (req, res) => {
   let data = jwt.verify(req.session.token, secretCode);
   let sql = "SELECT * FROM tb_user WHERE id = ?";

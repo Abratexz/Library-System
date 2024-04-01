@@ -9,34 +9,34 @@
                 </div>
                 <form method="post" action="/register" style="margin-top: 20px;">
                     <div class="form-group">
-                        <!-- Change to Name ;; Status : Waiting for Edit -->
-                        <label class="text-success" for="exampleInputUsername">Full Name</label>
+
+                        <label class="text-success">Full Name</label>
                         <input type="text" name="name" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="Enter Your Name">
+                            style="margin-top: 10px;" placeholder="Enter Your Name" required>
                     </div>
                     <div class="form-group" style="margin-top: 20px;">
-                        <!-- Change to Username ;; Status : Waiting for Edit -->
+
                         <label class="text-success">Username</label>
                         <input type="text" name="usr" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="Enter Username">
+                            style="margin-top: 10px;" placeholder="Enter Username" required>
                     </div>
                     <div class="form-group" style="margin-top: 20px;">
-                        <!-- Status : Waiting for Edit -->
+
                         <label class="text-success">Password</label>
                         <input type="password" name="pwd" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="Password">
+                            style="margin-top: 10px;" placeholder="Password" required>
                     </div>
                     <div class="form-group" style="margin-top: 20px;">
-                        <!-- Status : Waiting for Edit -->
+
                         <label class="text-success">Phone</label>
                         <input type="text" name="phone" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="ex.092-000-0000">
+                            style="margin-top: 10px;" placeholder="ex.092-000-0000" required>
                     </div>
                     <div class="form-group" style="margin-top: 20px;">
-                        <!-- Status : Waiting for Edit -->
+
                         <label class="text-success">Citizen ID</label>
                         <input type="text" name="citizencard" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="x-xxxx-xxxxx-xx-x">
+                            style="margin-top: 10px;" placeholder="x-xxxx-xxxxx-xx-x" required>
                     </div>
                     <div>
                         <% if ( session.message !==undefined ) {%>
