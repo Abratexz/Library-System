@@ -20,13 +20,22 @@
             <input type="password" name="pwd" class="form-control rounded-pill padding-left" style="margin-top: 10px;"
               placeholder="Password">
           </div>
-          <button type="submit" class="btn btn-outline-success rounded-pill"
-            style="width: 100%; margin-top: 20px;">Submit</button>
+          <div>
+            <% if ( session.message !==undefined ) {%>
+
+              <div
+                class="alert text-center mt-3 <%= session.message === 'Register Successfully!!' ? 'text-success alert-success' : 'text-danger alert-danger' %>">
+                <%= session.message %>
+                  <% session.message=undefined %>
+                    <% } %>
+              </div>
+              <button type="submit" class="btn btn-outline-success rounded-pill"
+                style="width: 100%; margin-top: 20px;">Log-in</button>
         </form>
 
         <div class="text-center" style="margin-top: 5px;"> - or - </div>
         <a href="/register" type="register" class="btn btn-outline-secondary rounded-pill"
-          style="width: 100%; margin-top: 5px;">Register</a>
+          style="width: 100%; margin-top: 5px;">Sign-up</a>
       </div>
     </div>
 

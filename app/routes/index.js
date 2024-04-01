@@ -37,7 +37,6 @@ const fetchGroupBooks = async (req, res, next) => {
     req.groupBooks = groupBooksResult; // Attach groupBooks data to the request object
     next(); // Call next to proceed to the next middleware/route handler
   } catch (error) {
-    // Handle errors
     res.status(500).send("Error fetching groupBooks data: " + error);
   }
 };
@@ -119,7 +118,15 @@ router.get("/login", (req, res) => {
 
 router.post("/login", (req, res) => {
   let sql = "SELECT * FROM tb_user WHERE usr = ? AND pwd = ?";
-  let params = [req.body["usr"], req.body["pwd"]];
+  let username = req.body["usr"];
+  let password = req.body["pwd"];
+
+  if (!username || !password) {
+    req.session.message = "Please provide both username and password";
+    return res.redirect("/login");
+  }
+
+  let params = [username, password];
 
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
@@ -136,7 +143,10 @@ router.post("/login", (req, res) => {
       req.session.level = result[0].level;
       res.redirect("/home");
     } else {
-      res.send("Username Or Password Invalid");
+      req.session.message =
+        "Username or password invalid. If you are not registered, please sign up";
+      res.redirect("/login");
+      //res.send("Username Or Password Invalid");
     }
   });
 });
@@ -146,18 +156,41 @@ router.get("/register", (req, res) => {
 });
 
 router.post("/register", (req, res) => {
-  let sql =
-    "INSERT INTO tb_user SET name = ?, usr =?, pwd = ?, level = ?, phone = ?";
-  let params = [
-    req.body["name"],
-    req.body["usr"],
-    req.body["pwd"],
-    req.body["level"],
-    req.body["phone"],
-  ];
+  if (
+    !req.body["name"] ||
+    !req.body["usr"] ||
+    !req.body["pwd"] ||
+    !req.body["level"] ||
+    !req.body["phone"]
+  ) {
+    req.session.message = "Please provide all information";
+    return res.redirect("/register");
+  }
 
-  conn.query(sql, params, (err, result) => {
+  let checkUsrSql = "SELECT * FROM tb_user WHERE usr = ? OR phone = ?";
+  let checkParam = [req.body["usr"], req.body["phone"]];
+
+  conn.query(checkUsrSql, checkParam, (err, ExistResult) => {
     if (err) throw err;
+    if (ExistResult.length > 0) {
+      req.session.message =
+        "Username or phone number already exists. Please try a different one.";
+      return res.redirect("/register");
+    }
+
+    let sql =
+      "INSERT INTO tb_user SET name = ?, usr =?, pwd = ?, level = ?, phone = ?";
+
+    let params = [
+      req.body["name"],
+      req.body["usr"],
+      req.body["pwd"],
+      req.body["level"],
+      req.body["phone"],
+    ];
+
+    conn.query(sql, params);
+    req.session.message = "Register Successfully!!";
     res.redirect("/login");
   });
 });
@@ -668,26 +701,24 @@ router.post("/reserve/:id", isLogin, async (req, res) => {
   }
 });
 
-router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
-  let conn = require("./connect2");
+router.get("/history", isLogin, fetchGroupBooks, (req, res) => {
   let data = jwt.verify(req.session.token, secretCode);
 
   let sql =
     "SELECT tb_book.*, tb_history.borrow_history_date, tb_history.return_history_date, tb_history.reserve_history_date,tb_history.pickup_history_date,tb_history.id AS history_id " +
     "FROM tb_book " +
     "JOIN tb_history ON tb_book.id = tb_history.book_id " +
-    "WHERE tb_history.user_id = ?";
+    "WHERE tb_history.user_id = ? ORDER BY id ASC";
 
   let params = [data.id];
 
-  try {
-    let [results] = await conn.query(sql, params);
+  conn.query(sql, params, (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    }
     res.render("history", { books: results, groupBooks: req.groupBooks });
-    console.log(results);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Internal Server Error");
-  }
+  });
 });
 
 router.get("/deleteHistory", isLogin, fetchGroupBooks, (req, res) => {
@@ -708,7 +739,6 @@ router.get("/deleteHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "DELETE FROM tb_history WHERE user_id = ? AND id = ?";
   let data = jwt.verify(req.session.token, secretCode);
   let params = [data.id, req.params.id];
-  console.log(params);
 
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
@@ -726,7 +756,7 @@ router.get("/borrowHistory", isLogin, fetchGroupBooks, (req, res) => {
 
   conn.query(sql, (err, result) => {
     if (err) throw err;
-    console.log(result);
+
     res.render("borrowHistory", {
       borrowHistory: result,
       groupBooks: req.groupBooks,
@@ -761,7 +791,6 @@ router.get("/reserveHistory", isLogin, fetchGroupBooks, (req, res) => {
 
   conn.query(sql, (err, result) => {
     if (err) throw err;
-    console.log(result);
     res.render("reserveHistory", {
       reserveHistory: result,
       groupBooks: req.groupBooks,
@@ -769,7 +798,7 @@ router.get("/reserveHistory", isLogin, fetchGroupBooks, (req, res) => {
   });
 });
 
-router.get("/deletereserveHistory", isLogin, (req, res) => {
+router.get("/deleteReserveHistory", isLogin, (req, res) => {
   let sql = "DELETE FROM tb_reserve";
   conn.query(sql, (err, result) => {
     if (err) throw err;
@@ -778,7 +807,7 @@ router.get("/deletereserveHistory", isLogin, (req, res) => {
 });
 
 router.get(
-  "/deletereserveHistory/:id",
+  "/deleteReserveHistory/:id",
   isLogin,
   fetchGroupBooks,
   (req, res) => {

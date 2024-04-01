@@ -10,7 +10,7 @@
                 <form method="post" action="/register" style="margin-top: 20px;">
                     <div class="form-group">
                         <!-- Change to Name ;; Status : Waiting for Edit -->
-                        <label class="text-success" for="exampleInputUsername">Name</label>
+                        <label class="text-success" for="exampleInputUsername">Full Name</label>
                         <input type="text" name="name" class="form-control rounded-pill padding-left"
                             style="margin-top: 10px;" placeholder="Enter Your Name">
                     </div>
@@ -32,13 +32,20 @@
                         <input type="text" name="phone" class="form-control rounded-pill padding-left"
                             style="margin-top: 10px;" placeholder="ex.092-000-0000">
                     </div>
-                    <input type="hidden" name="level" value="user" />
-                    <button type="submit" class="btn btn-outline-success rounded-pill" onsubmit="return validateForm()"
-                        style="width: 100%; margin-top: 20px;">Submit</button>
+                    <div>
+                        <% if ( session.message !==undefined ) {%>
+                            <div class="alert text-center mt-3 text-danger alert-danger ">
+                                <%= session.message %>
+                                    <% session.message=undefined %>
+                                        <% } %>
+                            </div>
+                            <input type="hidden" name="level" value="user" />
+                            <button type="submit" class="btn btn-outline-success rounded-pill"
+                                onsubmit="return validateForm()" style="width: 100%; margin-top: 20px;">Sign-up</button>
                 </form>
                 <div class="text-center" style="margin-top: 5px;"> - or - </div>
                 <a href="/login" type="login" class="btn btn-outline-secondary rounded-pill"
-                    style="width: 100%; margin-top: 5px;">Log In</a>
+                    style="width: 100%; margin-top: 5px;">Log-In</a>
             </div>
         </div>
 
