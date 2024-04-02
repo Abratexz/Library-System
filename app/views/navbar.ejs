@@ -39,8 +39,10 @@
                                 <% } %>
                                     <li><a class="dropdown-item text-success" href="/groupBook">Tag Book</a></li>
                                     <li><a class="dropdown-item text-success" href="/book">Book</a></li>
-                                    <li><a class="dropdown-item text-success" href="/borrowHistory">Borrow History</a></li>
-                                    <li><a class="dropdown-item text-success" href="/reserveHistory">Reserve History</a></li>
+                                    <li><a class="dropdown-item text-success" href="/borrowHistory">Borrow History</a>
+                                    </li>
+                                    <li><a class="dropdown-item text-success" href="/reserveHistory">Reserve History</a>
+                                    </li>
                         </ul>
                     </li>
                 </ul>
@@ -51,7 +53,8 @@
                         <form action="/home" method="GET">
                             <div class="input-group mb-3 ">
                                 <input type="text" name="search" class="form-control border border-success border-1 "
-                                    style="border-radius: 4em 0em 0em 4em; min-width: 150px;" placeholder="  Search">
+                                    style="border-radius: 4em 0em 0em 4em; min-width: 150px;"
+                                    placeholder="  Search book name..">
                                 <select class="form-control border border-success border-1" name="groupBookId">
                                     <option value="All">All</option>
                                     <% groupBooks.forEach((item)=> { %>
