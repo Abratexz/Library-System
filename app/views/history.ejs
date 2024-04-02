@@ -2,14 +2,14 @@
 
     <%- include('navbar') %>
 
-    <main class="card ms-3 me-3 mt-3 bg-white shadow" style="height: 100%;">
-        <div class="card-body">
-            <h2 class="mt-2 ms-2"><span class="special-elite-regular text-success">HISTORY</span>
-                <span class="float-end">
-                    <a class="btn btn-danger " href="/deleteHistory"
-                        onclick="return confirm('Are you sure to delete ?')">CLEAR ALL HISTORY</a>
-                </span>
-            </h2>
+        <main class="card ms-3 me-3 mt-3 bg-white shadow" style="height: 100%;">
+            <div class="card-body">
+                <h2 class="mt-2 ms-2"><span class="special-elite-regular text-success">HISTORY</span>
+                    <span class="float-end">
+                        <a class="btn btn-danger " href="/deleteHistory"
+                            onclick="return confirm('Are you sure to Clear All History ?')">CLEAR ALL HISTORY</a>
+                    </span>
+                </h2>
                 <form class="mt-4" action="/history" method="GET">
                     <div class="mb-3">
                         <label for="historyType" class="form-label">Select History Type:</label>
