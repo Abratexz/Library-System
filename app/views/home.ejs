@@ -14,9 +14,9 @@
             <% } %>
 
                 <div class="container mt-2">
-                    <main class="card m-4 mt-10 bg-white shadow" style="height: 100%;">
+                    <main class="card m-4 mt-10 bg-white shadow rounded" style="height: 100%;">
                         <div class="card-body">
-                            <h2 class="mt-2 text-dark text-center special-elite-regular">- BOOKS -</h2>
+                            <h2 class="mt-2 text-success text-center special-elite-regular">- BOOKS -</h2>
                             <div class="container mt-5">
                                 <div class="row justify-content-center">
                                     <!-- Center the row -->
@@ -74,7 +74,7 @@
                                 <!-- Render pagination links dynamically -->
                                 <% for (let i=1; i <=totalPages; i++) { %>
                                     <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                        <a class=" page-link" href="/home?page=<%= i %>">
+                                        <a class="page-link" href="/home?page=<%= i %>">
                                             <%= i %>
                                         </a>
                                     </li>

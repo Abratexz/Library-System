@@ -25,11 +25,26 @@
 .light-green {
   background-color: #dcf3de;
 }
-.green {
-  background-color: #dcf3de;
-}
 
 .material-icons {
   display: inline-block;
   vertical-align: text-bottom;
+}
+
+.page-link{
+  background-color: white);
+  border-color: green;
+  color: green;
+}
+
+.page-link:hover{
+  background-color: #dcf3de);
+  border-color: green;
+  color: green;
+}
+
+.page-item.active .page-link {
+  background-color: green;
+  border-color: green;
+  color: white;
 }
