@@ -22,3 +22,14 @@
   font-weight: 400;
   font-style: normal;
 }
+.light-green {
+  background-color: #dcf3de;
+}
+.green {
+  background-color: #dcf3de;
+}
+
+.material-icons {
+  display: inline-block;
+  vertical-align: text-bottom;
+}

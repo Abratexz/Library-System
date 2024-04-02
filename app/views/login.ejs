@@ -25,7 +25,6 @@
           </div>
           <div>
             <% if ( session.message !==undefined ) {%>
-
               <div
                 class="alert text-center mt-3 <%= (session.message === 'Register Successfully!!' || session.message === 'Reset Password Success!!') ? 'text-success alert-success' : 'text-danger alert-danger' %>">
                 <%= session.message %>
@@ -41,5 +40,4 @@
           style="width: 100%; margin-top: 5px;">Sign-up</a>
       </div>
     </div>
-
     <%- include('footer') %>

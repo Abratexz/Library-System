@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow" style="height: 80px;">
+<nav class="navbar navbar-expand-lg navbar-light shadow light-green " style="height: 80px;">
     <div class="container-fluid">
         <a class="navbar-brand special-elite-regular  ps-2" href="/home">LIBRARY HOME</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -8,15 +8,15 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCategory" role="button"
+                    <a class="nav-link dropdown-toggle " href="#" id="navbarDropdownCategory" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         Category
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <li class="list-group">
                             <% groupBooks.forEach((item)=> { %>
-                        <li class="dropdown-item">
-                            <a href="/home?groupBookId=<%= item.id %>" class="text-decoration-none">
+                        <li class="dropdown-item ">
+                            <a href="/home?groupBookId=<%= item.id %>" class="text-decoration-none text-success ">
                                 <%= item.name_tag %>
                             </a>
                         </li>
@@ -48,9 +48,10 @@
                     <div class="collapse navbar-collapse justify-content-center mt-3" style="padding-right: 180px;"
                         id="navbarScroll">
                         <form action="/home" method="GET">
-                            <div class="input-group mb-3">
-                                <input type="text" name="search" class="form-control" placeholder="Search">
-                                <select class="form-control" name="groupBookId">
+                            <div class="input-group mb-3 ">
+                                <input type="text" name="search" class="form-control border border-success border-1 "
+                                    style="border-radius: 4em 0em 0em 4em;" placeholder="  Search">
+                                <select class="form-control border border-success border-1" name="groupBookId">
                                     <option value="All">All</option>
                                     <% groupBooks.forEach((item)=> { %>
                                         <option value="<%= item.id %>">
@@ -58,7 +59,11 @@
                                         </option>
                                         <% }) %>
                                 </select>
-                                <button class="btn btn-secondary" type="submit">Search</button>
+                                <button class="btn green border border-success border-1"
+                                    style=" border-radius: 0em 4em 4em 0em;" type="submit"><span
+                                        class="material-symbols-outlined material-icons ">
+                                        search
+                                    </span></button>
                             </div>
                         </form>
                     </div>
@@ -68,7 +73,7 @@
                             <!-- Dropdown Menu -->
                             <% if (session.token !=undefined) { %>
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle text-white pt-4" href="#"
+                                    <a class="nav-link dropdown-toggle text-dark pt-4" href="#"
                                         id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown"
                                         aria-expanded="false">
                                         <%= session.name %>
@@ -77,11 +82,10 @@
 
                                         <li><a class="dropdown-item" href="/profile ">Profile</a></li>
                                         <li><a class="dropdown-item" href="/history ">History</a></li>
-                                        <li><a class="dropdown-item" href="/logout">Log Out</a></li>
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
-                                        <li><a class="dropdown-item" href="#">Support</a></li>
+                                        <li><a class="dropdown-item" href="/logout">Log Out</a></li>
                                     </ul>
                                 </li>
                                 <!-- User Profile -->

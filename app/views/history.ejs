@@ -2,8 +2,9 @@
 
     <%- include('navbar') %>
 
-        <main class="card m-4 mt-10 bg-white shadow" style="height: 100%;">
+        <main class="card ms-3 me-3 mt-3 bg-white shadow" style="height: 100%;">
             <div class="card-body">
+                <h2 class="special-elite-regular mt-2 text-dark text-center">- HISTORY -</h2>
                 <form action="/history" method="GET">
                     <div class="mb-3">
                         <label for="historyType" class="form-label">Select History Type:</label>
@@ -18,9 +19,6 @@
                             onclick="return confirm('Are you sure to delete ?')">CLEAR ALL HISTORY</a>
                     </div>
                 </form>
-
-                <h2 class="special-elite-regular mt-2 text-dark text-center">- HISTORY -</h2>
-
                 <table id="allHistory" class="table" style="display: block;">
                     <thead class="text-dark">
                         <tr>
