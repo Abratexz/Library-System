@@ -2,7 +2,7 @@ let express = require("express");
 let router = express.Router();
 let conn = require("./connect");
 let jwt = require("jsonwebtoken");
-let secretCode = "mylibraryprojectkey";
+let secretCode = "mylibraryprojectkey"; // Library ต่างๆ จาก  npmjs
 let session = require("express-session");
 let formidable = require("formidable");
 let fs = require("fs");
@@ -11,6 +11,9 @@ let numeral = require("numeral");
 let dayFormat = "DD/MM/YYYY HH:mm:ss";
 let path = require("path");
 
+/*router.use() ใช้จัดการ session โดยใช้ library ที่ถูกนำเข้ามาก่อนหน้านี้ เมื่อมีการเรียกใช้งานเซิร์ฟเวอร์ทุกครั้ง การใช้ session()
+จะเป็นการจัดเก็บข้อมูลของ session และการรักษาสถานะความเป็น user ในระบบ
+*/
 router.use(
   session({
     secret: "sessionformylibraryprojectkey",
@@ -21,7 +24,8 @@ router.use(
     },
   })
 );
-
+/*router.use() ทำหน้าที่นำข้อมูล session และอ็อบเจกต์ของตัวแปรต่างๆจาก Library เช่น numeral และ dayjs เพื่อให้สามารถใช้งานได้ใน views ได้
+ */
 router.use((req, res, next) => {
   res.locals.session = req.session;
   res.locals.numeral = numeral;
@@ -29,6 +33,10 @@ router.use((req, res, next) => {
 
   next();
 });
+
+/*Function fetchGroupBooks ทำหน้าที่ดึงข้อมูลกลุ่มหนังสือจาก database เพื่อส่งข้อมูลให้ router อื่นใช้ 
+เพราะว่า ทุก page ที่มี Navbar มี Function Search และ Function Search ต้องการใช้ข้อมูลของกลุ่มหนังสือจึงต้องทำการสร้าง method นี้ไว้เพื่อให้ใช้งานใน Route อื่นๆ
+*/
 const fetchGroupBooks = async (req, res, next) => {
   try {
     let conn = require("./connect2");
@@ -40,6 +48,9 @@ const fetchGroupBooks = async (req, res, next) => {
     res.status(500).send("Error fetching groupBooks data: " + error);
   }
 };
+/*Function isLogin เพื่อตรวจสอบว่าผู้ใช้ได้ Log-in เข้าหรือไม่ โดยตรวจสอบว่ามี session token หรือไม่ ถ้ามีก็ให้ผ่านไป ถ้าไม่มีก็ให้กลับไปหน้า login
+ */
+
 function isLogin(req, res, next) {
   if (req.session.token != undefined) {
     next();
@@ -48,21 +59,30 @@ function isLogin(req, res, next) {
   }
 }
 
-/* GET home page. */
+/* GET home page. 
+  ไปหน้า index
+*/
 router.get("/", function (req, res, next) {
   res.render("index");
 });
 
+/*router นีหลักๆคือการ ดึงข้อมูลของหนังสือจาก database มาแสดงที่หน้า home 
+มีการกำหนด logic การเเสดงผล Page หลายๆหน้า เช่น 1 2 3 ,
+กำหนดการเเสดงหนังสือของเเต่ละหน้า 
+การค้นหา การคัดข้อมูลหนังสือเพื่อนำมาเเสดงที่หน้า home
+
+*/
+
 router.get("/home", isLogin, async (req, res) => {
   try {
     let conn = require("./connect2");
-    let page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
-    let BooksPerPage = parseInt(req.query.BooksPerPage) || 10; // Default to 10 Books per page if not provided
-    let offset = (page - 1) * BooksPerPage;
+    let page = parseInt(req.query.page) || 1; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้า เช่น ถ้า url page=2 ค่า page ก็ = 2
+    let BooksPerPage = parseInt(req.query.BooksPerPage) || 10; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้าโดย ให้ Default = 10
+    let offset = (page - 1) * BooksPerPage; // ใช้ในการคำนวณข้อมูลที่ต้องการแสดงในแต่ละหน้า มี 2 หน้าก็อาจจะมีถึง 11 ข้อมูล เป็นต้น
     let params = [];
-    let sql = "SELECT COUNT(*) AS total FROM tb_book"; // Count total number of books
+    let sql = "SELECT COUNT(*) AS total FROM tb_book";
 
-    // Now fetch the books for the current page
+    //เงื่อนไขสำหรับการใช้หาหนังสือ
     let whereClause = "";
     if (req.query.search) {
       whereClause += "book_name LIKE(?)";
@@ -71,8 +91,7 @@ router.get("/home", isLogin, async (req, res) => {
     if (req.query.groupBookId) {
       if (whereClause) whereClause += " AND ";
       if (req.query.groupBookId === "All") {
-        // If groupBookId is 'All', include all group book names
-        whereClause += "1"; // True condition to include all group book names
+        whereClause += "1";
       } else {
         whereClause += "group_book_id = ?";
         params.push(req.query.groupBookId);
@@ -82,7 +101,7 @@ router.get("/home", isLogin, async (req, res) => {
       sql += " WHERE " + whereClause;
     }
 
-    let [countResult] = await conn.query(sql, params);
+    let [countResult] = await conn.query(sql, params); // นับจำนวนทั้งหมดของหนังสือ
     let totalBooks = countResult[0].total;
     let totalPages = Math.ceil(totalBooks / BooksPerPage);
     sql = "SELECT * FROM tb_book";
@@ -92,10 +111,11 @@ router.get("/home", isLogin, async (req, res) => {
     sql += " ORDER BY id DESC LIMIT ? OFFSET ?";
     params.push(BooksPerPage, offset);
 
-    let [books, fields] = await conn.query(sql, params);
+    let [books, fields] = await conn.query(sql, params); //ดึงข้อมูลจำนวนหนังสือทั้งหมดที่ตรงกับเงื่อนไขและจำนวนหนังสือที่ต้องการแสดง
     sql = "SELECT * FROM tb_group_book ORDER BY name_tag ASC";
-    let [groupBooks, fieldsGroupProduct] = await conn.query(sql);
+    let [groupBooks, fieldsGroupProduct] = await conn.query(sql); // ดึงข้อมูลกลุ่มหนังสือทั้งหมดจาก Database
     res.render("home", {
+      //ส่งข้อมูลหนังสือที่ดึงมาและข้อมูลการจัดหน้าไปยังหน้า "home"
       books: books,
       currentPage: page,
       BooksPerPage: BooksPerPage,
@@ -107,21 +127,25 @@ router.get("/home", isLogin, async (req, res) => {
   }
 });
 
+//เมื่อออกจากระบบให้ลบ session ของผู้ใช้ออกจาก server แล้วไปหน้า login
 router.get("/logout", isLogin, (req, res) => {
   req.session.destroy();
   res.redirect("/login");
 });
 
+//แสดงผลหน้า login
 router.get("/login", (req, res) => {
   res.render("login");
 });
 
+//ตรวจสอบข้อมูลที่ผู้ใช้ป้อนเพื่อทำการเข้าระบบและทำการตรวจสอบใน database ว่ามีข้อมูลผู้ใช้งานตรงกับที่ผู้ใช้ป้อนหรือไม่
 router.post("/login", (req, res) => {
   let sql = "SELECT * FROM tb_user WHERE usr = ? AND pwd = ?";
   let username = req.body["usr"];
   let password = req.body["pwd"];
 
   if (!username || !password) {
+    //ตรวจสอบว่าผู้ใช้ป้อนรหัสผ่านหรือไม่
     req.session.message = "Please provide both username and password";
     return res.redirect("/login");
   }
@@ -129,33 +153,36 @@ router.post("/login", (req, res) => {
   let params = [username, password];
 
   conn.query(sql, params, (err, result) => {
+    //ค้นหาข้อมูลผู้ใช้จาก database โดยใช้ชื่อผู้ใช้ (username) และรหัสผ่าน (password) ที่ผู้ใช้ป้อน
     if (err) throw err;
 
     if (result.length > 0) {
+      //ถ้าพบข้อมูลแสดงว่า log in ผ่าน และสร้าง token ใช้ในการยืนยันการเข้าสู่ระบบ โดย Function isLogin()
       let id = result[0].id;
       let name = result[0].name;
-
+      // Set ข้อมูลsession ของผู้ใช้ที่เข้าสู่ระบบเพื่อให้ระบบจำความเป็นผู้ใช้
       let token = jwt.sign({ id: id, name: name }, secretCode);
       req.session.token = token;
       req.session.name = name;
       req.session.usr = result[0].usr;
       req.session.img = result[0].img;
       req.session.level = result[0].level;
-      res.redirect("/home");
+      res.redirect("/home"); //ไปหน้า home
     } else {
+      //ถ้าไม่มีข้อมูล แสดงว่า รหัสผ่านผิดหรือไม่มีข้อมูลในระบบ
       req.session.message =
         "Username or password invalid. If you are not registered, please sign up";
-      res.redirect("/login");
-      //res.send("Username Or Password Invalid");
+      res.redirect("/login"); //ไปหน้า login
     }
   });
 });
-
+//แสดงผลหน้า register
 router.get("/register", (req, res) => {
   res.render("register");
 });
 
 router.post("/register", (req, res) => {
+  //ตรวจสอบว่าผู้ใช้ได้กรอกข้อมูลที่จำเป็นทั้งหมดหรือไม่
   if (
     !req.body["name"] ||
     !req.body["usr"] ||
@@ -164,6 +191,8 @@ router.post("/register", (req, res) => {
     !req.body["phone"] ||
     !req.body["citizencard"]
   ) {
+    // ถ้าไม่ได้กรอกทั้งหมดให้สร้างข้อความแจ้งเตือน และแสดงผลหน้า Register
+
     req.session.message = "Please provide all information";
     return res.redirect("/register");
   }
@@ -175,10 +204,13 @@ router.post("/register", (req, res) => {
     req.body["phone"],
     req.body["citizencard"],
   ];
-
+  //ตรวจสอบว่ามีชื่อผู้ใช้งานหรือหมายเลขโทรศัพท์ หรือหมายเลขบัตรประชาชนที่ผู้ใช้ป้อนมาว่า มีอยู่ใน database อยู่เเล้วหรือไม่
   conn.query(checkUsrSql, checkParam, (err, ExistResult) => {
     if (err) throw err;
+    //ถ้ามีข้อมูลแสดงว่าซ้ำ
     if (ExistResult.length > 0) {
+      //จะสร้างข้อความแจ้งเตือนและ แสดงผลหน้า register
+
       req.session.message =
         "Username Phone number or Citizen ID  already exists. Please try a different one.";
       return res.redirect("/register");
@@ -195,13 +227,15 @@ router.post("/register", (req, res) => {
       req.body["phone"],
       req.body["citizencard"],
     ];
-
+    //ถ้ากไม่มีข้อมูลซ้ำก็เพิ่มข้อมูลผู้ใช้ใหม่เข้าใน database
     conn.query(sql, params);
+    //สร้างข้อความแจ้งเตือน และแสดงผลหน้า Login
     req.session.message = "Register Successfully!!";
     res.redirect("/login");
   });
 });
 
+//แสดงผลหน้า forgotpassword
 router.get("/forgotPassword", (req, res) => {
   res.render("forgotPassword");
 });
@@ -211,32 +245,41 @@ router.post("/forgotPassword", (req, res) => {
   let username = req.body["usr"];
   let checkParam = [username];
 
+  //ตรวจสอบว่ามีชื่อผู้ใช้งานที่ผู้ใช้ป้อนมาอยู่ในฐ database หรือไม่
   conn.query(checkUsrSql, checkParam, (err, ExistResult) => {
     if (err) throw err;
-
+    // ถ้าไม่มีข่อมูลเเสดงว่า ไม่มีข้อมูลผู้ใช้งาน
     if (ExistResult.length === 0) {
+      //สร้างข้อความแจ้งเตือน และแสดงผลหน้า forgotpassword
+
       req.session.message = "Username does not exist. Please try again";
       return res.redirect("/forgotPassword");
     }
-
+    //ถ้ามีข้อมูล  สร้างและส่ง token ใหม่ (token จะมีอายุ 1 ชั่วโมง) และแสดงผลหน้า passwordResetLink เพื่อให้ผู้ใช้ตั้งค่ารหัสผ่านใหม่
     let token = jwt.sign({ username }, secretCode, { expiresIn: "1h" });
     res.render("passwordResetLink", { token });
   });
 });
+
+//รับค่า token จากพารามิเตอร์ของ URL และแสดงผลหน้า passwordReset
 router.get("/passwordReset/:token", (req, res) => {
   let { token } = req.params;
 
   res.render("passwordReset", { token });
 });
 
+//รับค่า token และรหัสผ่านใหม่จากข้อมูลที่ผู้ใช้ส่งมา
 router.post("/passwordReset/:token", (req, res) => {
   let { token } = req.params;
   let newPassword = req.body["pwd"];
 
+  //ตรวจสอบ token ว่าถูกต้องหรือไม่
   jwt.verify(token, secretCode, (err, decoded) => {
     if (err) {
+      //ถ้าไม่ถูก แสดงผลหน้า login
       return res.redirect("/login");
     } else {
+      //ถ้าถูกจะนำรหัสผ่านใหม่ที่ผู้ใช้ป้อนมาใช้ในการอัปเดตรหัสผ่านใน database
       let { username } = decoded;
       console.log({ newPassword });
       console.log({ username });
@@ -250,41 +293,54 @@ router.post("/passwordReset/:token", (req, res) => {
       });
     }
   });
+  //สร้างข้อความแจ้งเตือนและแสดงผลหน้า login
   req.session.message = "Reset Password Success!!";
   res.redirect("/login");
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+
 router.get("/profile", isLogin, fetchGroupBooks, (req, res) => {
-  let data = jwt.verify(req.session.token, secretCode);
+  let data = jwt.verify(req.session.token, secretCode); //ยืนยันตัวตนดยการถอดรหัส token
   let sql = "SELECT * FROM tb_user WHERE id = ?";
   let params = [data.id];
+  //ดึงข้อมูลผู้ใช้จาก database โดยใช้ id ของผู้ใช้จากข้อมูลใน token
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
+    //ส่งข้อมูลผู้ใช้ที่ดึงมาและข้อมูลกลุ่มหนังสือ และแสดงผลหน้า profile
     res.render("profile", { user: result[0], groupBooks: req.groupBooks });
   });
 });
+
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลผู้ใช้จาก dabase โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
 
 router.get("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "SELECT * FROM tb_user WHERE id = ?";
   let params = req.params.id;
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
+    //ส่งข้อมูลผู้ใช้ที่ดึงมาและข้อมูลกลุ่มหนังสือ และแสดงหน้า editprofile
     res.render("editProfile", { user: result[0], groupBooks: req.groupBooks });
   });
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+
 router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
-  let form = new formidable.IncomingForm();
+  let form = new formidable.IncomingForm(); //แปลงข้อมูลที่รับเข้ามาจากฟอร์ม
   form.parse(req, (error, fields, file) => {
+    //แปลงข้อมูลที่รับเข้ามาจาก request เป็น fields และ files
     let sqlSelect = "SELECT img FROM tb_user WHERE id = ?";
     let paramSelect = req.params.id;
     conn.query(sqlSelect, paramSelect, (err, oldUser) => {
+      //ดึงข้อมูลผู้ใช้เดิมจาก database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
       if (err) throw err;
       let oldUserImg = oldUser[0];
       let imgFileName = oldUserImg.img; // ค่าปกติของ Img ทื่มีอยู่ใน Data aka  รูปเก่า
 
       if (file.img && file.img.length > 0) {
-        // ถ้ามีรูปใหม่อัปโหลดเข้ามา
+        // เช็คว่ามีการอัปโหลดรูปภาพใหม่มาหรือไม่ ถ้ามีทำการบันทึกไฟล์รูปภาพใหม่ลงในเซิร์ฟเวอร์ และลบไฟล์รูปภาพเดิมออกจากเซิร์ฟเวอร์
         let filePath = file.img[0].filepath;
         let newPath =
           "C://Users/nemo_/Desktop/Library-System/app/public/images/users/";
@@ -302,6 +358,7 @@ router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
           }
         });
       }
+      //อัพเดตข้อมูลผู้ใช้ใน database ตามที่ได้ป้อน
       let sql =
         "UPDATE tb_user SET name = ? , pwd = ? ,phone = ?,citizencard = ?, img = ? WHERE id = ?";
       let params = [
@@ -314,7 +371,8 @@ router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
       ];
       conn.query(sql, params, (err, result) => {
         if (err) throw err;
-
+        //ดึงข้อมูลผู้ใช้ที่อัพเดตแล้วจาก database เพื่ออัพเดต session ด้วยข้อมูลผู้ใช้ที่อัพเดตแล้ว
+        //ส่งข้อความยืนยันการแก้ไขโปรไฟล์และ แสดงผลหน้า Profile
         let sqlFetchUser = "SELECT * FROM tb_user WHERE id = ?";
         conn.query(sqlFetchUser, paramSelect, (err, updatedUser) => {
           req.session.img = updatedUser[0].img;
@@ -327,19 +385,27 @@ router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
   });
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลผู้ใช้ทั้งหมดจาก database
 router.get("/user", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "SELECT * FROM tb_user ORDER BY id DESC";
   conn.query(sql, (err, result) => {
     if (err) throw err;
+    //ส่งข้อมูลผู้ใช้ที่ดึงมาและข้อมูลกลุ่มหนังสือ และแสดงหน้า user
     res.render("user", { users: result, groupBooks: req.groupBooks });
   });
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+
 router.get("/addUser", isLogin, fetchGroupBooks, (req, res) => {
+  //แสดงผลและส่งข้อมูลผู้ใช้เปล่า ไปที่หน้า "addUser" เพื่อให้ผู้ใช้กรอกข้อมูลผู้ใช้ในฟอร์ม
   res.render("addUser", { user: {}, groupBooks: req.groupBooks });
 });
 
 router.post("/addUser", isLogin, (req, res) => {
+  //เพิ่มข้อมูลผู้ใช้ใหม่ลงใน Datbase
+  //แสดงผลหน้า user
   let sql = "INSERT INTO tb_user SET ?";
   let params = req.body;
   conn.query(sql, params, (err, result) => {
@@ -348,14 +414,21 @@ router.post("/addUser", isLogin, (req, res) => {
   });
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลผู้ใช้จาก dabase โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
+
 router.get("/editUser/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "SELECT * FROM tb_user WHERE id = ?";
   let params = req.params.id;
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
+
+    //ส่งข้อมูลผู้ใช้ที่ดึงมาและข้อมูลกลุ่มหนังสือไปที่ "addUser" เพื่อให้ผู้ใช้ทำการแก้ไขข้อมูล
     res.render("addUser", { user: result[0], groupBooks: req.groupBooks });
   });
 });
+
+//อัพเดตข้อมูลผู้ใช้ใน database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL และแสดงผลหน้า user
 
 router.post("/editUser/:id", isLogin, (req, res) => {
   let sql =
@@ -376,6 +449,7 @@ router.post("/editUser/:id", isLogin, (req, res) => {
   });
 });
 
+//ลบข้อมูลผู้ใช้ใน database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL และแสดงผลหน้า user
 router.get("/deleteUser/:id", isLogin, (req, res) => {
   let sql = "DELETE FROM tb_user WHERE id = ?";
   let params = req.params.id;
@@ -386,6 +460,8 @@ router.get("/deleteUser/:id", isLogin, (req, res) => {
   });
 });
 
+//ดึงข้อมูลกลุ่มหนังสือทั้งหมดจาก dabase
+//ส่งข้อมูลลุ่มหนังสือทั้งหมด  และแสดงหน้า groupbook
 router.get("/groupBook", isLogin, (req, res) => {
   let sql = "SELECT * FROM tb_group_book ORDER BY id DESC";
   conn.query(sql, (err, result) => {
@@ -396,6 +472,7 @@ router.get("/groupBook", isLogin, (req, res) => {
   });
 });
 
+//ส่งข้อมูลกลุ่มหนังสือเปล่าไปที่หน้า "addGroupBook" เพื่อให้ผู้ใช้กรอกข้อมูลกลุ่มหนังสือในฟอร์ม
 router.get("/addGroupBook", isLogin, fetchGroupBooks, (req, res) => {
   res.render("addGroupBook", { groupBook: {}, groupBooks: req.groupBooks });
 });
@@ -403,12 +480,16 @@ router.get("/addGroupBook", isLogin, fetchGroupBooks, (req, res) => {
 router.post("/addGroupBook", isLogin, (req, res) => {
   let sql = "INSERT INTO tb_group_book SET ?";
   let params = req.body;
-
+  //เพิ่มข้อมูลกลุ่มหนังสือใหม่ลงใน Datbase
+  //แสดงผลหน้า user
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
     res.redirect("/groupBook");
   });
 });
+
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลกลุ่มหนังสือจาก dabase โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
 
 router.get("/editGroupBook/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "SELECT * FROM tb_group_book WHERE id = ?";
@@ -416,12 +497,16 @@ router.get("/editGroupBook/:id", isLogin, fetchGroupBooks, (req, res) => {
 
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
+
+    //ส่งข้อมูลกลุ่มหนังสือที่ดึงมาและข้อมูลกลุ่มหนังสือทั้งหมดไปที่ "addGroupBook" เพื่อให้ผู้ใช้ทำการแก้ไขข้อมูล
     res.render("addGroupBook", {
       groupBook: result[0],
       groupBooks: req.groupBooks,
     });
   });
 });
+
+//อัพเดตข้อมูลกลุ่มหนังสือใน database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL และแสดงผลหน้า groupbook
 
 router.post("/editGroupBook/:id", isLogin, (req, res) => {
   let sql = "UPDATE tb_group_book SET name_tag = ? WHERE id = ? ";
@@ -433,6 +518,7 @@ router.post("/editGroupBook/:id", isLogin, (req, res) => {
   });
 });
 
+//ลบข้อมูลกลุ่มหนังสือใน database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL และแสดงผลหน้า groupBook
 router.get("/deleteGroupBook/:id", isLogin, (req, res) => {
   let sql = "DELETE FROM tb_group_book WHERE id = ?";
   let params = req.params.id;
@@ -443,6 +529,9 @@ router.get("/deleteGroupBook/:id", isLogin, (req, res) => {
   });
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลหนังสือทั้งหมดจาก database โดยรวมกับกลุ่มหนังสือ
+//มีการค้นหาหนังสือโดยใช้เลข ISBN
 router.get("/book", isLogin, fetchGroupBooks, (req, res) => {
   let sql =
     "SELECT tb_book.* , tb_group_book.name_tag AS group_book_name_tag FROM tb_book " +
@@ -460,14 +549,19 @@ router.get("/book", isLogin, fetchGroupBooks, (req, res) => {
 
   conn.query(sql, sqlParams, (err, result) => {
     if (err) throw err;
+
+    //ส่งผลลัพธ์ไปที่หน้า "book" พร้อมกับข้อมูลกลุ่มหนังสือทั้งหมด
     res.render("book", { books: result, groupBooks: req.groupBooks });
   });
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลกลุ่มหนังสือทั้งหมดเพื่อใช้ในการเลือกกลุ่มหนังสือขณะเพิ่มหนังสือใหม่
 router.get("/addBook", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
   conn.query(sql, (err, result) => {
     if (err) throw err;
+
     res.render("addBook", {
       book: {},
       groupBooks: result,
@@ -479,14 +573,18 @@ router.get("/addBook", isLogin, fetchGroupBooks, (req, res) => {
 router.post("/addBook", isLogin, (req, res) => {
   let form = new formidable.IncomingForm();
   form.parse(req, (err, fields, file) => {
+    //ตรวจสอบว่ามีการอัปโหลดภาพหรือไม่ ถ้าไม่มีจะสร้างข้อความแจ้งเตือนและแสดงผลหน้า"book"
     if (!file || !file.img) {
       req.session.message = "You must upload images!!!";
       res.redirect("/book");
     } else {
+      //นำภาพที่อัปโหลดมาบันทึกในไดเรกทอรีของเซิร์ฟเวอร์
+
       let filePath = file.img[0].filepath;
       let newPath =
         "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
       newPath += file.img[0].originalFilename;
+      //เพิ่มข้อมูลหนังสือใหม่ลงใน database และแสดงผลหน้า book
       fs.copyFile(filePath, newPath, () => {
         let sql =
           "INSERT INTO tb_book(group_book_id, isbn, author, book_name, detail,status, img) VALUES(?, ?, ?, ?, ?, ?, ?)";
@@ -509,20 +607,23 @@ router.post("/addBook", isLogin, (req, res) => {
 });
 
 router.get("/editBook/:id", isLogin, (req, res) => {
+  //ดึงข้อมูลหนังสือที่ต้องการแก้ไขจาก database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
   let sql = "SELECT * FROM tb_book WHERE id = ?";
   let params = req.params.id;
 
   conn.query(sql, params, (err, book) => {
     if (err) throw err;
-
+    //ดึงข้อมูลกลุ่มหนังสือทั้งหมดจาก database
     sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
     conn.query(sql, (err, groupBooks) => {
       if (err) throw err;
+      //ส่งข้อมูลหนังสือที่ได้และข้อมูลกลุ่มหนังสือทั้งหมด แสดงผลหน้า "addBook" เพื่อให้ผู้ใช้สามารถแก้ไขข้อมูลหนังสือได้
       res.render("addBook", { book: book[0], groupBooks: groupBooks });
     });
   });
 });
 
+//แก้ไข้ขอมูลหนังสือ โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
 router.post("/editBook/:id", isLogin, (req, res) => {
   let form = new formidable.IncomingForm();
   form.parse(req, (err, fields, file) => {
@@ -534,7 +635,7 @@ router.post("/editBook/:id", isLogin, (req, res) => {
 
       let imgFileName = Book.img; // ค่าปกติของ Img ทื่มีอยู่ใน Data aka  รูปเก่า
       if (file.img && file.img.length > 0) {
-        // ถ้ามีรูปใหม่อัปโหลดเข้ามา
+        //ตรวจสอบว่ามีการอัปโหลดภาพหรือไม่ ถ้ามีการอัปโหลดภาพใหม่ เปลี่ยนเป็นรูปภาพใหม่และลบรูปภาพเก่าออกจากเซิร์ฟเวอร์
         let filePath = file.img[0].filepath;
         let newPath =
           "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
@@ -564,6 +665,7 @@ router.post("/editBook/:id", isLogin, (req, res) => {
         imgFileName, // ใช้รูปใหม่ หรือรูปเก่าที่มี
         req.params.id,
       ];
+      //อัปเดตข้อมูลหนังสือใน database ด้วยข้อมูลที่ผู้ใช้ป้อน และแสดงผลหน้า book
       conn.query(sql, params, (err, result) => {
         if (err) throw err;
         res.redirect("/book");
@@ -572,14 +674,17 @@ router.post("/editBook/:id", isLogin, (req, res) => {
   });
 });
 
+//ลบหนังสือที่ต้องการลบโดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
 router.get("/deleteBook/:id/:img", isLogin, (req, res) => {
   let newPath =
     "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
 
   newPath += req.params.img;
+  //Path ไปยังไฟล์รูปภาพของหนังสือที่ต้องการลบ
 
   fs.unlink(newPath, (err) => {
     if (err) throw err;
+    //ลบไฟล์รูปภาพของหนังสือออกจากเซิร์ฟเวอร์และลบข้อมูลหนังสือออกจาก database และแสดงผลหน้า book
 
     let sql = "DELETE FROM tb_book WHERE id = ?";
     let params = req.params.id;
@@ -590,19 +695,20 @@ router.get("/deleteBook/:id/:img", isLogin, (req, res) => {
     });
   });
 });
-
+//ลบหนังสือทั้งหมดที่มีอยู่ในระบบ
 router.get("/deleteAllBook", isLogin, (req, res) => {
   let newPath =
     "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
-
+  //ชี้ไปยังไดเรกทอรีของภาพหนังสือ
+  //ดึงรายชื่อของไฟล์ทั้งหมดในไดเรกทอรี
   fs.readdir(newPath, (err, files) => {
     if (err) throw err;
-
+    //วนลูป ไฟล์ที่ได้และตรวจสอบว่าไฟล์ที่วนลูปเป็นไฟล์ที่ต้องการลบหรือไม่
     for (const file of files) {
       const filePath = path.join(newPath, file);
       fs.stat(filePath, (err, stats) => {
         if (err) throw err;
-
+        //ถ้่าไฟล์เป็นไฟล์ที่ต้องการลบ ให้ลบไฟล์ออกจากเซิร์ฟเวอร์
         if (stats.isFile()) {
           fs.unlink(filePath, (err) => {
             if (err) throw err;
@@ -611,6 +717,7 @@ router.get("/deleteAllBook", isLogin, (req, res) => {
       });
     }
   });
+  //ลบข้อมูลหนังสือทั้งหมด
   let sql = "DELETE FROM tb_book";
 
   conn.query(sql, (err, results) => {
@@ -618,7 +725,7 @@ router.get("/deleteAllBook", isLogin, (req, res) => {
     res.redirect("/book");
   });
 });
-
+//เปลี่ยนข้อมูล status ของหนังสือทั้งหมดเป็น 'Available'
 router.get("/setAllBookAvailable", isLogin, (req, res) => {
   let sql = "UPDATE tb_book SET status = 'Available'";
   conn.query(sql, (err, results) => {
@@ -626,7 +733,8 @@ router.get("/setAllBookAvailable", isLogin, (req, res) => {
     res.redirect("/book");
   });
 });
-
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลหนังสือที่ต้องการยืม database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
 router.get("/borrow/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "SELECT * FROM tb_book WHERE id = ?";
   let params = req.params.id;
@@ -636,6 +744,7 @@ router.get("/borrow/:id", isLogin, fetchGroupBooks, (req, res) => {
     sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
     conn.query(sql, (err, groupBooks) => {
       if (err) throw err;
+      //นำข้อมูลหนังสือที่ได้และข้อมูลกลุ่มหนังสือทั้งหมดที่ได้ แสดงผลหน้า "borrow" เพื่อให้ผู้ใช้สามารถยืมหนังสือได้
       res.render("borrow", {
         book: result[0],
         groupBooks: groupBooks,
@@ -644,7 +753,9 @@ router.get("/borrow/:id", isLogin, fetchGroupBooks, (req, res) => {
   });
 });
 
+//ยืมโดยเอาข้อมูลหนังสือ โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL ส่วนข้อมูล id ผู้ใช้ ใช้การยืนยันโดยถอดรหัสจาก token
 router.post("/borrow/:id", isLogin, async (req, res) => {
+  //ยืนยันการยืนยันตัวตนid ของผู้ใช้ จากการถอดรหัส ใช้ token
   let data = jwt.verify(req.session.token, secretCode);
   let conn = require("./connect2");
   let bookId = req.params.id;
@@ -652,19 +763,21 @@ router.post("/borrow/:id", isLogin, async (req, res) => {
   let bookStatusQuery = "SELECT status FROM tb_book WHERE id = ?";
   let [bookStatusRow] = await conn.query(bookStatusQuery, [bookId]);
   let bookStatus = bookStatusRow[0].status;
-
+  //ตรวจสอบสถานะของหนังสือที่ต้องการยืม
   if (
     bookStatus === "Borrowed" ||
     bookStatus === "Lost" ||
     bookStatus === "Reserved"
   ) {
+    //แสดงข้อความและ แสดงผลหน้า home
     req.session.message = "FAILED TO BORROW";
     res.redirect("/home");
   } else {
+    //ดึงข้อมูลที่ต้องการใช้ ระยะเวลาที่ต้องการยืมหนังสือ
     let duration = req.body["duration"];
     let currentTime = dayjs().format(dayFormat);
     let returnDate = dayjs().add(duration, "day").format(dayFormat);
-
+    //บันทึกข้อมูลการยืมหนังสือ
     let borrowSql = "INSERT INTO tb_borrow SET ?";
     let borrowParams = {
       user_id: data.id,
@@ -675,28 +788,29 @@ router.post("/borrow/:id", isLogin, async (req, res) => {
       duration: req.body["duration"],
     };
 
-    // Insert into tb_borrow
     let [borrowResult] = await conn.query(borrowSql, borrowParams);
     let borrowId = borrowResult.insertId; // Get the auto-increment of borrow_id
-
+    //อัพเดทสถานะของหนังสือ
     let updateBookSql = "UPDATE tb_book SET status = 'Borrowed' WHERE id = ? ";
     await conn.query(updateBookSql, bookId);
-    // Insert into tb_history with borrow_id
+    //บันทึกประวัติการยืมหนังสือ
     let historySql = "INSERT INTO tb_history SET ?";
     let historyParams = {
       user_id: data.id,
       book_id: bookId,
-      borrow_id: borrowId, // Use the borrow_id obtained from tb_borrow
+      borrow_id: borrowId,
       borrow_history_date: currentTime,
       return_history_date: returnDate,
     };
     await conn.query(historySql, historyParams);
-
+    //สร้างข้อความแจ้งเตือนและแสดงผลหน้า home
     req.session.message = "Book Borrowed Successfully !!";
     res.redirect("/home");
   }
 });
 
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ดึงข้อมูลหนังสือที่ต้องการจองจาก database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
 router.get("/reserve/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "SELECT * FROM tb_book WHERE id = ?";
   let params = req.params.id;
@@ -704,6 +818,7 @@ router.get("/reserve/:id", isLogin, fetchGroupBooks, (req, res) => {
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
     sql = "SELECT * FROM tb_group_book ORDER BY name_tag";
+    ////นำข้อมูลหนังสือที่ได้และข้อมูลกลุ่มหนังสือทั้งหมดที่ได้ แสดงผลหน้า "reserve" เพื่อให้ผู้ใช้สามารถจองหนังสือได้
     conn.query(sql, (err, groupBooks) => {
       if (err) throw err;
       res.render("reserve", {
@@ -714,7 +829,9 @@ router.get("/reserve/:id", isLogin, fetchGroupBooks, (req, res) => {
   });
 });
 
+//ยืมโดยเอาข้อมูลหนังสือ โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL ส่วนข้อมูล id ผู้ใช้ ใช้การยืนยันโดยถอดรหัสจาก token
 router.post("/reserve/:id", isLogin, async (req, res) => {
+  //ยืนยันการยืนยันตัวตน id ของผู้ใช้ จากการถอดรหัส ใช้ token
   let data = jwt.verify(req.session.token, secretCode);
   let conn = require("./connect2");
   let bookId = req.params.id;
@@ -722,19 +839,21 @@ router.post("/reserve/:id", isLogin, async (req, res) => {
   let bookStatusQuery = "SELECT status FROM tb_book WHERE id = ?";
   let [bookStatusRow] = await conn.query(bookStatusQuery, [bookId]);
   let bookStatus = bookStatusRow[0].status;
-
+  //ตรวจสอบสถานะของหนังสือที่ต้องการยืม
   if (
     bookStatus === "Borrowed" ||
     bookStatus === "Lost" ||
     bookStatus === "Reserved"
   ) {
+    //แสดงข้อความและ แสดงผลหน้า home
     req.session.message = "FAILED TO RESERVE";
     res.redirect("/home");
   } else {
+    //ดึงข้อมูลที่ต้องการใช้ ระยะเวลาที่ต้องการจองหนังสือ
     let duration = req.body["duration"];
     let currentTime = dayjs().format(dayFormat);
     let pickupDate = dayjs().add(duration, "day").format(dayFormat);
-
+    //บันทึกข้อมูลการจองหนังสือ
     let reserveSql = "INSERT INTO tb_reserve SET ?";
     let reserveParams = {
       user_id: data.id,
@@ -745,23 +864,22 @@ router.post("/reserve/:id", isLogin, async (req, res) => {
       duration: req.body["duration"],
     };
 
-    // Insert into tb_reserve
     let [reserveResult] = await conn.query(reserveSql, reserveParams);
-    let reserveId = reserveResult.insertId; // Get the auto-increment of reserve_id
-
+    let reserveId = reserveResult.insertId;
+    ////อัพเดทสถานะของหนังสือ
     let updateBookSql = "UPDATE tb_book SET status = 'Reserved' WHERE id = ? ";
     await conn.query(updateBookSql, bookId);
-    // Insert into tb_history with reserve_id
+    //บันทึกประวัติการจองหนังสือ
     let historySql = "INSERT INTO tb_history SET ?";
     let historyParams = {
       user_id: data.id,
       book_id: bookId,
-      reserve_id: reserveId, // Use the reserve_id obtained from tb_reserve
+      reserve_id: reserveId,
       reserve_history_date: currentTime,
       pickup_history_date: pickupDate,
     };
     await conn.query(historySql, historyParams);
-
+    //สร้างข้อความแจ้งเตือนและแสดงผลหน้า home
     req.session.message = "Book Reserve Successfully !!";
     res.redirect("/home");
   }
@@ -770,7 +888,7 @@ router.post("/reserve/:id", isLogin, async (req, res) => {
 router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
   let conn = require("./connect2");
   let data = jwt.verify(req.session.token, secretCode);
-
+  //ยืนยันการยืนยันตัวตน id ของผู้ใช้ จากการถอดรหัส ใช้ token
   let sql =
     "SELECT tb_book.*,tb_borrow.borrow_history_status, tb_borrow.borrow_date, tb_borrow.return_date,tb_borrow.id AS borrow_id,tb_history.id AS history_id " +
     "FROM tb_borrow " +
@@ -781,7 +899,7 @@ router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
   let params = [data.id];
 
   let [borrowUserHistory] = await conn.query(sql, params);
-
+  //ดึงข้อมูลการยืม
   sql =
     "SELECT tb_book.*,tb_reserve.reserve_history_status, tb_reserve.reserve_date, tb_reserve.pickup_date,tb_reserve.id AS reserve_id,tb_history.id AS history_id " +
     "FROM tb_reserve " +
@@ -790,7 +908,7 @@ router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
     "WHERE tb_reserve.user_id = ? ORDER BY id ASC";
 
   let [reserveUserHistory] = await conn.query(sql, params);
-
+  //ดึงข้อมูลการจอง
   sql =
     "SELECT tb_book.*,tb_borrow.borrow_history_status,tb_history.borrow_history_date, tb_history.return_history_date, tb_history.reserve_history_date,tb_history.pickup_history_date, tb_history.id AS history_id " +
     "FROM tb_history " +
@@ -808,9 +926,10 @@ router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
     "WHERE tb_history.user_id = ? ORDER BY id ASC";
 
   let [RHUserHistory] = await conn.query(sql, params);
-
+  //ดึงขอมูลที่เป็นประวัติของ user BH= BorrowHistory RH = ReserveHistory , BHUserHistory RHUserHistorya เพื่อจะนำมารวมกันทีหลัง
   console.log(BHUserHistory);
   console.log(RHUserHistory);
+  //รวมข้อมูลประวัติการยืมและการจองหนังสือทั้งหมดและแสดงผลหน้า"history" เพื่อให้ผู้ใช้ดูประวัติการยืมและการจองของตัวเองได้
   res.render("history", {
     BHUserHistory: BHUserHistory,
     RHUserHistory: RHUserHistory,
@@ -819,13 +938,16 @@ router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
     groupBooks: req.groupBooks,
   });
 });
-
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ลบประวัติการยืมและการจองหนังสือของผู้ใช้
 router.get("/deleteHistory", isLogin, fetchGroupBooks, (req, res) => {
   let deleteHistorySql = "DELETE FROM tb_history WHERE user_id = ?";
   let data = jwt.verify(req.session.token, secretCode);
+  //ยืนยันการยืนยันตัวตน id ของผู้ใช้ จากการถอดรหัส ใช้ token
   let params = [data.id];
   conn.query(deleteHistorySql, params, (err, result) => {
     if (err) throw err;
+    //หลังจากลบประวัติการยืมและการจองหนังสือ ให้ดึงข้อมูลประวัติการยืมและการจองหนังสือใหม่แม้จะว่างเปล่าเพื่อให้มีค่า ว่างไปเข้าเงื่อนไขต่างๆ เช่นว่าหากไม่มีค่า ให้เเสดงว่าข้อความว่า ไม่มีประวัติการทำรายการ
     let fetchSql = "SELECT * FROM tb_history WHERE user_id = ?";
     conn.query(fetchSql, params, (err, history) => {
       if (err) throw err;
@@ -833,17 +955,21 @@ router.get("/deleteHistory", isLogin, fetchGroupBooks, (req, res) => {
     });
   });
 });
-
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ลบประวัติการยืมและการจองหนังสือของผู้ใช้โดยระบุข้อมูลประวัติ จาก id ที่ส่งมาจากพารามเตอร์ url
 router.get("/deleteHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "DELETE FROM tb_history WHERE user_id = ? AND id = ?";
   let data = jwt.verify(req.session.token, secretCode);
+  //ยืนยันการยืนยันตัวตน id ของผู้ใช้ จากการถอดรหัส ใช้ token
   let params = [data.id, req.params.id];
-
+  //ลบและแสดงผลหน้า history
   conn.query(sql, params, (err, result) => {
     if (err) throw err;
     res.redirect("/history");
   });
 });
+
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
 
 router.get("/borrowHistory", isLogin, fetchGroupBooks, (req, res) => {
   let sql =
@@ -852,10 +978,10 @@ router.get("/borrowHistory", isLogin, fetchGroupBooks, (req, res) => {
     "JOIN tb_book ON tb_borrow.book_id = tb_book.id " +
     "JOIN tb_user ON tb_borrow.user_id = tb_user.id " +
     "ORDER BY tb_borrow.id DESC";
-
+  //เลือกข้อมูลประวัติการยืมหนังสือทั้งหมดของผู้ใช้ทั้งหมดในระบบ
   conn.query(sql, (err, result) => {
     if (err) throw err;
-
+    //ส่งข้อมูลที่ได้รับไปแสดงผลหน้า "borrowHistory"
     res.render("borrowHistory", {
       borrowHistory: result,
       groupBooks: req.groupBooks,
@@ -863,6 +989,7 @@ router.get("/borrowHistory", isLogin, fetchGroupBooks, (req, res) => {
   });
 });
 
+//ลบข้อมูลการยืมทั้งหมดในระบบและแสดงผลหน้า "borrowHistory"
 router.get("/deleteborrowHistory", isLogin, (req, res) => {
   let sql = "DELETE FROM tb_borrow";
   conn.query(sql, (err, result) => {
@@ -870,7 +997,8 @@ router.get("/deleteborrowHistory", isLogin, (req, res) => {
     res.redirect("/borrowHistory");
   });
 });
-
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ลบข้อมูลรายการจองหนังสือที่มี id ที่ระบุจากพารามิเตอร์ url และแสดงผลหน้า "borrowHistory"
 router.get("/deleteborrowHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
   let sql = "DELETE FROM tb_borrow WHERE id = ?";
   let params = req.params.id;
@@ -879,6 +1007,7 @@ router.get("/deleteborrowHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
     res.redirect("/borrowHistory");
   });
 });
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
 
 router.get("/reserveHistory", isLogin, fetchGroupBooks, (req, res) => {
   let sql =
@@ -887,16 +1016,17 @@ router.get("/reserveHistory", isLogin, fetchGroupBooks, (req, res) => {
     "JOIN tb_book ON tb_reserve.book_id = tb_book.id " +
     "JOIN tb_user ON tb_reserve.user_id = tb_user.id " +
     "ORDER BY tb_reserve.id DESC";
-
+  ////เลือกข้อมูลประวัติการจองหนังสือทั้งหมดของผู้ใช้ทั้งหมดในระบบ
   conn.query(sql, (err, result) => {
     if (err) throw err;
     res.render("reserveHistory", {
+      //ส่งข้อมูลที่ได้รับไปแสดงผลหน้า "reserveHistory"
       reserveHistory: result,
       groupBooks: req.groupBooks,
     });
   });
 });
-
+//ลบข้อมูลการจองทั้งหมดในระบบและแสดงผลหน้า "reserveHistory"
 router.get("/deleteReserveHistory", isLogin, (req, res) => {
   let sql = "DELETE FROM tb_reserve";
   conn.query(sql, (err, result) => {
@@ -904,7 +1034,8 @@ router.get("/deleteReserveHistory", isLogin, (req, res) => {
     res.redirect("/reserveHistory");
   });
 });
-
+//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+//ลบข้อมูลรายการจองหนังสือที่มี id ที่ระบุจากพารามิเตอร์ url และแสดงผลหน้า "reserveHistory"
 router.get(
   "/deleteReserveHistory/:id",
   isLogin,
