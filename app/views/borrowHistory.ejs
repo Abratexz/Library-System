@@ -41,7 +41,8 @@
                                             <%= borrow.detail %>
                                         </p>
                                     </td>
-                                    <td>
+                                    <td
+                                        class="<%= borrow.status === 'Available' ? 'text-success' : (borrow.status === 'Reserved' ? 'text-warning' : 'text-danger') %>">
                                         <%= borrow.status %>
                                     </td>
                                     <td>

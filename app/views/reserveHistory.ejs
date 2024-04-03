@@ -41,7 +41,8 @@
                                             <%= reserve.detail %>
                                         </p>
                                     </td>
-                                    <td>
+                                    <td
+                                        class="<%= reserve.status === 'Available' ? 'text-success' : (reserve.status === 'Reserved' ? 'text-warning' : 'text-danger') %>">
                                         <%= reserve.status %>
                                     </td>
                                     <td>

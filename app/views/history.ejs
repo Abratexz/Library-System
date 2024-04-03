@@ -55,7 +55,8 @@
                                             <%= book.detail %>
                                         </p>
                                     </td>
-                                    <td>
+                                    <td
+                                        class="<%= book.status === 'Available' ? 'text-success' : (book.status === 'Reserved' ? 'text-warning' : 'text-danger') %>">
                                         <%= book.status %>
                                     </td>
                                     <td>
@@ -116,7 +117,8 @@
                                                 <%= book.detail %>
                                             </p>
                                         </td>
-                                        <td>
+                                        <td
+                                            class="<%= book.status === 'Available' ? 'text-success' : (book.status === 'Reserved' ? 'text-warning' : 'text-danger') %>">
                                             <%= book.status %>
                                         </td>
                                         <td>
@@ -172,7 +174,8 @@
                                                 <%= book.detail %>
                                             </p>
                                         </td>
-                                        <td>
+                                        <td
+                                            class="<%= book.status === 'Available' ? 'text-success' : (book.status === 'Reserved' ? 'text-warning' : 'text-danger') %>">
                                             <%= book.status %>
                                         </td>
                                         <td>
