@@ -8,9 +8,9 @@
                     <div class="col-xl-6 mx-auto">
                         <!-- Profile picture -->
                         <div class="card mt-4 mb-10">
-                            <div class="card-body text-center">
+                            <div class="card-body">
                                 <div class="align-items-center ">
-                                    <div>
+                                    <div class="text-center ">
                                         <div class="text-start fs-4 special-elite-regular">
                                             Profile
                                         </div>
@@ -24,60 +24,61 @@
 
                                         </div>
                                     </div>
+                                    <div class="fs-5">
+                                        <form method="post" enctype="multipart/form-data">
+
+
+                                            <div class="mt-3">
+                                                <label class="form-label ">Image</label>
+                                                <input type="file" name="img" class="form-control" />
+                                            </div>
+                                            <div class="mt-3">
+                                                <label class="form-label">Name:</label>
+                                                <input type="text" class="form-control" name="name"
+                                                    value="<%= user.name %>" required>
+                                            </div>
+                                            <div class="">
+                                                <label class="form-label mt-3">Username:</label>
+                                                <div class="fs-6 ps-2">
+                                                    <%= user.usr %>
+                                                </div>
+
+                                            </div>
+                                            <div class="">
+                                                <label class="form-label mt-3">Password:</label>
+                                                <input type="password" class="form-control" name="pwd"
+                                                    value="<%= user.pwd %>" required>
+                                            </div>
+                                            <div class="">
+                                                <label class="form-label mt-3">Phone:</label>
+                                                <input type="text" class="form-control" name="phone"
+                                                    value="<%= user.phone %>" required>
+                                            </div>
+                                            <div class="">
+                                                <label class="form-label mt-3">Citizen ID:</label>
+                                                <input type="text" class="form-control" name="citizencard"
+                                                    value="<%= user.citizencard %>" required>
+                                            </div>
+                                            <div class="text-end ">
+                                                <a type="button" class="btn btn-md btn-neutral mt-3 me-2"
+                                                    href="/profile">Cancel</a>
+                                                <button type="submit" class="btn btn-md btn-primary mt-3  "
+                                                    onclick="return confirm('Confirm ?')">Save</button>
+                                            </div>
+
+
+                                        </form>
+                                    </div>
 
                                 </div>
                             </div>
                         </div>
 
-                        <form method="post" enctype="multipart/form-data">
-                            <div class="card mt-2">
-                                <div class="card-body fs-5 ">
-                                    <div class="">
-                                        <label class="form-label">Name</label>
-                                        <input type="text" class="form-control" name="name" value="<%= user.name %>"
-                                            required>
-                                    </div>
-                                    <div class="">
-                                        <label class="form-label mt-3">Username</label>
-                                        <div>
-                                            <%= user.usr %>
-                                        </div>
 
-                                    </div>
-                                    <div class="">
-                                        <label class="form-label mt-3">Password</label>
-                                        <input type="password" class="form-control" name="pwd" value="<%= user.pwd %>"
-                                            required>
-                                    </div>
-                                    <div class="">
-                                        <label class="form-label mt-3">Phone</label>
-                                        <input type="text" class="form-control" name="phone" value="<%= user.phone %>"
-                                            required>
-                                    </div>
-                                    <div class="">
-                                        <label class="form-label mt-3">Citizen ID</label>
-                                        <input type="text" class="form-control" name="citizencard"
-                                            value="<%= user.citizencard %>" required>
-                                    </div>
-                                    <div class="mt-3">
-                                        <label class="form-label fs-5">Image</label>
-                                        <input type="file" name="img" class="form-control" />
-                                    </div>
-                                    <div class="text-end ">
-                                        <a type="button" class="btn btn-md btn-neutral mt-3 me-2"
-                                            href="/profile">Cancel</a>
-                                        <button type="submit" class="btn btn-md btn-primary mt-3  "
-                                            onclick="return confirm('Confirm ?')">Save</button>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
         </main>
-        </div>
-        </div>
+
 
         <%- include('footer') %>
