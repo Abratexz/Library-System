@@ -303,10 +303,9 @@ router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
         });
       }
       let sql =
-        "UPDATE tb_user SET name = ? , usr = ?, pwd = ? ,phone = ?,citizencard = ?, img = ? WHERE id = ?";
+        "UPDATE tb_user SET name = ? , pwd = ? ,phone = ?,citizencard = ?, img = ? WHERE id = ?";
       let params = [
         fields["name"],
-        fields["usr"],
         fields["pwd"],
         fields["phone"],
         fields["citizencard"],
@@ -319,6 +318,8 @@ router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
         let sqlFetchUser = "SELECT * FROM tb_user WHERE id = ?";
         conn.query(sqlFetchUser, paramSelect, (err, updatedUser) => {
           req.session.img = updatedUser[0].img;
+          req.session.name = updatedUser[0].name;
+          req.session.message = "Edit Profile Successfully!!";
           res.redirect("/profile");
         });
       });
