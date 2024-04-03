@@ -282,6 +282,7 @@ router.post("/editProfile/:id", isLogin, fetchGroupBooks, (req, res) => {
       if (err) throw err;
       let oldUserImg = oldUser[0];
       let imgFileName = oldUserImg.img; // ค่าปกติของ Img ทื่มีอยู่ใน Data aka  รูปเก่า
+
       if (file.img && file.img.length > 0) {
         // ถ้ามีรูปใหม่อัปโหลดเข้ามา
         let filePath = file.img[0].filepath;
