@@ -572,7 +572,7 @@ router.post("/editBook/:id", isLogin, (req, res) => {
 
 router.get("/deleteBook/:id/:img", isLogin, (req, res) => {
   let newPath =
-    "C://Users/nemo_/Desktop/Library-System/app/public/images/books";
+    "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
 
   newPath += req.params.img;
 
@@ -591,7 +591,7 @@ router.get("/deleteBook/:id/:img", isLogin, (req, res) => {
 
 router.get("/deleteAllBook", isLogin, (req, res) => {
   let newPath =
-    "C://Users/nemo_/Desktop/Library-System/app/public/images/books";
+    "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
 
   fs.readdir(newPath, (err, files) => {
     if (err) throw err;
