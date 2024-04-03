@@ -34,8 +34,8 @@ const fetchGroupBooks = async (req, res, next) => {
     let conn = require("./connect2");
     let sqlGroupBooks = "SELECT * FROM tb_group_book ORDER BY name_tag ASC";
     let [groupBooksResult] = await conn.query(sqlGroupBooks);
-    req.groupBooks = groupBooksResult; // Attach groupBooks data to the request object
-    next(); // Call next to proceed to the next middleware/route handler
+    req.groupBooks = groupBooksResult;
+    next();
   } catch (error) {
     res.status(500).send("Error fetching groupBooks data: " + error);
   }
