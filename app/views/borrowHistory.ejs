@@ -17,7 +17,6 @@
                             <th width="90px" scope="col"></th>
                             <th scope="col" style="width: 150px;">Book</th>
                             <th width="300px" scope="col">Book name</th>
-                            <th width="200px" scope="col">Status</th>
                             <th width="300px" scope="col">Borrow By</th>
                             <th width="300px" scope="col">Borrow Date</th>
                             <th width="300px" scope="col">Return Date</th>
@@ -41,16 +40,13 @@
                                             <%= borrow.detail %>
                                         </p>
                                     </td>
-                                    <td
-                                        class="<%= borrow.status === 'Available' ? 'text-success' : (borrow.status === 'Reserved' ? 'text-warning' : 'text-danger') %>">
-                                        <%= borrow.status %>
                                     </td>
                                     <td>
                                         <p>
-                                            ID: <%= borrow.tb_user_account_id %> & Username: <%= borrow.usr %>
+                                            ID: <%= borrow.user_id %> & Name: <%= borrow.user_name %>
                                         </p>
                                         <p>
-                                            Phone: <%= borrow.phone %>
+                                            Username: <%= borrow.user_usr %> Phone: <%= borrow.user_phone %>
                                         </p>
                                     </td>
                                     <td>

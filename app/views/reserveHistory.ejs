@@ -7,7 +7,7 @@
                 <div class="card-title fs-3 m-2"> <span class="special-elite-regular text-success">Reserve Book
                         History</span>
                     <span class="float-end">
-                        <a class="btn btn-danger" href="/deleteborrowHistory"
+                        <a class="btn btn-danger" href="/deletereserveHistory"
                             onclick="return confirm('Are you sure to Clear All History?')">CLEAR ALL RESERVE
                             HISTORY</a></span>
                 </div>
@@ -17,7 +17,6 @@
                             <th width="90px" scope="col"></th>
                             <th scope="col" style="width: 150px;">Book</th>
                             <th width="300px" scope="col">Book name</th>
-                            <th width="200px" scope="col">Status</th>
                             <th width="300px" scope="col">Reserve By</th>
                             <th width="300px" scope="col">Reserve Date</th>
                             <th width="300px" scope="col">PickUp Date</th>
@@ -41,16 +40,12 @@
                                             <%= reserve.detail %>
                                         </p>
                                     </td>
-                                    <td
-                                        class="<%= reserve.status === 'Available' ? 'text-success' : (reserve.status === 'Reserved' ? 'text-warning' : 'text-danger') %>">
-                                        <%= reserve.status %>
-                                    </td>
                                     <td>
                                         <p>
-                                            ID: <%= reserve.tb_user_account_id %> & Username: <%= reserve.usr %>
+                                            ID: <%= reserve.user_id %> & Name: <%= reserve.user_name %>
                                         </p>
                                         <p>
-                                            Phone: <%= reserve.phone %>
+                                            Username: <%= reserve.user_usr %> Phone: <%= reserve.user_phone %>
                                         </p>
                                     </td>
                                     <td>

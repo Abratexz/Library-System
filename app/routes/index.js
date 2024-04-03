@@ -671,6 +671,7 @@ router.post("/borrow/:id", isLogin, async (req, res) => {
       book_id: bookId,
       borrow_date: currentTime,
       return_date: returnDate,
+      borrow_history_status: "Borrowed",
       duration: req.body["duration"],
     };
 
@@ -740,6 +741,7 @@ router.post("/reserve/:id", isLogin, async (req, res) => {
       book_id: bookId,
       reserve_date: currentTime,
       pickup_date: pickupDate,
+      reserve_history_status: "Reserved",
       duration: req.body["duration"],
     };
 
@@ -765,23 +767,56 @@ router.post("/reserve/:id", isLogin, async (req, res) => {
   }
 });
 
-router.get("/history", isLogin, fetchGroupBooks, (req, res) => {
+router.get("/history", isLogin, fetchGroupBooks, async (req, res) => {
+  let conn = require("./connect2");
   let data = jwt.verify(req.session.token, secretCode);
 
   let sql =
-    "SELECT tb_book.*, tb_history.borrow_history_date, tb_history.return_history_date, tb_history.reserve_history_date,tb_history.pickup_history_date,tb_history.id AS history_id " +
-    "FROM tb_book " +
-    "JOIN tb_history ON tb_book.id = tb_history.book_id " +
-    "WHERE tb_history.user_id = ? ORDER BY id ASC";
+    "SELECT tb_book.*,tb_borrow.borrow_history_status, tb_borrow.borrow_date, tb_borrow.return_date,tb_borrow.id AS borrow_id,tb_history.id AS history_id " +
+    "FROM tb_borrow " +
+    "JOIN tb_book ON tb_borrow.book_id = tb_book.id " +
+    "JOIN tb_history ON tb_borrow.id = tb_history.borrow_id " +
+    "WHERE tb_borrow.user_id = ? ORDER BY id ASC";
 
   let params = [data.id];
 
-  conn.query(sql, params, (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    }
-    res.render("history", { books: results, groupBooks: req.groupBooks });
+  let [borrowUserHistory] = await conn.query(sql, params);
+
+  sql =
+    "SELECT tb_book.*,tb_reserve.reserve_history_status, tb_reserve.reserve_date, tb_reserve.pickup_date,tb_reserve.id AS reserve_id,tb_history.id AS history_id " +
+    "FROM tb_reserve " +
+    "JOIN tb_book ON tb_reserve.book_id = tb_book.id " +
+    "JOIN tb_history ON tb_reserve.id = tb_history.reserve_id " +
+    "WHERE tb_reserve.user_id = ? ORDER BY id ASC";
+
+  let [reserveUserHistory] = await conn.query(sql, params);
+
+  sql =
+    "SELECT tb_book.*,tb_borrow.borrow_history_status,tb_history.borrow_history_date, tb_history.return_history_date, tb_history.reserve_history_date,tb_history.pickup_history_date, tb_history.id AS history_id " +
+    "FROM tb_history " +
+    "JOIN tb_book ON tb_history.book_id = tb_book.id " +
+    "JOIN tb_borrow ON tb_history.borrow_id = tb_borrow.id " +
+    "WHERE tb_history.user_id = ? ORDER BY id ASC";
+
+  let [BHUserHistory] = await conn.query(sql, params);
+
+  sql =
+    "SELECT tb_book.*,tb_reserve.reserve_history_status,tb_history.borrow_history_date, tb_history.return_history_date, tb_history.reserve_history_date,tb_history.pickup_history_date, tb_history.id AS history_id " +
+    "FROM tb_history " +
+    "JOIN tb_book ON tb_history.book_id = tb_book.id " +
+    "JOIN tb_reserve ON tb_history.reserve_id = tb_reserve.id " +
+    "WHERE tb_history.user_id = ? ORDER BY id ASC";
+
+  let [RHUserHistory] = await conn.query(sql, params);
+
+  console.log(BHUserHistory);
+  console.log(RHUserHistory);
+  res.render("history", {
+    BHUserHistory: BHUserHistory,
+    RHUserHistory: RHUserHistory,
+    reserveUserHistory: reserveUserHistory,
+    borrowUserHistory: borrowUserHistory,
+    groupBooks: req.groupBooks,
   });
 });
 
@@ -812,7 +847,7 @@ router.get("/deleteHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
 
 router.get("/borrowHistory", isLogin, fetchGroupBooks, (req, res) => {
   let sql =
-    "SELECT tb_book.*, tb_borrow.id, tb_borrow.borrow_date, tb_borrow.return_date, tb_user.usr, tb_user.phone, tb_user.id AS tb_user_account_id " +
+    "SELECT tb_book.*, tb_borrow.* ,tb_user.id AS user_id ,tb_user.name AS user_name,tb_user.phone AS user_phone,tb_user.usr AS user_usr " +
     "FROM tb_borrow " +
     "JOIN tb_book ON tb_borrow.book_id = tb_book.id " +
     "JOIN tb_user ON tb_borrow.user_id = tb_user.id " +
@@ -847,7 +882,7 @@ router.get("/deleteborrowHistory/:id", isLogin, fetchGroupBooks, (req, res) => {
 
 router.get("/reserveHistory", isLogin, fetchGroupBooks, (req, res) => {
   let sql =
-    "SELECT tb_book.*, tb_reserve.id, tb_reserve.reserve_date, tb_reserve.pickup_date, tb_user.usr, tb_user.phone, tb_user.id AS tb_user_account_id " +
+    "SELECT tb_book.*, tb_reserve.* ,tb_user.id AS user_id ,tb_user.name AS user_name,tb_user.phone AS user_phone,tb_user.usr AS user_usr " +
     "FROM tb_reserve " +
     "JOIN tb_book ON tb_reserve.book_id = tb_book.id " +
     "JOIN tb_user ON tb_reserve.user_id = tb_user.id " +
