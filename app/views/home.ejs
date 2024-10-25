@@ -49,6 +49,10 @@
                                                             href="/borrow/<%= book.id %>">Borrow</a>
                                                         <a class="btn btn-warning mt-2 text-sm btn-sm"
                                                             href="/reserve/<%= book.id %>">Reserve</a>
+                                                        <form action="/add-to-cart" method="POST" class="d-inline">
+                                                            <input type="hidden" name="bookId" value="<%= book.id %>">
+                                                            <button type="submit" class="btn btn-success mt-2 text-sm btn-sm">Add to Cart</button>
+                                                        </form>   
                                                     </div>
                                                 </div>
                                             </div>

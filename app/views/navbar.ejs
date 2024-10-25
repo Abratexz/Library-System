@@ -57,7 +57,7 @@
                                     placeholder="  Search book name..">
                                 <select class="form-control border border-success border-1" name="groupBookId">
                                     <option value="All">All</option>
-                                    <% groupBooks.forEach((item)=> { %>
+                                    <% groupBooks.forEach(item=> { %>
                                         <option value="<%= item.id %>">
                                             <%= item.name_tag %>
                                         </option>
@@ -71,12 +71,19 @@
                             </div>
                         </form>
                     </div>
+                    <div> 
+                    <a href="/cart" class="nav-link text-success">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        <span class="badge bg-secondary"><%= cartCount %></span>
+                    </a>
+                    </div>
                     <div class="justify-content-end">
                         <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 navbar-nav-scroll"
                             style="--bs-scroll-height: 100px;">
                             <!-- Dropdown Menu -->
                             <% if (session.token !=undefined) { %>
                                 <li class="nav-item dropdown">
+                                    
                                     <a class="nav-link dropdown-toggle text-success pt-3 " href="#"
                                         id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown"
                                         aria-expanded="false">
