@@ -111,9 +111,9 @@ router.get("/home", isLogin, async (req, res) => {
     sql += " ORDER BY id DESC LIMIT ? OFFSET ?";
     params.push(BooksPerPage, offset);
 
-    let [books, fields] = await conn.query(sql, params); //ดึงข้อมูลจำนวนหนังสือทั้งหมดที่ตรงกับเงื่อนไขและจำนวนหนังสือที่ต้องการแสดง
+    let [books] = await conn.query(sql, params); //ดึงข้อมูลจำนวนหนังสือทั้งหมดที่ตรงกับเงื่อนไขและจำนวนหนังสือที่ต้องการแสดง
     sql = "SELECT * FROM tb_group_book ORDER BY name_tag ASC";
-    let [groupBooks, fieldsGroupProduct] = await conn.query(sql); // ดึงข้อมูลกลุ่มหนังสือทั้งหมดจาก Database
+    let [groupBooks] = await conn.query(sql); // ดึงข้อมูลกลุ่มหนังสือทั้งหมดจาก Database
     res.render("home", {
       //ส่งข้อมูลหนังสือที่ดึงมาและข้อมูลการจัดหน้าไปยังหน้า "home"
       books: books,
