@@ -10,6 +10,7 @@ let dayjs = require("dayjs");
 let numeral = require("numeral");
 let dayFormat = "DD/MM/YYYY HH:mm:ss";
 let path = require("path");
+const flash = require("connect-flash");
 
 /*router.use() ใช้จัดการ session โดยใช้ library ที่ถูกนำเข้ามาก่อนหน้านี้ เมื่อมีการเรียกใช้งานเซิร์ฟเวอร์ทุกครั้ง การใช้ session()
 จะเป็นการจัดเก็บข้อมูลของ session และการรักษาสถานะความเป็น user ในระบบ
@@ -25,6 +26,15 @@ router.use(
     },
   })
 );
+
+router.use(flash());
+
+router.use((req, res, next) => {
+  res.locals.messages = req.flash();
+  next();
+});
+
+
 /*router.use() ทำหน้าที่นำข้อมูล session และอ็อบเจกต์ของตัวแปรต่างๆจาก Library เช่น numeral และ dayjs เพื่อให้สามารถใช้งานได้ใน views ได้
  */
 router.use((req, res, next) => {
@@ -37,7 +47,6 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
   if (!req.session.cart) {
     req.session.cart = [];
-    
   }
   next();
 });
@@ -77,7 +86,15 @@ router.use(fetchGroupBooks);
 
 // Apply `isLogin` to all routes (except explicitly public ones)
 router.use((req, res, next) => {
-  if (['/login', '/register', '/forgotPassword'].includes(req.path)) {
+  if (
+    [
+      "/login",
+      "/register",
+      "/forgotPassword",
+      "/passwordReset",
+      "/passwordResetLink",
+    ].some((route) => req.path.startsWith(route))
+  ) {
     return next(); // Skip authentication for these routes
   }
   if (!req.session.token) {
@@ -85,13 +102,13 @@ router.use((req, res, next) => {
     }
 
     // Store user data and login status in res.locals for easy access in views
-    res.locals.isAuthenticated = true;
-    res.locals.user = {
-      name: req.session.name,
-      usr: req.session.usr,
-      img: req.session.img,
-      level: req.session.level,
-    };
+  res.locals.user = {
+    id: req.session.userid,
+    name: req.session.name,
+    usr: req.session.usr,
+    img: req.session.img,
+    level: req.session.level,
+  };
 
     next();
 });
@@ -184,7 +201,7 @@ router.post("/login", (req, res) => {
 
   if (!username || !password) {
     //ตรวจสอบว่าผู้ใช้ป้อนรหัสผ่านหรือไม่
-    req.session.message = "Please provide both username and password";
+    req.flash("loginrequire","Please provide both username and password");
     return res.redirect("/login");
   }
 
@@ -205,11 +222,11 @@ router.post("/login", (req, res) => {
       req.session.usr = result[0].usr;
       req.session.img = result[0].img;
       req.session.level = result[0].level;
+      req.session.userid = result[0].id;
       res.redirect("/home"); //ไปหน้า home
     } else {
       //ถ้าไม่มีข้อมูล แสดงว่า รหัสผ่านผิดหรือไม่มีข้อมูลในระบบ
-      req.session.message =
-        "Username or password invalid. If you are not registered, please sign up";
+      req.flash("loginfail","Username or password invalid. If you are not registered, please sign up");
       res.redirect("/login"); //ไปหน้า login
     }
   });
@@ -231,7 +248,7 @@ router.post("/register", (req, res) => {
   ) {
     // ถ้าไม่ได้กรอกทั้งหมดให้สร้างข้อความแจ้งเตือน และแสดงผลหน้า Register
 
-    req.session.message = "Please provide all information";
+    req.flash("registerrequire","Please provide all information");
     return res.redirect("/register");
   }
 
@@ -249,8 +266,7 @@ router.post("/register", (req, res) => {
     if (ExistResult.length > 0) {
       //จะสร้างข้อความแจ้งเตือนและ แสดงผลหน้า register
 
-      req.session.message =
-        "Username Phone number or Citizen ID  already exists. Please try a different one.";
+      req.flash("registerfail","Username Phone number or Citizen ID  already exists. Please try a different one.");
       return res.redirect("/register");
     }
 
@@ -268,7 +284,7 @@ router.post("/register", (req, res) => {
     //ถ้ากไม่มีข้อมูลซ้ำก็เพิ่มข้อมูลผู้ใช้ใหม่เข้าใน database
     conn.query(sql, params);
     //สร้างข้อความแจ้งเตือน และแสดงผลหน้า Login
-    req.session.message = "Register Successfully!!";
+    req.flash("registerpass", "Register Successfully!!");
     res.redirect("/login");
   });
 });
@@ -290,7 +306,7 @@ router.post("/forgotPassword", (req, res) => {
     if (ExistResult.length === 0) {
       //สร้างข้อความแจ้งเตือน และแสดงผลหน้า forgotpassword
 
-      req.session.message = "Username does not exist. Please try again";
+      req.flash("usernotexist","Username does not exist. Please try again");
       return res.redirect("/forgotPassword");
     }
     //ถ้ามีข้อมูล  สร้างและส่ง token ใหม่ (token จะมีอายุ 1 ชั่วโมง) และแสดงผลหน้า passwordResetLink เพื่อให้ผู้ใช้ตั้งค่ารหัสผ่านใหม่
@@ -318,7 +334,7 @@ router.post("/passwordReset/:token", (req, res) => {
       return res.redirect("/login");
     } else {
       //ถ้าถูกจะนำรหัสผ่านใหม่ที่ผู้ใช้ป้อนมาใช้ในการอัปเดตรหัสผ่านใน database
-      let { username } = decoded;
+      let { username } =  decoded;
       console.log({ newPassword });
       console.log({ username });
 
@@ -332,7 +348,7 @@ router.post("/passwordReset/:token", (req, res) => {
     }
   });
   //สร้างข้อความแจ้งเตือนและแสดงผลหน้า login
-  req.session.message = "Reset Password Success!!";
+  req.flash("resetsuccess","Reset Password Success!!");
   res.redirect("/login");
 });
 
@@ -407,7 +423,7 @@ router.post("/editProfile/:id", (req, res) => {
         conn.query(sqlFetchUser, paramSelect, (err, updatedUser) => {
           req.session.img = updatedUser[0].img;
           req.session.name = updatedUser[0].name;
-          req.session.message = "Edit Profile Successfully!!";
+          req.flash("profilepass","Edit Profile Successfully!!");
           res.redirect("/profile");
         });
       });
@@ -605,7 +621,7 @@ router.post("/addBook", (req, res) => {
   form.parse(req, (err, fields, file) => {
     //ตรวจสอบว่ามีการอัปโหลดภาพหรือไม่ ถ้าไม่มีจะสร้างข้อความแจ้งเตือนและแสดงผลหน้า"book"
     if (!file || !file.img) {
-      req.session.message = "You must upload images!!!";
+      req.flash("errorimg","You must upload images!!!");
       res.redirect("/book");
     } else {
       //นำภาพที่อัปโหลดมาบันทึกในไดเรกทอรีของเซิร์ฟเวอร์
@@ -799,7 +815,10 @@ router.post("/borrow/:id", async (req, res) => {
     bookStatus === "Reserved"
   ) {
     //แสดงข้อความและ แสดงผลหน้า home
-    req.session.message = "FAILED TO BORROW";
+    req.flash(
+      "error",
+      "FAILED TO BORROW !! Book Status could be Borrowed,Reserved or Lost !!"
+    );
     res.redirect("/home");
   } else {
     //ดึงข้อมูลที่ต้องการใช้ ระยะเวลาที่ต้องการยืมหนังสือ
@@ -833,7 +852,7 @@ router.post("/borrow/:id", async (req, res) => {
     };
     await conn.query(historySql, historyParams);
     //สร้างข้อความแจ้งเตือนและแสดงผลหน้า home
-    req.session.message = "Book Borrowed Successfully !!";
+    req.flash("success", "Book Borrowed Successfully !!");
     res.redirect("/home");
   }
 });
@@ -874,7 +893,10 @@ router.post("/reserve/:id", async (req, res) => {
     bookStatus === "Reserved"
   ) {
     //แสดงข้อความและ แสดงผลหน้า home
-    req.session.message = "FAILED TO RESERVE";
+        req.flash(
+          "reserveerror",
+          "FAILED TO RESERVE !! Book Status could be Borrowed,Reserved or Lost !!"
+        );
     res.redirect("/home");
   } else {
     //ดึงข้อมูลที่ต้องการใช้ ระยะเวลาที่ต้องการจองหนังสือ
@@ -908,7 +930,7 @@ router.post("/reserve/:id", async (req, res) => {
     };
     await conn.query(historySql, historyParams);
     //สร้างข้อความแจ้งเตือนและแสดงผลหน้า home
-    req.session.message = "Book Reserve Successfully !!";
+    req.flash("reservesuccess", "Book Borrowed Successfully !!");
     res.redirect("/home");
   }
 });

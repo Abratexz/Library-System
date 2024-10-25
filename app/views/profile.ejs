@@ -1,12 +1,6 @@
 <%- include('header') %>
     <%- include('navbar') %>
-        <% if ( session.message !==undefined ) {%>
-            <div
-                class="alert text-center mt-3 <%= (session.message === 'Edit Profile Successfully!!') ? 'text-success alert-success' : 'text-danger alert-danger' %>">
-                <%= session.message %>
-                    <% session.message=undefined %>
-                        <% } %>
-            </div>
+        <%- include('normalms') %>
 
             <!-- Main -->
             <main class="py-6 bg-surface-secondary">

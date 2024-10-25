@@ -1,0 +1,48 @@
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+    // Function to show message in modal
+    function showModal(message, type) {
+        // Get modal elements
+        const modalBody = document.getElementById('modalMessage');
+        const modalTitle = document.getElementById('messageModalLabel');
+        
+        // Create alert div for the message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = ` text-center alert alert-${type} mb-0`; // mb-0 removes bottom margin
+        alertDiv.innerHTML = message;
+        
+        // Clear previous content and add new alert
+        modalBody.innerHTML = '';
+        modalBody.appendChild(alertDiv);
+        
+        // Set title based on message type
+        modalTitle.textContent = type === 'danger' ? 'Error' : 'Success';
+        
+        // Initialize and show Bootstrap modal
+        const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+        messageModal.show();
+        
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+            messageModal.hide();
+        }, 5000);
+    }
+
+    // Check and show messages if they exist
+    if (messages.error && messages.error.length > 0) {
+        showModal(messages.error, 'danger');
+    }
+    
+    if (messages.success && messages.success.length > 0) {
+        showModal(messages.success, 'success');
+    }
+
+        if (messages.reserveerror && messages.reserveerror.length > 0) {
+        showModal(messages.reserveerror, 'danger');
+    }
+
+        if (messages.reservesuccess && messages.reservesuccess.length > 0) {
+        showModal(messages.reservesuccess, 'success');
+    }
+});
+</script>

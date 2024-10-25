@@ -38,13 +38,7 @@
                         <input type="text" name="citizencard" class="form-control rounded-pill padding-left"
                             style="margin-top: 10px;" placeholder="x-xxxx-xxxxx-xx-x" required>
                     </div>
-                    <div>
-                        <% if ( session.message !==undefined ) {%>
-                            <div class="alert text-center mt-3 text-danger alert-danger ">
-                                <%= session.message %>
-                                    <% session.message=undefined %>
-                                        <% } %>
-                            </div>
+                    <%- include('normalms') %>
                             <input type="hidden" name="level" value="user" />
                             <button type="submit" class="btn btn-outline-success rounded-pill"
                                 onsubmit="return validateForm()" style="width: 100%; margin-top: 20px;">Sign-up</button>
