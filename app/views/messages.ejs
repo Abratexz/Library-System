@@ -1,5 +1,10 @@
 <script>
  document.addEventListener('DOMContentLoaded', function() {
+
+    function addLineBreaksAfterPeriods(text) {
+        text = text.replace(/,/g, '');
+        return text.replace(/\./g, '.<br>');
+    }
     // Function to show message in modal
     function showModal(message, type) {
         // Get modal elements
@@ -9,11 +14,12 @@
         // Create alert div for the message
         const alertDiv = document.createElement('div');
         alertDiv.className = ` text-center alert alert-${type} mb-0`; // mb-0 removes bottom margin
-        alertDiv.innerHTML = message;
+        alertDiv.innerHTML =  addLineBreaksAfterPeriods(message);
         
         // Clear previous content and add new alert
         modalBody.innerHTML = '';
         modalBody.appendChild(alertDiv);
+        
         
         // Set title based on message type
         modalTitle.textContent = type === 'danger' ? 'Error' : 'Success';
@@ -27,6 +33,13 @@
             messageModal.hide();
         }, 5000);
     }
+        const messages = {
+        error: '<%= messages.error %>',
+        success: '<%= messages.success %>',
+        reserveerror :'<%= messages.reserveerror %>', 
+        reservesuccess :'<%= messages.reservesuccess %>',
+        stockerror: '<%= messages.stockerror %>',
+    }
 
     // Check and show messages if they exist
     if (messages.error && messages.error.length > 0) {
@@ -37,12 +50,15 @@
         showModal(messages.success, 'success');
     }
 
-        if (messages.reserveerror && messages.reserveerror.length > 0) {
+    if (messages.reserveerror && messages.reserveerror.length > 0) {
         showModal(messages.reserveerror, 'danger');
     }
 
-        if (messages.reservesuccess && messages.reservesuccess.length > 0) {
+    if (messages.reservesuccess && messages.reservesuccess.length > 0) {
         showModal(messages.reservesuccess, 'success');
+    }
+    if (messages.stockerror && messages.stockerror.length > 0) {
+        showModal(messages.stockerror, 'danger');
     }
 });
 </script>

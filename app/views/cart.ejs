@@ -1,70 +1,77 @@
 <%- include('header') %>
-  <%- include('navbar') %>
-    <div class="container mt-5">
-      <main class="card m-4 mt-10 bg-white shadow rounded" style="min-height: 400px">
-        <div class="card-body">
-          <h2 class="mt-2 text-success text-center special-elite-regular">
-            - YOUR CART -
-          </h2>
-          <% if (cart && cart.length> 0) { %>
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Book</th>
-                  <th>Title</th>
-                  <th>Quantity</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% let total=0; %>
-                  <% cart.forEach((item)=> { %>
-                    <tr>
-                      <td>
-                        <img src="/images/books/<%= item.img %>" alt="<%= item.book_name %>" width="50" height="75" />
-                      </td>
-                      <td>
-                        <%= item.book_name %>
-                      </td>
-                      <td>
-                        <form action="#" method="POST" class="d-inline">
-                          <input type="hidden" name="bookId" value="<%= item.id %>" />
-                          <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="5"
-                            class="form-control d-inline-block" style="width: 60px" />
-                          <button type="submit" class="btn btn-sm btn-outline-primary">
-                            Update
-                          </button>
-                        </form>
-                      </td>
-                      <td>
-                        <form action="#" method="POST" class="d-inline">
-                          <input type="hidden" name="bookId" value="<%= item.id %>" />
-                          <button type="submit" class="btn btn-sm btn-outline-danger">
-                            Remove
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                    <% total +=item.quantity; %>
-                      <% }); %>
-              </tbody>
-            </table>
-            <div class="text-end">
-              <h4>Total Books: <%= total %>
-              </h4>
-              <form action="#" method="POST">
-                <button type="submit" class="btn btn-success">
-                  Proceed to Checkout
-                </button>
-              </form>
-            </div>
-            <% } else { %>
-              <p class="text-center mt-5">
-                Your cart is empty.
-                <a href="/home" class="text-success">Continue browsing</a>
-              </p>
-              <% } %>
+<%- include('navbar') %>
+<%- include('messages') %> 
+<div class="container mt-5">
+  <main class="card m-4 mt-10 bg-white shadow rounded" style="min-height: 400px">
+    <div class="card-body">
+      <h2 class="mt-2 text-success text-center special-elite-regular">
+        - YOUR CART -
+      </h2>
+      <% if (cart && cart.length > 0) { %>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Book</th>
+              <th>Title</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% let totalPrice = 0; %>
+            <% cart.forEach((item) => { %>
+              <tr>
+                <td>
+                  <img src="/images/books/<%= item.img %>" alt="<%= item.book_name %>" width="50" height="75" />
+                </td>
+                <td>
+                  <%= item.book_name %>
+                </td>
+                <td>
+                  <form action="/update-cart" method="POST" class="d-inline">
+                    <input type="hidden" name="bookId" value="<%= item.id %>" />
+                    <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="99"
+                      class="form-control d-inline-block" style="width: 60px" />
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                      Update
+                    </button>
+                  </form>
+                </td>
+                <td>
+                  <%= item.price * item.quantity %> THB
+                </td>
+                <td>
+                  <form action="/remove-from-cart" method="POST" class="d-inline">
+                    <input type="hidden" name="bookId" value="<%= item.id %>" />
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      Remove
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              <% totalPrice += item.price * item.quantity; %> <!-- Accumulate total price for all items -->
+            <% }); %>
+          </tbody>
+        </table>
+        <div class="text-end">
+          <h4>Total Books: <%= totalQuantity %> | Total Price: <%= totalPrice %> THB</h4>
+          <form action="/create-checkout-session" method="POST">
+            <input type="hidden" name="totalAmount" value="<%= totalPrice %>">
+            <button type="submit" class="btn btn-success">
+              Proceed to Checkout
+            </button>
+          </form>
         </div>
-      </main>
+      <% } else { %>
+        <p class="text-center mt-5">
+          Your cart is empty.
+          <a href="/home" class="text-success">Continue browsing</a>
+        </p>
+      <% } %>
     </div>
-    <%- include('footer') %>
+  </main>
+</div>
+
+
+<%- include('footer') %>

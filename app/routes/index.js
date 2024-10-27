@@ -11,6 +11,11 @@ let numeral = require("numeral");
 let dayFormat = "DD/MM/YYYY HH:mm:ss";
 let path = require("path");
 const flash = require("connect-flash");
+const { error } = require("console");
+const stripe = require("stripe")(
+  "sk_test_51QE6LuH1PpF6eqqYSdsEw6LLmzvwaQuljsksA2U1sJcPMOhfh5077KncsvE8GS5E0Lg5Dg3uo781wxVWdRnH4IKT00P6cxbTqJ"
+);
+
 
 /*router.use() ใช้จัดการ session โดยใช้ library ที่ถูกนำเข้ามาก่อนหน้านี้ เมื่อมีการเรียกใช้งานเซิร์ฟเวอร์ทุกครั้ง การใช้ session()
 จะเป็นการจัดเก็บข้อมูลของ session และการรักษาสถานะความเป็น user ในระบบ
@@ -633,7 +638,7 @@ router.post("/addBook", (req, res) => {
       //เพิ่มข้อมูลหนังสือใหม่ลงใน database และแสดงผลหน้า book
       fs.copyFile(filePath, newPath, () => {
         let sql =
-          "INSERT INTO tb_book(group_book_id, isbn, author, book_name, detail,status, img) VALUES(?, ?, ?, ?, ?, ?, ?)";
+          "INSERT INTO tb_book(group_book_id, isbn, author, book_name, detail,status, img,price,stock) VALUES(?, ?, ?, ?, ?, ?, ?,?,?)";
         let params = [
           fields["group_book_id"],
           fields["isbn"],
@@ -642,6 +647,8 @@ router.post("/addBook", (req, res) => {
           fields["detail"],
           fields["status"],
           file.img[0].originalFilename,
+          fields["price"], 
+          fields["stock"],
         ];
         conn.query(sql, params, (err, result) => {
           if (err) throw err;
@@ -700,7 +707,7 @@ router.post("/editBook/:id", (req, res) => {
         });
       }
       let sql =
-        "UPDATE tb_book SET group_book_id = ?, isbn = ?, author = ?, book_name = ?, detail = ?,status = ?, img = ? WHERE id = ?";
+        "UPDATE tb_book SET group_book_id = ?, isbn = ?, author = ?, book_name = ?, detail = ?,status = ?, img = ? ,price = ? , stock = ?WHERE id = ?";
       let params = [
         fields["group_book_id"],
         fields["isbn"],
@@ -709,6 +716,8 @@ router.post("/editBook/:id", (req, res) => {
         fields["detail"],
         fields["status"],
         imgFileName, // ใช้รูปใหม่ หรือรูปเก่าที่มี
+        fields["price"],
+        fields["stock"],
         req.params.id,
       ];
       //อัปเดตข้อมูลหนังสือใน database ด้วยข้อมูลที่ผู้ใช้ป้อน และแสดงผลหน้า book
@@ -1097,33 +1106,179 @@ router.get("/deleteReserveHistory/:id",(req, res) => {
 );
 
 router.post("/add-to-cart", (req, res) => {
-  const bookId = req.body.bookId;
-  if (!req.session.cart.includes(bookId)) {
-    req.session.cart.push(bookId);
+  const bookId = parseInt(req.body.bookId);
+  const cart = req.session.cart || [];
+  
+
+  // Check if the book already exists in the cart
+  const existingItem = cart.find((item) => item.bookId === bookId);
+
+  if (existingItem) {
+    // If book is already in the cart, increase its quantity
+    existingItem.quantity += 1;
+  } else {
+    // If book is not in the cart, add it with a default quantity of 1
+    cart.push({ bookId: bookId, quantity: 1 });
   }
+  let totalQuantity = 0;
+  cart.forEach((item) => {
+    totalQuantity += item.quantity;
+  });
+  req.session.totalQuantity = totalQuantity;
+  // Update the session cart
+  req.session.cart = cart;
+
   res.redirect("/home");
 });
 
 router.get("/cart", async (req, res) => {
   try {
     let conn = require("./connect2");
-    let cartItems = req.session.cart || [];
+    let carts = req.session.cart || [];
     let books = [];
+    let totalPrice = 0;
 
-    if (cartItems.length > 0) {
+    if (carts.length > 0) {
+      // Extract only bookId values for the SQL query
+      let bookIds = carts.map((item) => item.bookId);
       let sql = "SELECT * FROM tb_book WHERE id IN (?)";
-      let [results] = await conn.query(sql, [cartItems]);
+      let [results] = await conn.query(sql, [bookIds]);
       books = results;
+
+      // Map quantity from cartItems to books and calculate total price
+      books.forEach((book) => {
+        const cartItem = carts.find((item) => item.bookId === book.id);
+        if (cartItem) {
+          book.quantity = cartItem.quantity;
+          book.totalPrice = book.price * book.quantity;
+          totalPrice += book.totalPrice;
+        }
+      });
     }
 
     res.render("cart", {
-      cart: books, 
-      cartCount: cartItems.length,
-      
+      cart: books,
+      cartCount: carts.length,
+      totalQuantity: req.session.totalQuantity,
+      totalPrice: totalPrice / 100,
     });
+    console.log(carts);
   } catch (error) {
     res.send("Error: " + error);
   }
 });
+
+router.post("/update-cart", (req, res) => {
+  const bookId = parseInt(req.body.bookId);
+  const newQuantity = parseInt(req.body.quantity);
+  const cart = req.session.cart || [];
+
+  // Find the item in the cart and update its quantity
+  const cartItem = cart.find((item) => item.bookId === bookId);
+  if (cartItem) {
+    cartItem.quantity = newQuantity;
+  }
+    let totalQuantity = 0;
+    cart.forEach((item) => {
+      totalQuantity += item.quantity;
+    });
+    req.session.totalQuantity = totalQuantity;
+  // Update the session cart and redirect back to the cart page
+  req.session.cart = cart;
+  res.redirect("/cart"); //
+});
+
+
+
+
+
+router.post("/create-checkout-session", async (req, res) => {
+  try {
+    const conn = require("./connect2");
+    const cart = req.session.cart || [];
+
+    if (cart.length === 0) {
+      return res.status(400).send("Cart is empty");
+    }
+
+    const bookIds = cart.map((item) => item.bookId);
+    const [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [
+      bookIds,
+    ]);
+
+    const stockErrors = [];
+    cart.forEach((carts) => {
+      const book = books.find((b) => b.id === carts.bookId);
+      if (!book || book.stock < carts.quantity) {
+        stockErrors.push(`Insufficient stock for "${book.book_name}" Only ${book ? book.stock : 0} book left.`);
+      }
+    });
+    if (stockErrors.length > 0) {
+      req.flash("stockerror", stockErrors);
+      return res.redirect("/cart");
+    }
+
+    const lineItems = books.map((book) => {
+      const cartItem = cart.find((item) => item.bookId === book.id);
+      return {
+        price_data: {
+          currency: "thb", // Corrected: added quotes
+          product_data: {
+            name: book.book_name,
+          },
+          unit_amount: book.price * 100, // Use book's price from database in satang
+        },
+        quantity: cartItem.quantity, // Access quantity from cart
+      };
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems, // Ensure variable name matches
+      mode: "payment",
+      success_url: `${req.protocol}://${req.get("host")}/success`,
+      cancel_url: `${req.protocol}://${req.get("host")}/cancel`,
+    });
+    
+    res.redirect(303, session.url);
+  } catch (error) {
+    console.log("Error creating checkout session:", error);
+    res.status(500).send("An error occurred while creating a session.");
+  }
+});
+
+
+router.get("/success", async (req, res) => {
+  try {
+    const conn = require("./connect2");
+    const cart = req.session.cart || [];
+    console.log(cart);
+
+  
+    for (const carts of cart) {
+      const { bookId, quantity } = carts;
+      await conn.query(
+        "UPDATE tb_book SET stock = stock - ? WHERE id = ? AND stock >= ?",
+        [
+          quantity,
+          bookId,
+          quantity, 
+        ]
+      );
+      req.session.cart = [];
+      req.session.totalQuantity = 0;
+      res.render("success");
+    }
+  } catch (error) {
+    console.log("Error updating stock: ", error)
+    res.status(500).send("An error occurred during stock update.");
+    }});
+
+router.get("/cancel", (req, res) => {
+        req.session.cart = [];
+        req.session.totalQuantity = 0;
+  res.render("cancel"); 
+});
+
 
 module.exports = router;
