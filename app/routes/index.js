@@ -1,21 +1,19 @@
+require("dotenv").config();
 let express = require("express");
 let router = express.Router();
 let conn = require("./connect");
 let jwt = require("jsonwebtoken");
-let secretCode = "mylibraryprojectkey"; // Library ต่างๆ จาก  npmjs
 let session = require("express-session");
 let formidable = require("formidable");
 let fs = require("fs");
 let dayjs = require("dayjs");
 let numeral = require("numeral");
-let dayFormat = "DD/MM/YYYY HH:mm:ss";
 let path = require("path");
 const flash = require("connect-flash");
 const { error } = require("console");
-const stripe = require("stripe")(
-  "sk_test_51QE6LuH1PpF6eqqYSdsEw6LLmzvwaQuljsksA2U1sJcPMOhfh5077KncsvE8GS5E0Lg5Dg3uo781wxVWdRnH4IKT00P6cxbTqJ"
-);
-
+let secretCode = process.env.SECRET_CODE;
+let dayFormat = process.env.DAY_FORMAT;
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 /*router.use() ใช้จัดการ session โดยใช้ library ที่ถูกนำเข้ามาก่อนหน้านี้ เมื่อมีการเรียกใช้งานเซิร์ฟเวอร์ทุกครั้ง การใช้ session()
 จะเป็นการจัดเก็บข้อมูลของ session และการรักษาสถานะความเป็น user ในระบบ
@@ -23,7 +21,7 @@ const stripe = require("stripe")(
 
 router.use(
   session({
-    secret: "sessionformylibraryprojectkey",
+    secret: process.env.SECRET_CODE,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -35,20 +33,13 @@ router.use(
 router.use(flash());
 
 router.use((req, res, next) => {
+  res.locals.session = req.session;
+  res.locals.numeral = numeral;
+  res.locals.dayjs = dayjs;
   res.locals.messages = req.flash();
   next();
 });
 
-
-/*router.use() ทำหน้าที่นำข้อมูล session และอ็อบเจกต์ของตัวแปรต่างๆจาก Library เช่น numeral และ dayjs เพื่อให้สามารถใช้งานได้ใน views ได้
- */
-router.use((req, res, next) => {
-  res.locals.session = req.session;
-  res.locals.numeral = numeral;
-  res.locals.dayjs = dayjs;
-
-  next();
-});
 router.use((req, res, next) => {
   if (!req.session.cart) {
     req.session.cart = [];
@@ -84,10 +75,8 @@ const fetchGroupBooks = async (req, res, next) => {
 };
 router.use(fetchGroupBooks);
 
-
 /*Function isLogin เพื่อตรวจสอบว่าผู้ใช้ได้ Log-in เข้าหรือไม่ โดยตรวจสอบว่ามี session token หรือไม่ ถ้ามีก็ให้ผ่านไป ถ้าไม่มีก็ให้กลับไปหน้า login
  */
-
 
 // Apply `isLogin` to all routes (except explicitly public ones)
 router.use((req, res, next) => {
@@ -103,10 +92,10 @@ router.use((req, res, next) => {
     return next(); // Skip authentication for these routes
   }
   if (!req.session.token) {
-      return res.redirect("/login"); // Redirect if not logged in
-    }
+    return res.redirect("/login"); // Redirect if not logged in
+  }
 
-    // Store user data and login status in res.locals for easy access in views
+  // Store user data and login status in res.locals for easy access in views
   res.locals.user = {
     id: req.session.userid,
     name: req.session.name,
@@ -115,10 +104,8 @@ router.use((req, res, next) => {
     level: req.session.level,
   };
 
-    next();
+  next();
 });
-
-
 
 /* GET home page. 
   ไปหน้า index
@@ -174,7 +161,7 @@ router.get("/home", async (req, res) => {
 
     let [books] = await conn.query(sql, params); //ดึงข้อมูลจำนวนหนังสือทั้งหมดที่ตรงกับเงื่อนไขและจำนวนหนังสือที่ต้องการแสดง
     sql = "SELECT * FROM tb_group_book ORDER BY name_tag ASC";
-    
+
     res.render("home", {
       //ส่งข้อมูลหนังสือที่ดึงมาและข้อมูลการจัดหน้าไปยังหน้า "home"
       books: books,
@@ -206,7 +193,7 @@ router.post("/login", (req, res) => {
 
   if (!username || !password) {
     //ตรวจสอบว่าผู้ใช้ป้อนรหัสผ่านหรือไม่
-    req.flash("loginrequire","Please provide both username and password");
+    req.flash("loginrequire", "Please provide both username and password");
     return res.redirect("/login");
   }
 
@@ -231,7 +218,10 @@ router.post("/login", (req, res) => {
       res.redirect("/home"); //ไปหน้า home
     } else {
       //ถ้าไม่มีข้อมูล แสดงว่า รหัสผ่านผิดหรือไม่มีข้อมูลในระบบ
-      req.flash("loginfail","Username or password invalid. If you are not registered, please sign up");
+      req.flash(
+        "loginfail",
+        "Username or password invalid. If you are not registered, please sign up"
+      );
       res.redirect("/login"); //ไปหน้า login
     }
   });
@@ -253,7 +243,7 @@ router.post("/register", (req, res) => {
   ) {
     // ถ้าไม่ได้กรอกทั้งหมดให้สร้างข้อความแจ้งเตือน และแสดงผลหน้า Register
 
-    req.flash("registerrequire","Please provide all information");
+    req.flash("registerrequire", "Please provide all information");
     return res.redirect("/register");
   }
 
@@ -271,7 +261,10 @@ router.post("/register", (req, res) => {
     if (ExistResult.length > 0) {
       //จะสร้างข้อความแจ้งเตือนและ แสดงผลหน้า register
 
-      req.flash("registerfail","Username Phone number or Citizen ID  already exists. Please try a different one.");
+      req.flash(
+        "registerfail",
+        "Username Phone number or Citizen ID  already exists. Please try a different one."
+      );
       return res.redirect("/register");
     }
 
@@ -311,7 +304,7 @@ router.post("/forgotPassword", (req, res) => {
     if (ExistResult.length === 0) {
       //สร้างข้อความแจ้งเตือน และแสดงผลหน้า forgotpassword
 
-      req.flash("usernotexist","Username does not exist. Please try again");
+      req.flash("usernotexist", "Username does not exist. Please try again");
       return res.redirect("/forgotPassword");
     }
     //ถ้ามีข้อมูล  สร้างและส่ง token ใหม่ (token จะมีอายุ 1 ชั่วโมง) และแสดงผลหน้า passwordResetLink เพื่อให้ผู้ใช้ตั้งค่ารหัสผ่านใหม่
@@ -339,7 +332,7 @@ router.post("/passwordReset/:token", (req, res) => {
       return res.redirect("/login");
     } else {
       //ถ้าถูกจะนำรหัสผ่านใหม่ที่ผู้ใช้ป้อนมาใช้ในการอัปเดตรหัสผ่านใน database
-      let { username } =  decoded;
+      let { username } = decoded;
       console.log({ newPassword });
       console.log({ username });
 
@@ -353,7 +346,7 @@ router.post("/passwordReset/:token", (req, res) => {
     }
   });
   //สร้างข้อความแจ้งเตือนและแสดงผลหน้า login
-  req.flash("resetsuccess","Reset Password Success!!");
+  req.flash("resetsuccess", "Reset Password Success!!");
   res.redirect("/login");
 });
 
@@ -369,7 +362,7 @@ router.get("/profile", (req, res) => {
 router.get("/editProfile/:id", (req, res) => {
   let sql = "SELECT * FROM tb_user WHERE id = ?";
   let params = req.params.id;
-  conn.query(sql, params, (err, result) => {    
+  conn.query(sql, params, (err, result) => {
     if (err) throw err;
     //ส่งข้อมูลผู้ใช้ที่ดึงมาและข้อมูลกลุ่มหนังสือ และแสดงหน้า editprofile
     res.render("editProfile", { user: result[0] });
@@ -428,7 +421,7 @@ router.post("/editProfile/:id", (req, res) => {
         conn.query(sqlFetchUser, paramSelect, (err, updatedUser) => {
           req.session.img = updatedUser[0].img;
           req.session.name = updatedUser[0].name;
-          req.flash("profilepass","Edit Profile Successfully!!");
+          req.flash("profilepass", "Edit Profile Successfully!!");
           res.redirect("/profile");
         });
       });
@@ -552,7 +545,6 @@ router.get("/editGroupBook/:id", (req, res) => {
     //ส่งข้อมูลกลุ่มหนังสือที่ดึงมาและข้อมูลกลุ่มหนังสือทั้งหมดไปที่ "addGroupBook" เพื่อให้ผู้ใช้ทำการแก้ไขข้อมูล
     res.render("addGroupBook", {
       groupBook: result[0],
-      
     });
   });
 });
@@ -616,7 +608,6 @@ router.get("/addBook", (req, res) => {
     res.render("addBook", {
       book: {},
       groupBooks: result,
-      
     });
   });
 });
@@ -626,7 +617,7 @@ router.post("/addBook", (req, res) => {
   form.parse(req, (err, fields, file) => {
     //ตรวจสอบว่ามีการอัปโหลดภาพหรือไม่ ถ้าไม่มีจะสร้างข้อความแจ้งเตือนและแสดงผลหน้า"book"
     if (!file || !file.img) {
-      req.flash("errorimg","You must upload images!!!");
+      req.flash("errorimg", "You must upload images!!!");
       res.redirect("/book");
     } else {
       //นำภาพที่อัปโหลดมาบันทึกในไดเรกทอรีของเซิร์ฟเวอร์
@@ -647,7 +638,7 @@ router.post("/addBook", (req, res) => {
           fields["detail"],
           fields["status"],
           file.img[0].originalFilename,
-          fields["price"], 
+          fields["price"],
           fields["stock"],
         ];
         conn.query(sql, params, (err, result) => {
@@ -826,7 +817,7 @@ router.post("/borrow/:id", async (req, res) => {
     //แสดงข้อความและ แสดงผลหน้า home
     req.flash(
       "error",
-      "FAILED TO BORROW !! Book Status could be Borrowed,Reserved or Lost !!"
+      "FAILED TO BORROW !! Book Status could be Borrowed Reserved or Lost !!"
     );
     res.redirect("/home");
   } else {
@@ -902,10 +893,10 @@ router.post("/reserve/:id", async (req, res) => {
     bookStatus === "Reserved"
   ) {
     //แสดงข้อความและ แสดงผลหน้า home
-        req.flash(
-          "reserveerror",
-          "FAILED TO RESERVE !! Book Status could be Borrowed,Reserved or Lost !!"
-        );
+    req.flash(
+      "error",
+      "FAILED TO RESERVE !! Book Status could be Borrowed Reserved or Lost !!"
+    );
     res.redirect("/home");
   } else {
     //ดึงข้อมูลที่ต้องการใช้ ระยะเวลาที่ต้องการจองหนังสือ
@@ -939,7 +930,7 @@ router.post("/reserve/:id", async (req, res) => {
     };
     await conn.query(historySql, historyParams);
     //สร้างข้อความแจ้งเตือนและแสดงผลหน้า home
-    req.flash("reservesuccess", "Book Borrowed Successfully !!");
+    req.flash("error", "Book Borrowed Successfully !!");
     res.redirect("/home");
   }
 });
@@ -994,7 +985,6 @@ router.get("/history", async (req, res) => {
     RHUserHistory: RHUserHistory,
     reserveUserHistory: reserveUserHistory,
     borrowUserHistory: borrowUserHistory,
-    
   });
 });
 //isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
@@ -1043,7 +1033,6 @@ router.get("/borrowHistory", (req, res) => {
     //ส่งข้อมูลที่ได้รับไปแสดงผลหน้า "borrowHistory"
     res.render("borrowHistory", {
       borrowHistory: result,
-      
     });
   });
 });
@@ -1081,7 +1070,6 @@ router.get("/reserveHistory", (req, res) => {
     res.render("reserveHistory", {
       //ส่งข้อมูลที่ได้รับไปแสดงผลหน้า "reserveHistory"
       reserveHistory: result,
-      
     });
   });
 });
@@ -1095,20 +1083,18 @@ router.get("/deleteReserveHistory", (req, res) => {
 });
 //isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
 //ลบข้อมูลรายการจองหนังสือที่มี id ที่ระบุจากพารามิเตอร์ url และแสดงผลหน้า "reserveHistory"
-router.get("/deleteReserveHistory/:id",(req, res) => {
-    let sql = "DELETE FROM tb_reserve WHERE id = ?";
-    let params = req.params.id;
-    conn.query(sql, params, (err, result) => {
-      if (err) throw err;
-      res.redirect("/reserveHistory");
-    });
-  }
-);
+router.get("/deleteReserveHistory/:id", (req, res) => {
+  let sql = "DELETE FROM tb_reserve WHERE id = ?";
+  let params = req.params.id;
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/reserveHistory");
+  });
+});
 
 router.post("/add-to-cart", (req, res) => {
   const bookId = parseInt(req.body.bookId);
   const cart = req.session.cart || [];
-  
 
   // Check if the book already exists in the cart
   const existingItem = cart.find((item) => item.bookId === bookId);
@@ -1151,7 +1137,7 @@ router.get("/cart", async (req, res) => {
         if (cartItem) {
           book.quantity = cartItem.quantity;
           book.totalPrice = book.price * book.quantity;
-          totalPrice += book.totalPrice;
+          totalPrice += parseFloat(book.totalPrice);
         }
       });
     }
@@ -1160,9 +1146,9 @@ router.get("/cart", async (req, res) => {
       cart: books,
       cartCount: carts.length,
       totalQuantity: req.session.totalQuantity,
-      totalPrice: totalPrice / 100,
+      totalPrice: totalPrice,
     });
-    console.log(carts);
+
   } catch (error) {
     res.send("Error: " + error);
   }
@@ -1178,11 +1164,11 @@ router.post("/update-cart", (req, res) => {
   if (cartItem) {
     cartItem.quantity = newQuantity;
   }
-    let totalQuantity = 0;
-    cart.forEach((item) => {
-      totalQuantity += item.quantity;
-    });
-    req.session.totalQuantity = totalQuantity;
+  let totalQuantity = 0;
+  cart.forEach((item) => {
+    totalQuantity += item.quantity;
+  });
+  req.session.totalQuantity = totalQuantity;
   // Update the session cart and redirect back to the cart page
   req.session.cart = cart;
   res.redirect("/cart"); //
@@ -1190,12 +1176,36 @@ router.post("/update-cart", (req, res) => {
 
 
 
+router.post("/remove-cart", (req, res) => {
+  const bookId = parseInt(req.body.bookId);
+  const cart = req.session.cart || [];
+  let totalQuantity = 0;
+
+  // Loop through the cart and filter out the item to be removed
+  req.session.cart = cart.filter((item) => {
+    if (item.bookId === bookId) {
+      // Skip this item to remove it from the cart
+      return false;
+    }
+    // Add the quantity of remaining items to the total quantity
+    totalQuantity += item.quantity;
+    return true;
+  });
+
+  // Update total quantity in session
+  req.session.totalQuantity = totalQuantity;
+
+  // Redirect back to the cart page
+  res.redirect("/cart");
+});
+
 
 
 router.post("/create-checkout-session", async (req, res) => {
   try {
     const conn = require("./connect2");
     const cart = req.session.cart || [];
+    const { couponCode } = req.body;
 
     if (cart.length === 0) {
       return res.status(400).send("Cart is empty");
@@ -1210,75 +1220,146 @@ router.post("/create-checkout-session", async (req, res) => {
     cart.forEach((carts) => {
       const book = books.find((b) => b.id === carts.bookId);
       if (!book || book.stock < carts.quantity) {
-        stockErrors.push(`Insufficient stock for "${book.book_name}" Only ${book ? book.stock : 0} book left.`);
+        stockErrors.push(
+          `Insufficient stock for "${book.book_name}". Only ${
+            book ? book.stock : 0
+          } left.`
+        );
       }
     });
+
     if (stockErrors.length > 0) {
-      req.flash("stockerror", stockErrors);
+      req.flash("error", stockErrors);
       return res.redirect("/cart");
     }
 
+    let totalDiscount = 0;
+    let promotion = null;
+   
+    if (couponCode) {
+      // Check if the coupon exists in the promotions table
+      const [promotionResults] = await conn.query(
+        "SELECT * FROM tb_promotion WHERE coupon_code = ? AND startdate <= NOW() AND enddate >= NOW() AND quantity > 0",
+        [couponCode]
+      );
+
+      if (promotionResults.length > 0) {
+        promotion = promotionResults[0];
+      } else {
+        req.flash("error", "Invalid or expired coupon code");
+        return res.redirect("/cart");
+      }
+    }
+    
     const lineItems = books.map((book) => {
       const cartItem = cart.find((item) => item.bookId === book.id);
+      let unitAmount = Math.round(parseFloat(book.price) * 100);
+
+      // Apply discount if promotion is valid and is a discount type
+      if (promotion && promotion.type === "discount") {
+        unitAmount = Math.round(unitAmount - unitAmount * (promotion.discount / 100));
+        totalDiscount += (parseFloat(book.price) - unitAmount / 100) * cartItem.quantity;
+      }
       return {
         price_data: {
-          currency: "thb", // Corrected: added quotes
+          currency: "thb",
           product_data: {
             name: book.book_name,
           },
-          unit_amount: book.price * 100, // Use book's price from database in satang
+          unit_amount: unitAmount, // Convert price to satang (smallest currency unit)
         },
-        quantity: cartItem.quantity, // Access quantity from cart
+        quantity: cartItem.quantity,
       };
     });
 
+     if (promotion && promotion.type === "free_book") {
+       // Fetch the free book
+       const [freeBookResults] = await conn.query(
+         "SELECT * FROM tb_book WHERE id = ? AND stock > 0",
+         [promotion.book_id]
+       );
+       if (freeBookResults.length > 0) {
+         const freeBook = freeBookResults[0];
+
+         // Add the free book as a line item with unit_amount of 0
+         lineItems.push({
+           price_data: {
+             currency: "thb",
+             product_data: {
+               name: freeBook.book_name,
+             },
+             unit_amount: 0, // Free book
+           },
+           quantity: 1,
+         });
+
+         // Update the stock of the free book
+         await conn.query("UPDATE tb_book SET stock = stock - 1 WHERE id = ?", [
+           promotion.book_id,
+         ]);
+
+         // Decrease the quantity of the promotion
+         await conn.query(
+           "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
+           [promotion.id]
+         );
+       } else {
+         req.flash("error", "Free book is not available");
+         return res.redirect("/cart");
+       }
+     }
+
+     // Decrease the promotion quantity for discount type promotions
+     if (promotion && promotion.type === "discount") {
+       await conn.query(
+         "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
+         [promotion.id]
+       );
+     }
+    
+    // Create a PaymentIntent to handle multiple payment methods
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: lineItems, // Ensure variable name matches
+      payment_method_types: ["card", "promptpay"], // Enable both Card and PromptPay
+      line_items: lineItems,
       mode: "payment",
       success_url: `${req.protocol}://${req.get("host")}/success`,
       cancel_url: `${req.protocol}://${req.get("host")}/cancel`,
     });
-    
+
+    // Redirect to the checkout page
     res.redirect(303, session.url);
   } catch (error) {
-    console.log("Error creating checkout session:", error);
+    console.error("Error creating checkout session:", error);
     res.status(500).send("An error occurred while creating a session.");
   }
 });
 
 
-router.get("/success", async (req, res) => {
-  try {
-    const conn = require("./connect2");
-    const cart = req.session.cart || [];
-    console.log(cart);
 
-  
-    for (const carts of cart) {
-      const { bookId, quantity } = carts;
+
+router.get("/success", async (req, res) => {
+  const conn = require("./connect2");
+  const cart = req.session.cart || [];
+  try {
+    for (const { bookId, quantity } of cart) {
       await conn.query(
         "UPDATE tb_book SET stock = stock - ? WHERE id = ? AND stock >= ?",
-        [
-          quantity,
-          bookId,
-          quantity, 
-        ]
+        [quantity, bookId, quantity]
       );
       req.session.cart = [];
       req.session.totalQuantity = 0;
       res.render("success");
     }
   } catch (error) {
-    console.log("Error updating stock: ", error)
+    console.log("Error updating stock: ", error);
     res.status(500).send("An error occurred during stock update.");
-    }});
-
-router.get("/cancel", (req, res) => {
-        req.session.cart = [];
-        req.session.totalQuantity = 0;
-  res.render("cancel"); 
+  }
 });
 
+router.get("/cancel", (req, res) => {
+  req.session.cart = [];
+  req.session.totalQuantity = 0;
+  res.render("cancel");
+});
 
 module.exports = router;

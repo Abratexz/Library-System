@@ -1,112 +1,120 @@
-<nav class="navbar navbar-expand-lg navbar-light shadow light-green" style="height: 80px;">
-    <div class="container-fluid">
-        <a class="navbar-brand special-elite-regular ps-2 text-success" href="/home">LIBRARY</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="nav-link text-success" href="/home">HOME</a>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-success" href="#" id="navbarDropdownCategory" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        CATEGORY
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li class="list-group">
-                            <% groupBooks.forEach((item)=> { %>
-                        <li class="dropdown-item ">
-                            <a href="/home?groupBookId=<%= item.id %>" class="text-decoration-none text-success ">
-                                <%= item.name_tag %>
-                            </a>
-                        </li>
-                        <% }) %>
-                </li>
-            </ul>
-            </li>
-            </ul>
-            <% if (session.level=="admin" || session.level=="librarian" ) { %>
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-success" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            ADMIN COMMAND
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <% if (session.level=="admin" ) { %>
-                                <li><a class="dropdown-item text-success" href="/user">Users in system</a></li>
-                                <% } %>
-                                    <li><a class="dropdown-item text-success" href="/groupBook">Tag Book</a></li>
-                                    <li><a class="dropdown-item text-success" href="/book">Book</a></li>
-                                    <li><a class="dropdown-item text-success" href="/borrowHistory">Borrow History</a>
-                                    </li>
-                                    <li><a class="dropdown-item text-success" href="/reserveHistory">Reserve History</a>
-                                    </li>
-                        </ul>
-                    </li>
-                </ul>
-                <% } %>
+<nav class="navbar navbar-expand-lg navbar-light shadow light-green">
+  <div class="container-fluid">
+    <!-- Brand and Toggle -->
+    <a class="navbar-brand special-elite-regular ps-2 text-success" href="/home">LIBRARY</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-                    <div class="collapse navbar-collapse justify-content-center mt-3 ms-4" style="padding-right: 180px;"
-                        id="navbarScroll">
-                        <form action="/home" method="GET">
-                            <div class="input-group mb-3 ">
-                                <input type="text" name="search" class="form-control border border-success border-1 "
-                                    style="border-radius: 4em 0em 0em 4em; min-width: 150px;"
-                                    placeholder="  Search book name..">
-                                <select class="form-control border border-success border-1" name="groupBookId">
-                                    <option value="All">All</option>
-                                    <% groupBooks.forEach(item=> { %>
-                                        <option value="<%= item.id %>">
-                                            <%= item.name_tag %>
-                                        </option>
-                                        <% }) %>
-                                </select>
-                                <button class="btn green border border-success border-1 text-success"
-                                    style=" border-radius: 0em 4em 4em 0em;" type="submit"><span
-                                        class="material-symbols-outlined material-icons ">
-                                        search
-                                    </span></button>
-                            </div>
-                        </form>
-                    </div>
-                    <div> 
-                    <a href="/cart" class="nav-link text-success">
-                        <span class="material-symbols-outlined">shopping_cart</span>
-                        <span class="badge bg-secondary"><%= cartCount %></span>
-                    </a>
-                    </div>
-                    <div class="justify-content-end">
-                        <ul class="navbar-nav navbar-expand-lg my-2 my-lg-0 navbar-nav-scroll"
-                            style="--bs-scroll-height: 100px;">
-                            <!-- Dropdown Menu -->
-                            <% if (session.token !=undefined) { %>
-                                <li class="nav-item dropdown">
-                                    
-                                    <a class="nav-link dropdown-toggle text-success pt-3 " href="#"
-                                        id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                        <%= session.name %>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
+    <!-- Navbar Content -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Left Side: Navigation Links -->
+      <ul class=" text-center navbar-nav me-auto mb-2 mb-lg-0">
+        <!-- HOME Link -->
+        <li class="nav-item">
+          <a class="nav-link text-success" href="/home">HOME</a>
+        </li>
+        <!-- CATEGORY Dropdown -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-success" href="#" id="navbarDropdownCategory" role="button"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            CATEGORY
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdownCategory">
+            <% groupBooks.forEach((item) => { %>
+              <li>
+                <a href="/home?groupBookId=<%= item.id %>" class="dropdown-item text-success">
+                  <%= item.name_tag %>
+                </a>
+              </li>
+            <% }) %>
+          </ul>
+        </li>
+        <!-- ADMIN COMMAND Dropdown (Conditional) -->
+        <% if (session.level == "admin" || session.level == "librarian") { %>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-success" href="#" id="navbarDropdownAdmin" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              ADMIN COMMAND
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+              <% if (session.level == "admin") { %>
+                <li><a class="dropdown-item text-success" href="/user">Users in system</a></li>
+              <% } %>
+              <li><a class="dropdown-item text-success" href="/groupBook">Tag Book</a></li>
+              <li><a class="dropdown-item text-success" href="/book">Book</a></li>
+              <li><a class="dropdown-item text-success" href="/borrowHistory">Borrow History</a></li>
+              <li><a class="dropdown-item text-success" href="/reserveHistory">Reserve History</a></li>
+            </ul>
+          </li>
+        <% } %>
+      </ul>
 
-                                        <li><a class="dropdown-item text-success" href="/profile ">Profile</a></li>
-                                        <li><a class="dropdown-item text-success" href="/history ">History</a></li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li><a class="dropdown-item text-success" href="/logout">Log Out</a></li>
-                                    </ul>
-                                </li>
-                                <!-- User Profile -->
-                                <li class="nav-item ps-2 pe-1">
-                                    <img class="rounded-circle" src="../images/users/<%= session.img %>"
-                                        class="img-thumbnail" alt="..." style="width: 50px; height: 50px;">
-                                </li>
-                        </ul>
-                    </div>
-        </div>
+      <!-- Right Side: Search Form and User Actions -->
+      <ul class="navbar-nav mb-2 mb-lg-0 d-flex align-items-center">
+        <!-- Search Form (Hidden on Small Screens) -->
+        <li class="nav-item me-3">
+          <form id="searchbar" class="d-flex" action="/home" method="GET">
+            <div class="input-group">
+              <input type="text" name="search" class="form-control border-success" placeholder="Search book name...">
+              <select class="form-select border-success" name="groupBookId">
+                <option value="All">All</option>
+                <% groupBooks.forEach(item => { %>
+                  <option value="<%= item.id %>">
+                    <%= item.name_tag %>
+                  </option>
+                <% }) %>
+              </select>
+              <button class="btn btn-outline-success" type="submit">
+                <span class="material-symbols-outlined">search</span>
+              </button>
+            </div>
+          </form>
+        </li>
+
+        <!-- Cart Icon -->
+        <li class="nav-item">
+          <a href="/cart" class="nav-link text-success position-relative">
+            <span class="material-symbols-outlined">shopping_cart</span>
+            <% if (cartCount > 0) { %>
+              <span class="badge bg-secondary ">
+                <%= cartCount %>
+              </span>
+            <% } %>
+          </a>
+        </li>
+
+        <!-- User Profile or Login/Register -->
+        <% if (session.token != undefined) { %>
+          <!-- User Profile Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-success" href="#" id="navbarScrollingDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <%= session.name %>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdown">
+              <li><a class="dropdown-item text-success" href="/profile">Profile</a></li>
+              <li><a class="dropdown-item text-success" href="/history">History</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-success" href="/logout">Log Out</a></li>
+            </ul>
+          </li>
+          <!-- User Avatar -->
+          <li class="nav-item">
+            <img src="../images/users/<%= session.img %>" alt="User Avatar" class="rounded-circle ms-2"
+              style="width: 40px; height: 40px;">
+          </li>
+        <% } else { %>
+          <!-- Login/Register Links for Guests -->
+          <li class="nav-item">
+            <a class="nav-link text-success" href="/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-success" href="/register">Register</a>
+          </li>
+        <% } %>
+      </ul>
     </div>
+  </div>
 </nav>
-<% } %>

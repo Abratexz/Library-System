@@ -1,7 +1,37 @@
 <%- include('header') %>
 
     <%- include('navbar') %>
-  <h1>Payment Canceled</h1>
-  <p>Your payment has been canceled. If you have any questions, please contact support.</p>
-  <a href="/home">Return to Home</a>
+                    <main class="py-6 bg-surface-secondary">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xl-6 mx-auto">
+                          <div class="card shadow mt-5 mb-5">
+                              <div class="card-body fs-5 ">
+                                <h1 class="text-center">Payment Canceled</h1>
+                                <p class="text-center">Your payment has been canceled. If you have any questions, please contact support.</p>
+                                <div class="text-center">
+                                    <p id="countdown">Redirecting to Home Page in <span id="counter">3</span>...</p>
+                                </div>
+                                  <div class="text-center">
+                                    <a  href="/home">Return to Home</a>
+                                  </div>
+                              </div>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+              </main>
+ <script>
+    let countdown = 3; 
+
+    const interval = setInterval(() => {
+      countdown -= 1; 
+      document.getElementById('counter').textContent = countdown; 
+
+      if (countdown === 0) {
+        clearInterval(interval); 
+        window.location.href = "/home"; 
+      }
+    }, 1000); 
+  </script>
 <%- include('footer') %>

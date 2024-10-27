@@ -36,9 +36,7 @@
         const messages = {
         error: '<%= messages.error %>',
         success: '<%= messages.success %>',
-        reserveerror :'<%= messages.reserveerror %>', 
-        reservesuccess :'<%= messages.reservesuccess %>',
-        stockerror: '<%= messages.stockerror %>',
+
     }
 
     // Check and show messages if they exist
@@ -48,17 +46,6 @@
     
     if (messages.success && messages.success.length > 0) {
         showModal(messages.success, 'success');
-    }
-
-    if (messages.reserveerror && messages.reserveerror.length > 0) {
-        showModal(messages.reserveerror, 'danger');
-    }
-
-    if (messages.reservesuccess && messages.reservesuccess.length > 0) {
-        showModal(messages.reservesuccess, 'success');
-    }
-    if (messages.stockerror && messages.stockerror.length > 0) {
-        showModal(messages.stockerror, 'danger');
     }
 });
 </script>

@@ -48,3 +48,14 @@
   border-color: green;
   color: white;
 }
+ #coupon{
+  width: 15%;
+  margin-left: 1030px;
+ }
+
+
+/* Adjust padding for the navbar (optional) */
+.navbar {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}

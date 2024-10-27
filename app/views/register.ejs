@@ -7,48 +7,104 @@
                     <h2 class="text-success">REGISTER</h2>
                     <h4>Don't have an Account?</h4>
                 </div>
-                <form method="post" action="/register" style="margin-top: 20px;">
-                    <div class="form-group">
+                    <form method="post" action="/register" style="margin-top: 20px;" onsubmit="return validateForm()">
+                        <div class="form-group">
+                            <label class="text-success">Full Name</label>
+                            <input type="text" name="name" class="form-control rounded-pill padding-left"
+                                style="margin-top: 10px;" placeholder="Enter Your Name" required 
+                                pattern="[A-Za-z\s]+" title="Full name should only contain letters and spaces.">
+                        </div>
 
-                        <label class="text-success">Full Name</label>
-                        <input type="text" name="name" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="Enter Your Name" required>
-                    </div>
-                    <div class="form-group" style="margin-top: 20px;">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="text-success">Username</label>
+                            <input type="text" name="usr" class="form-control rounded-pill padding-left"
+                                style="margin-top: 10px;" placeholder="Enter Username" required 
+                                pattern="[A-Za-z0-9_]{5,15}" title="Username should be 5-15 characters long and contain only letters, numbers, or underscores.">
+                        </div>
 
-                        <label class="text-success">Username</label>
-                        <input type="text" name="usr" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="Enter Username" required>
-                    </div>
-                    <div class="form-group" style="margin-top: 20px;">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="text-success">Password</label>
+                            <input type="password" name="pwd" class="form-control rounded-pill padding-left"
+                                style="margin-top: 10px;" placeholder="Password" required 
+                                pattern=".{8,}" title="Password should be at least 8 characters long.">
+                        </div>
 
-                        <label class="text-success">Password</label>
-                        <input type="password" name="pwd" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="Password" required>
-                    </div>
-                    <div class="form-group" style="margin-top: 20px;">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="text-success">Phone</label>
+                            <input type="text" name="phone" class="form-control rounded-pill padding-left"
+                                style="margin-top: 10px;" placeholder="ex.092-000-0000" required 
+                                pattern="\d{3}-\d{3}-\d{4}" title="Phone number should match the format: xxx-xxx-xxxx."
+                                oninput="formatPhone(this)">
+                        </div>
 
-                        <label class="text-success">Phone</label>
-                        <input type="text" name="phone" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="ex.092-000-0000" required>
-                    </div>
-                    <div class="form-group" style="margin-top: 20px;">
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="text-success">Citizen ID</label>
+                            <input type="text" name="citizencard" class="form-control rounded-pill padding-left"
+                                style="margin-top: 10px;" placeholder="x-xxxx-xxxxx-xx-x" required 
+                                pattern="\d-\d{4}-\d{5}-\d{2}-\d" title="Citizen ID should match the format: x-xxxx-xxxxx-xx-x."
+                                oninput="formatCitizenID(this)">
+                        </div>
 
-                        <label class="text-success">Citizen ID</label>
-                        <input type="text" name="citizencard" class="form-control rounded-pill padding-left"
-                            style="margin-top: 10px;" placeholder="x-xxxx-xxxxx-xx-x" required>
-                    </div>
-                    <%- include('normalms') %>
-                            <input type="hidden" name="level" value="user" />
-                            <button type="submit" class="btn btn-outline-success rounded-pill"
-                                onsubmit="return validateForm()" style="width: 100%; margin-top: 20px;">Sign-up</button>
-                </form>
+                        <%- include('normalms') %>
+                        <input type="hidden" name="level" value="user" />
+                        <button type="submit" class="btn btn-outline-success rounded-pill"
+                            onsubmit="return validateForm()" style="width: 100%; margin-top: 20px;">Sign-up</button>
+                    </form>
                 <div class="text-center" style="margin-top: 5px;"> - or - </div>
                 <a href="/login" type="login" class="btn btn-outline-secondary rounded-pill"
                     style="width: 100%; margin-top: 5px;">Log-In</a>
             </div>
         </div>
+<script>
+  // Automatically add hyphens for phone number format: xxx-xxx-xxxx
+  function formatPhone(input) {
+    const value = input.value.replace(/\D/g, ''); // Remove any non-digit characters
+    let formatted = '';
+    
+    if (value.length > 3) {
+      formatted += value.substring(0, 3) + '-';
+    } else {
+      formatted += value;
+    }
+    
+    if (value.length > 6) {
+      formatted += value.substring(3, 6) + '-';
+      formatted += value.substring(6, 10);
+    } else if (value.length > 3) {
+      formatted += value.substring(3);
+    }
+    
+    input.value = formatted;
+  }
 
+  // Automatically add hyphens for citizen ID format: x-xxxx-xxxxx-xx-x
+function formatCitizenID(input) {
+    // Remove any non-digit characters
+    const value = input.value.replace(/\D/g, '');
+    let formatted = '';
+
+    // Build the formatted string according to the pattern x-xxxx-xxxxx-xx-x
+    if (value.length > 0) {
+        formatted += value.substring(0, 1); // First digit
+    }
+    if (value.length > 1) {
+        formatted += '-' + value.substring(1, 5); // Next four digits
+    }
+    if (value.length > 5) {
+        formatted += '-' + value.substring(5, 10); // Next five digits
+    }
+    if (value.length > 10) {
+        formatted += '-' + value.substring(10, 12); // Next two digits
+    }
+    if (value.length > 12) {
+        formatted += '-' + value.substring(12, 13); // Last digit
+    }
+
+    // Set the formatted value back to the input field
+    input.value = formatted;
+}
+
+</script>
 
 
         <%- include('footer') %>
