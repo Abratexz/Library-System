@@ -386,8 +386,7 @@ router.post("/editProfile/:id", (req, res) => {
       if (file.img && file.img.length > 0) {
         // เช็คว่ามีการอัปโหลดรูปภาพใหม่มาหรือไม่ ถ้ามีทำการบันทึกไฟล์รูปภาพใหม่ลงในเซิร์ฟเวอร์ และลบไฟล์รูปภาพเดิมออกจากเซิร์ฟเวอร์
         let filePath = file.img[0].filepath;
-        let newPath =
-          "C://Users/nemo_/Desktop/Library-System/app/public/images/users/";
+        let newPath = path.join(__dirname, "../public/images/users/");
         imgFileName = file.img[0].originalFilename; // ใช้รูปใหม่
 
         fs.copyFile(filePath, newPath + imgFileName, () => {
@@ -623,8 +622,7 @@ router.post("/addBook", (req, res) => {
       //นำภาพที่อัปโหลดมาบันทึกในไดเรกทอรีของเซิร์ฟเวอร์
 
       let filePath = file.img[0].filepath;
-      let newPath =
-        "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
+      let newPath = path.join(__dirname, "../public/images/books/");
       newPath += file.img[0].originalFilename;
       //เพิ่มข้อมูลหนังสือใหม่ลงใน database และแสดงผลหน้า book
       fs.copyFile(filePath, newPath, () => {
@@ -681,8 +679,7 @@ router.post("/editBook/:id", (req, res) => {
       if (file.img && file.img.length > 0) {
         //ตรวจสอบว่ามีการอัปโหลดภาพหรือไม่ ถ้ามีการอัปโหลดภาพใหม่ เปลี่ยนเป็นรูปภาพใหม่และลบรูปภาพเก่าออกจากเซิร์ฟเวอร์
         let filePath = file.img[0].filepath;
-        let newPath =
-          "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
+        let newPath = path.join(__dirname, "../public/images/books/");
         imgFileName = file.img[0].originalFilename; // ใช้รูปใหม่
 
         fs.copyFile(filePath, newPath + imgFileName, () => {
@@ -722,8 +719,7 @@ router.post("/editBook/:id", (req, res) => {
 
 //ลบหนังสือที่ต้องการลบโดยใช้ id ที่ระบุในพารามิเตอร์ของ URL
 router.get("/deleteBook/:id/:img", (req, res) => {
-  let newPath =
-    "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
+    let newPath = path.join(__dirname, "../public/images/books/");
 
   newPath += req.params.img;
   //Path ไปยังไฟล์รูปภาพของหนังสือที่ต้องการลบ
@@ -743,8 +739,7 @@ router.get("/deleteBook/:id/:img", (req, res) => {
 });
 //ลบหนังสือทั้งหมดที่มีอยู่ในระบบ
 router.get("/deleteAllBook", (req, res) => {
-  let newPath =
-    "C://Users/nemo_/Desktop/Library-System/app/public/images/books/";
+  let newPath = path.join(__dirname, "../public/images/books/");
   //ชี้ไปยังไดเรกทอรีของภาพหนังสือ
   //ดึงรายชื่อของไฟล์ทั้งหมดในไดเรกทอรี
   fs.readdir(newPath, (err, files) => {
