@@ -1229,6 +1229,7 @@ router.post("/create-checkout-session", async (req, res) => {
       const [promotionResults] = await conn.query("SELECT * FROM tb_promotion WHERE coupon_code = ? AND startdate <= NOW() AND enddate >= NOW() AND quantity > 0",[couponCode]);
 
       if (promotionResults.length > 0) {
+        req.session.couponCode = couponCode;
         promotion = promotionResults[0];
       } else {
         req.flash("error", "Invalid or expired coupon code");
@@ -1347,9 +1348,9 @@ router.get("/success", async (req, res) => {
     
 
     if (session.payment_status === "paid") {
-      const { couponCode } = req.session;
-    
+      const couponCode = req.session.couponCode;
 
+      // Insert order into `tb_order`
       const [orderResult] = await conn.query(
         "INSERT INTO tb_order (user_id, order_date, total_amount, status) VALUES (?, NOW(), ?, ?)",
         [res.locals.user.id, session.amount_total / 100, "Completed"]
@@ -1377,20 +1378,48 @@ router.get("/success", async (req, res) => {
           "SELECT * FROM tb_promotion WHERE coupon_code = ?",
           [couponCode]
         );
-        if (promotionResults.length > 0) {
-          const promotion = promotionResults[0];
 
-          if (promotion.type === "discount" || promotion.type === "free_book") {
-            await conn.query(
-              "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
-              [promotion.id]
-            );
+        if (promotionResults.length > 0) {
+          for (const promotion of promotionResults) {
+            if (promotion.type === "free_book" && promotion.book_id) {
+              const [freeBookResults] = await conn.query(
+                "SELECT * FROM tb_book WHERE id = ? AND stock > 0",
+                [promotion.book_id]
+              );
+
+              if (freeBookResults.length > 0) {
+                const freeBook = freeBookResults[0];
+
+                await conn.query(
+                  "INSERT INTO tb_order_items (order_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
+                  [orderId, freeBook.id, 1, 0]
+                );
+
+                await conn.query(
+                  "UPDATE tb_book SET stock = stock - 1 WHERE id = ?",
+                  [freeBook.id]
+                );
+                await conn.query(
+                  "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
+                  [promotion.id]
+                );
+              } else {
+                req.flash("error", "Free book is not available");
+                return res.redirect("/cart");
+              }
+            } else if (promotion.type === "discount") {
+              // Decrease promotion quantity for discount type if applicable
+              await conn.query(
+                "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
+                [promotion.id]
+              );
+            }
           }
         }
       }
-
       req.session.cart = [];
       req.session.totalQuantity = 0;
+      req.session.couponCode = null;
       res.render("success");
     } else {
       res.redirect("/cancel");
