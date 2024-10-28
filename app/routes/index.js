@@ -1227,7 +1227,8 @@ router.post("/create-checkout-session", async (req, res) => {
 
       if (promotionResults.length > 0) {
         req.session.couponCode = couponCode;
-        promotion = promotionResults[0];
+        promotion = promotionResults;
+        
       } else {
         req.flash("error", "Invalid or expired coupon code");
         return res.redirect("/cart");
@@ -1252,27 +1253,29 @@ router.post("/create-checkout-session", async (req, res) => {
         quantity: cartItem.quantity,
       };
     });
-
-     if (promotion && promotion.type === "free_book") {
-       // Fetch the free book
-       const [freeBookResults] = await conn.query("SELECT * FROM tb_book WHERE id = ? AND stock > 0",[promotion.book_id]);
-       if (freeBookResults.length > 0) {
-         const freeBook = freeBookResults[0];
-
-         // Add the free book as a line item with unit_amount of 0
-         lineItems.push({
-           price_data: {
-             currency: "thb",
-             product_data: { name: freeBook.book_name},
-             unit_amount: 0, // Free book
-           },
-           quantity: 1,
-         });
-       } else {
-         req.flash("error", "Free book is not available");
-         return res.redirect("/cart");
-       }
-     }
+    for (const promo of promotion) {
+      if (promo.book_id && promo.type === "free_book") {
+        const [freeBookResults] = await conn.query(
+          "SELECT * FROM tb_book WHERE id = ? AND stock > 0",
+          [promo.book_id]
+        );
+        if (freeBookResults.length > 0) {
+          const freeBook = freeBookResults[0];
+          // Add each free book as a line item with unit_amount of 0
+          lineItems.push({
+            price_data: {
+              currency: "thb",
+              product_data: { name: freeBook.book_name },
+              unit_amount: 0, // Free book
+            },
+            quantity: 1,
+          });
+        } else {
+          req.flash("error", "Free book is not available");
+          return res.redirect("/cart");
+        }
+      }
+    }
     // Create a PaymentIntent to handle multiple payment methods
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "promptpay"], // Enable both Card and PromptPay
