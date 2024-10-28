@@ -24,7 +24,7 @@
           <ul class="dropdown-menu" aria-labelledby="navbarDropdownCategory">
             <% groupBooks.forEach((item) => { %>
               <li>
-                <a href="/home?groupBookId=<%= item.id %>" class="dropdown-item text-success">
+                <a href="/home?groupBookId=<%= item.id %>" class="dropdown-item text-success text-truncate">
                   <%= item.name_tag %>
                 </a>
               </li>
@@ -101,7 +101,7 @@
             </ul>
           </li>
           <!-- User Avatar -->
-          <li class="nav-item">
+          <li class="nav-item d-none d-lg-block">
             <img src="../images/users/<%= session.img %>" alt="User Avatar" class="rounded-circle ms-2"
               style="width: 40px; height: 40px;">
           </li>

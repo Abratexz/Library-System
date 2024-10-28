@@ -1202,24 +1202,16 @@ router.post("/create-checkout-session", async (req, res) => {
     const cart = req.session.cart || [];
     const { couponCode } = req.body;
 
-    if (cart.length === 0) {
-      return res.status(400).send("Cart is empty");
-    }
+    if (cart.length === 0) return res.status(400).send("Cart is empty");
 
     const bookIds = cart.map((item) => item.bookId);
-    const [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [
-      bookIds,
-    ]);
+    const [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [bookIds,]);
 
     const stockErrors = [];
     cart.forEach((carts) => {
       const book = books.find((b) => b.id === carts.bookId);
       if (!book || book.stock < carts.quantity) {
-        stockErrors.push(
-          `Insufficient stock for "${book.book_name}". Only ${
-            book ? book.stock : 0
-          } left.`
-        );
+        stockErrors.push(`Insufficient stock for "${book.book_name}". Only ${book ? book.stock : 0} left.`);
       }
     });
 
@@ -1233,10 +1225,7 @@ router.post("/create-checkout-session", async (req, res) => {
    
     if (couponCode) {
       // Check if the coupon exists in the promotions table
-      const [promotionResults] = await conn.query(
-        "SELECT * FROM tb_promotion WHERE coupon_code = ? AND startdate <= NOW() AND enddate >= NOW() AND quantity > 0",
-        [couponCode]
-      );
+      const [promotionResults] = await conn.query("SELECT * FROM tb_promotion WHERE coupon_code = ? AND startdate <= NOW() AND enddate >= NOW() AND quantity > 0",[couponCode]);
 
       if (promotionResults.length > 0) {
         promotion = promotionResults[0];
@@ -1258,9 +1247,7 @@ router.post("/create-checkout-session", async (req, res) => {
       return {
         price_data: {
           currency: "thb",
-          product_data: {
-            name: book.book_name,
-          },
+          product_data: {name: book.book_name,},
           unit_amount: unitAmount, // Convert price to satang (smallest currency unit)
         },
         quantity: cartItem.quantity,
@@ -1269,10 +1256,7 @@ router.post("/create-checkout-session", async (req, res) => {
 
      if (promotion && promotion.type === "free_book") {
        // Fetch the free book
-       const [freeBookResults] = await conn.query(
-         "SELECT * FROM tb_book WHERE id = ? AND stock > 0",
-         [promotion.book_id]
-       );
+       const [freeBookResults] = await conn.query("SELECT * FROM tb_book WHERE id = ? AND stock > 0",[promotion.book_id]);
        if (freeBookResults.length > 0) {
          const freeBook = freeBookResults[0];
 
@@ -1280,9 +1264,7 @@ router.post("/create-checkout-session", async (req, res) => {
          lineItems.push({
            price_data: {
              currency: "thb",
-             product_data: {
-               name: freeBook.book_name,
-             },
+             product_data: { name: freeBook.book_name},
              unit_amount: 0, // Free book
            },
            quantity: 1,
@@ -1311,7 +1293,7 @@ router.post("/create-checkout-session", async (req, res) => {
          [promotion.id]
        );
      }
-    
+
     // Create a PaymentIntent to handle multiple payment methods
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "promptpay"], // Enable both Card and PromptPay
