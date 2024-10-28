@@ -334,14 +334,11 @@ router.post("/passwordReset/:token", (req, res) => {
     } else {
       //ถ้าถูกจะนำรหัสผ่านใหม่ที่ผู้ใช้ป้อนมาใช้ในการอัปเดตรหัสผ่านใน database
       let { username } = decoded;
-      console.log({ newPassword });
-      console.log({ username });
 
       let pwdUpdateSql = "UPDATE tb_user SET pwd = ? WHERE usr = ?";
       let updatePwdParams = [newPassword, username];
 
       conn.query(pwdUpdateSql, updatePwdParams, (err, result) => {
-        console.log(result);
         if (err) throw err;
       });
     }
@@ -592,7 +589,7 @@ router.get("/book", (req, res) => {
 
   conn.query(sql, sqlParams, (err, result) => {
     if (err) throw err;
-    
+
     //ส่งผลลัพธ์ไปที่หน้า "book" พร้อมกับข้อมูลกลุ่มหนังสือทั้งหมด
     res.render("book", { books: result });
   });
@@ -973,8 +970,8 @@ router.get("/history", async (req, res) => {
 
   let [RHUserHistory] = await conn.query(sql, params);
   //ดึงขอมูลที่เป็นประวัติของ user BH= BorrowHistory RH = ReserveHistory , BHUserHistory RHUserHistorya เพื่อจะนำมารวมกันทีหลัง
-  console.log(BHUserHistory);
-  console.log(RHUserHistory);
+ // console.log(BHUserHistory);
+  //console.log(RHUserHistory);
   //รวมข้อมูลประวัติการยืมและการจองหนังสือทั้งหมดและแสดงผลหน้า"history" เพื่อให้ผู้ใช้ดูประวัติการยืมและการจองของตัวเองได้
   res.render("history", {
     BHUserHistory: BHUserHistory,
@@ -1539,7 +1536,7 @@ router.get("/orderhistory", async (req, res) => {
         items: orderItems.filter((item) => item.order_id === order.id),
       };
     });
-    console.log(JSON.stringify(orderMap, null, 2));
+   // console.log(JSON.stringify(orderMap, null, 2));
     // Render the order history page with organized data
     res.render("orderhistory", { orders: orderMap, query: req.query });
   } catch (error) {
@@ -1615,7 +1612,7 @@ router.get("/orderhistoryadmin", async (req, res) => {
       };
     });
 
-    console.log(JSON.stringify(orderMap, null, 2));
+   // console.log(JSON.stringify(orderMap, null, 2));
     res.render("orderhistoryadmin", {
       orders: orderMap,
       query: req.query,
