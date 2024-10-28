@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 27, 2024 at 08:30 PM
+-- Generation Time: Oct 28, 2024 at 12:55 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,16 +45,16 @@ CREATE TABLE `tb_book` (
 --
 
 INSERT INTO `tb_book` (`id`, `group_book_id`, `isbn`, `book_name`, `detail`, `img`, `author`, `status`, `price`, `stock`) VALUES
-(24, 2, '111111', 'Algebra', 'Algebra', '51YCr-JaTwL._AC_UF1000,1000_QL80_.jpg', 'Unknown', 'Available', 199.00, 20),
+(24, 2, '111111', 'Algebra', 'Algebra', '51YCr-JaTwL._AC_UF1000,1000_QL80_.jpg', 'Unknown', 'Available', 199.00, 16),
 (25, 2, '111112', 'MATH', 'MATH', 'images (1).jpg', 'Unknown', 'Available', 150.00, 30),
 (26, 3, '111113', 'MATH2', 'MATH2', 'images (2).jpg', 'Unknown', 'Available', 189.00, 0),
-(27, 7, '111114', 'Python', 'Python', 'images (3).jpg', 'Unknown', 'Available', 219.00, 11),
-(28, 7, '111115', 'Python For Beginner', 'Are you looking to learn more about Machine Learning with Python?  Then Python Programming: The Ultimate Intermediate Guide to Learn Python Machine Learning Step-by-Step is the book for you!  The knowledge you learned in beginner-level programming will he', 'Python-Programming-for-Beginners-cover.jpg', 'Unknown', 'Available', 349.00, 84),
-(29, 6, '111116', 'JAVA ฉบับสมบูรณ์', 'การทำความเข้าใจกับหลักการของ OOP จะช่วยให้เรียนรู้การเขียนโปรแกรมภาษาจาวาได้ไม่ยาก หนังสือเล่มนี้จึงมุ่งเน้นอธิบายให้เข้าใจหลักการของ OPP ก่อน คุณจะรู้สึกได้ว่าการเขียนโปรแกรมด้วยภาษาจาวาไม่ใช่เรื่องยากเลยแม้แต่นิดเดียว', '1000203773_front_XXL.jpg', 'Unknown', 'Borrowed', 499.00, 8),
-(31, 6, '111118', 'JAVA III', 'JAVA III', 'book_detail_large.gif', 'Unknown', 'Available', 149.00, 50),
-(32, 2, '111119', 'CALCULUS', 'Application-oriented introduction relates the subject as closely as possible to science. In-depth explorations of the derivative, the differentiation and integration of the powers of x, and theorems on differentiation and antidifferentiation lead to a def', 'images.jpg', 'Unknown', 'Available', 590.00, 3),
-(33, 7, '111120', 'PYTHON TH', 'Python', 'images.png', 'Unknown', 'Borrowed', 1290.00, 57),
-(38, 6, 'a', 'a', 'a', '9786162044632l.jpg', 'a', 'Available', 129.00, 8);
+(27, 7, '111114', 'Python', 'Python', 'images (3).jpg', 'Unknown', 'Available', 219.00, 6),
+(28, 7, '111115', 'Python For Beginner', 'Are you looking to learn more about Machine Learning with Python?  Then Python Programming: The Ultimate Intermediate Guide to Learn Python Machine Learning Step-by-Step is the book for you!  The knowledge you learned in beginner-level programming will he', 'Python-Programming-for-Beginners-cover.jpg', 'Unknown', 'Available', 349.00, 73),
+(29, 6, '111116', 'JAVA ฉบับสมบูรณ์', 'การทำความเข้าใจกับหลักการของ OOP จะช่วยให้เรียนรู้การเขียนโปรแกรมภาษาจาวาได้ไม่ยาก หนังสือเล่มนี้จึงมุ่งเน้นอธิบายให้เข้าใจหลักการของ OPP ก่อน คุณจะรู้สึกได้ว่าการเขียนโปรแกรมด้วยภาษาจาวาไม่ใช่เรื่องยากเลยแม้แต่นิดเดียว', '1000203773_front_XXL.jpg', 'Unknown', 'Available', 499.00, 1),
+(31, 6, '111118', 'JAVA III', 'JAVA III', 'book_detail_large.gif', 'Unknown', 'Available', 149.00, 48),
+(32, 2, '111119', 'CALCULUS', 'Application-oriented introduction relates the subject as closely as possible to science. In-depth explorations of the derivative, the differentiation and integration of the powers of x, and theorems on differentiation and antidifferentiation lead to a def', 'images.jpg', 'Unknown', 'Available', 590.00, 0),
+(33, 7, '111120', 'PYTHON TH', 'Python', 'images.png', 'Unknown', 'Available', 1290.00, 57),
+(38, 6, 'a', 'a', 'a', '9786162044632l.jpg', 'a', 'Available', 129.00, 7);
 
 -- --------------------------------------------------------
 
@@ -147,6 +147,51 @@ INSERT INTO `tb_history` (`id`, `user_id`, `book_id`, `borrow_history_date`, `re
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tb_order`
+--
+
+CREATE TABLE `tb_order` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `order_date` datetime DEFAULT current_timestamp(),
+  `total_amount` decimal(11,2) NOT NULL,
+  `status` varchar(50) DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tb_order`
+--
+
+INSERT INTO `tb_order` (`id`, `user_id`, `order_date`, `total_amount`, `status`) VALUES
+(18, 1, '2024-10-28 18:53:04', 349.00, 'Completed');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tb_order_items`
+--
+
+CREATE TABLE `tb_order_items` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(11,2) NOT NULL,
+  `total_price` decimal(11,2) GENERATED ALWAYS AS (`quantity` * `unit_price`) STORED
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tb_order_items`
+--
+
+INSERT INTO `tb_order_items` (`id`, `order_id`, `book_id`, `quantity`, `unit_price`) VALUES
+(23, 18, 28, 1, 349.00),
+(24, 18, 27, 1, 0.00),
+(25, 18, 28, 1, 0.00);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tb_promotion`
 --
 
@@ -169,7 +214,8 @@ CREATE TABLE `tb_promotion` (
 
 INSERT INTO `tb_promotion` (`id`, `name`, `detail`, `type`, `startdate`, `enddate`, `quantity`, `coupon_code`, `discount`, `book_id`) VALUES
 (2, 'DISCOUNT10% FOR 1 MONTH', 'DISCOUNT10% FOR 1 MONTH FOR FIRST CUSTOMER', 'discount', '2024-10-01', '2024-10-31', 5, 'FIRST10', 10.00, 0),
-(4, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-10-31', 9, 'PYTHONFR', 0.00, 27);
+(4, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-10-31', 4, 'PYTHONFR', 0.00, 27),
+(5, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-10-31', 5, 'PYTHONFR', 0.00, 28);
 
 -- --------------------------------------------------------
 
@@ -253,6 +299,19 @@ ALTER TABLE `tb_history`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `tb_order`
+--
+ALTER TABLE `tb_order`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `tb_order_items`
+--
+ALTER TABLE `tb_order_items`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `tb_promotion`
 --
 ALTER TABLE `tb_promotion`
@@ -299,10 +358,22 @@ ALTER TABLE `tb_history`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
+-- AUTO_INCREMENT for table `tb_order`
+--
+ALTER TABLE `tb_order`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT for table `tb_order_items`
+--
+ALTER TABLE `tb_order_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+
+--
 -- AUTO_INCREMENT for table `tb_promotion`
 --
 ALTER TABLE `tb_promotion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `tb_reserve`
@@ -315,6 +386,16 @@ ALTER TABLE `tb_reserve`
 --
 ALTER TABLE `tb_user`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `tb_order`
+--
+ALTER TABLE `tb_order`
+  ADD CONSTRAINT `tb_order_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tb_user` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
