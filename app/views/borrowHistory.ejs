@@ -1,17 +1,18 @@
 <%- include('header') %>
 
     <%- include('navbar') %>
-
+<div >
         <main class="card ms-3 me-3 mt-3 bg-white shadow" style="height: 100%;">
             <div class="card-body">
-                <div class="card-title fs-3 m-2"> <span class="special-elite-regular text-success">Borrow Book
+                <div class="card-title fs-3 m-2 d-flex justify-content-between"> <span class="special-elite-regular text-success">Borrow Book
                         History</span>
-                    <span class="float-end">
+                    <span>
                         <a class="btn btn-danger" href="/deleteborrowHistory"
                             onclick="return confirm('Are you sure to Clear All History?')">CLEAR ALL BORROW
                             HISTORY</a></span>
                 </div>
-                <table class="table">
+                <div class="table-responsive">
+                <table class="table table-hover">
                     <thead class="text-dark">
                         <tr class="text-success">
                             <th width="90px" scope="col"></th>
@@ -61,7 +62,8 @@
                                     <% } %>
                     </tbody>
                 </table>
+                </div>
             </div>
         </main>
-
+</div>
         <%- include('footer') %>

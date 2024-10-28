@@ -1,5 +1,6 @@
 require("dotenv").config();
 let express = require("express");
+let bodyParser = require("body-parser");
 let router = express.Router();
 let conn = require("./connect");
 let jwt = require("jsonwebtoken");
@@ -1269,38 +1270,18 @@ router.post("/create-checkout-session", async (req, res) => {
            },
            quantity: 1,
          });
-
-         // Update the stock of the free book
-         await conn.query("UPDATE tb_book SET stock = stock - 1 WHERE id = ?", [
-           promotion.book_id,
-         ]);
-
-         // Decrease the quantity of the promotion
-         await conn.query(
-           "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
-           [promotion.id]
-         );
        } else {
          req.flash("error", "Free book is not available");
          return res.redirect("/cart");
        }
      }
-
-     // Decrease the promotion quantity for discount type promotions
-     if (promotion && promotion.type === "discount") {
-       await conn.query(
-         "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
-         [promotion.id]
-       );
-     }
-
     // Create a PaymentIntent to handle multiple payment methods
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "promptpay"], // Enable both Card and PromptPay
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.protocol}://${req.get("host")}/success`,
-      cancel_url: `${req.protocol}://${req.get("host")}/cancel`,
+      success_url: `${req.protocol}://${req.get("host")}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.protocol}://${req.get("host")}/cancel?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     // Redirect to the checkout page
@@ -1312,31 +1293,314 @@ router.post("/create-checkout-session", async (req, res) => {
 });
 
 
+router.post("/webhook", bodyParser.raw({ type: "application/json" }),async (req, res) => {
+    const endpointSecret ="whsec_5b9383c1baabb5923e55a9740dc4949ab44b14f5a25da5f5038c5fe63fbb9e09"; // You get this from the Stripe Dashboard when setting up the webhook
+    const sig = req.headers["stripe-signature"];
+    let event;
+
+    try {
+      // Verify the event came from Stripe
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err) {
+      console.error(`Webhook signature verification failed.`, err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the different event types
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      // Handle successful checkout session completion
+      console.log("Payment successful:", session);
+      // You might want to update your database or send a confirmation email here
+    } else if (event.type === "payment_intent.payment_failed") {
+      const paymentIntent = event.data.object;
+      console.log("Payment failed:", paymentIntent);
+      // Handle failed payment (e.g., notify the user, revert inventory, etc.)
+    }
+
+    // Return a 200 status to acknowledge receipt of the event
+    res.sendStatus(200);
+  }
+);
 
 
 router.get("/success", async (req, res) => {
-  const conn = require("./connect2");
-  const cart = req.session.cart || [];
   try {
-    for (const { bookId, quantity } of cart) {
-      await conn.query(
-        "UPDATE tb_book SET stock = stock - ? WHERE id = ? AND stock >= ?",
-        [quantity, bookId, quantity]
+    const conn = require("./connect2");
+    const sessionId = req.query.session_id;
+    const cart = req.session.cart || [];
+
+    const bookIds = cart.map((item) => item.bookId);
+    const [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [bookIds,]);
+
+    const bookPriceMap = books.reduce((acc, book) => {
+        acc[book.id] = parseFloat(book.price);
+        return acc;
+      }, {});
+
+    if (!sessionId) {
+        return res.redirect("/cancel");
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    
+
+    if (session.payment_status === "paid") {
+      const { couponCode } = req.session;
+    
+
+      const [orderResult] = await conn.query(
+        "INSERT INTO tb_order (user_id, order_date, total_amount, status) VALUES (?, NOW(), ?, ?)",
+        [res.locals.user.id, session.amount_total / 100, "Completed"]
       );
+
+      const orderId = orderResult.insertId;
+
+      for (const { bookId, quantity } of cart) {
+        const unitPrice = bookPriceMap[bookId];
+        await conn.query(
+          "INSERT INTO tb_order_items (order_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
+          [orderId, bookId, quantity, unitPrice]
+        );
+      }
+
+      for (const { bookId, quantity } of cart) {
+        await conn.query(
+          "UPDATE tb_book SET stock = stock - ? WHERE id = ? AND stock >= ?",
+          [quantity, bookId, quantity]
+        );
+      }
+
+      if (couponCode) {
+        const [promotionResults] = await conn.query(
+          "SELECT * FROM tb_promotion WHERE coupon_code = ?",
+          [couponCode]
+        );
+        if (promotionResults.length > 0) {
+          const promotion = promotionResults[0];
+
+          if (promotion.type === "discount" || promotion.type === "free_book") {
+            await conn.query(
+              "UPDATE tb_promotion SET quantity = quantity - 1 WHERE id = ?",
+              [promotion.id]
+            );
+          }
+        }
+      }
+
       req.session.cart = [];
       req.session.totalQuantity = 0;
       res.render("success");
+    } else {
+      res.redirect("/cancel");
     }
   } catch (error) {
-    console.log("Error updating stock: ", error);
-    res.status(500).send("An error occurred during stock update.");
+    console.error("Error finalizing order:", error);
+    res.status(500).send("An error occurred while finalizing the order.");
   }
 });
 
-router.get("/cancel", (req, res) => {
-  req.session.cart = [];
-  req.session.totalQuantity = 0;
-  res.render("cancel");
+router.get("/cancel", async (req, res) => {
+
+   try {
+     const conn = require("./connect2");
+     const sessionId = req.query.session_id;
+     const cart = req.session.cart || [];
+     
+    const bookIds = cart.map((item) => item.bookId);
+    const [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [
+      bookIds,
+    ]);
+
+    const bookPriceMap = books.reduce((acc, book) => {
+      acc[book.id] = parseFloat(book.price);
+      return acc;
+    }, {});
+
+     if (!sessionId) {
+           return res.redirect("/cancel");
+     }
+     const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+     if (session.payment_status === "unpaid") {
+      const [orderResult] = await conn.query(
+        "INSERT INTO tb_order (user_id, order_date, total_amount, status) VALUES (?, NOW(), ?, ?)",
+        [res.locals.user.id, session.amount_total / 100, "Failed"]
+      );
+       
+       const orderId = orderResult.insertId;
+       
+       for (const { bookId, quantity } of cart) {
+         const unitPrice = bookPriceMap[bookId];
+         
+         await conn.query(
+           "INSERT INTO tb_order_items (order_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
+           [orderId, bookId, quantity, unitPrice]
+         );
+       }
+     }
+     req.session.cart = [];
+     req.session.totalQuantity = 0;
+     res.render("cancel");
+   } catch (error) {
+     console.error("Error finalizing order:", error);
+     res.status(500).send("An error occurred while finalizing the order.");
+   }
 });
+
+router.get("/orderhistory", async (req, res) => {
+  try {
+    const conn = require("./connect2");
+
+    const { day, month, year } = req.query;
+    
+    let query = `
+      SELECT o.*, u.id AS user_id, u.name AS user_name 
+      FROM tb_order AS o
+      LEFT JOIN tb_user AS u ON o.user_id = u.id
+    `;
+
+    const conditions = [];
+    const values = [];
+
+    if (day) {
+      conditions.push("DAY(o.order_date) = ?");
+      values.push(day);
+    }
+    if (month) {
+      conditions.push("MONTH(o.order_date) = ?");
+      values.push(month);
+    }
+    if (year) {
+      conditions.push("YEAR(o.order_date) = ?");
+      values.push(year);
+    }
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY o.order_date ASC";
+
+    // Query to get all orders for the user
+    const [orders] = await conn.query(query, values);
+
+        if (orders.length === 0) {
+          return res.render("orderhistory", {
+            orders: [],
+            query: req.query,
+            message: "No orders found for the selected date range.",
+          });
+        }
+
+    // Query to get all order items for the user's orders
+    const orderIds = orders.map((order) => order.id);
+    const [orderItems] = await conn.query(
+      "SELECT oi.order_id, oi.book_id, oi.quantity, oi.unit_price, b.book_name, b.img \
+       FROM tb_order_items AS oi \
+       LEFT JOIN tb_book AS b ON oi.book_id = b.id \
+       WHERE oi.order_id IN (?)",
+      [orderIds]
+    );
+
+    // Organize order items under their respective orders
+    const orderMap = orders.map((order) => {
+      return {
+        ...order,
+        items: orderItems.filter((item) => item.order_id === order.id),
+      };
+    });
+    console.log(JSON.stringify(orderMap, null, 2));
+    // Render the order history page with organized data
+    res.render("orderhistory", { orders: orderMap, query: req.query });
+  } catch (error) {
+    console.error("Error fetching order history:", error);
+    res.status(500).send("An error occurred while fetching order history.");
+  }
+});
+
+router.get("/orderhistoryadmin", async (req, res) => {
+  try {
+    const conn = require("./connect2");
+
+    // Get date filters from query parameters
+    const { day, month, year, user_id } = req.query;
+
+    // Construct the base query for orders
+    let query = `
+      SELECT o.*, u.id AS user_id, u.name AS user_name 
+      FROM tb_order AS o
+      LEFT JOIN tb_user AS u ON o.user_id = u.id
+    `;
+
+    const conditions = [];
+    const values = [];
+
+    if (day) {
+      conditions.push("DAY(o.order_date) = ?");
+      values.push(day);
+    }
+    if (month) {
+      conditions.push("MONTH(o.order_date) = ?");
+      values.push(month);
+    }
+    if (year) {
+      conditions.push("YEAR(o.order_date) = ?");
+      values.push(year);
+    }
+    if (user_id) {
+      conditions.push("u.id = ?");
+      values.push(user_id);
+    }
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY o.order_date ASC";
+
+    const [orders] = await conn.query(query, values);
+
+    if (orders.length === 0) {
+      return res.render("orderhistoryadmin", {
+        orders: [],
+        query: req.query,
+        message: "No orders found for the selected date range.",
+      });
+    }
+
+    // Fetch items for all orders at once using the `order_id`
+    const orderIds = orders.map((order) => order.id);
+    const [orderItems] = await conn.query(
+      `SELECT oi.order_id, oi.book_id, oi.quantity, oi.unit_price, b.book_name, b.img 
+       FROM tb_order_items AS oi
+       LEFT JOIN tb_book AS b ON oi.book_id = b.id
+       WHERE oi.order_id IN (?)`,
+      [orderIds]
+    );
+
+    // Organize order items under their respective orders
+    const orderMap = orders.map((order) => {
+      return {
+        ...order,
+        items: orderItems.filter((item) => item.order_id === order.id),
+      };
+    });
+
+    console.log(JSON.stringify(orderMap, null, 2));
+    res.render("orderhistoryadmin", {
+      orders: orderMap,
+      query: req.query,
+      message: null,
+    });
+  } catch (error) {
+    console.error("Error fetching all orders for admin:", error);
+    res.status(500).send("An error occurred while fetching all orders.");
+  }
+});
+
+
+
+
+
 
 module.exports = router;

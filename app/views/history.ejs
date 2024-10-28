@@ -20,10 +20,11 @@
                         </select>
                     </div>
                 </form>
-                <table id="allHistory" class="table" style="display: block;">
+                <div class="table-responsive">
+                <table id="allHistory" class="table table-hover" style="display: block;">
                     <thead class="text-dark">
                         <tr class="text-success">
-                            <th width="200px" scope="col"></th>
+                            <th width="240px" scope="col"></th>
                             <th scope="col" style="width: 150px;">Book</th>
                             <th width="300px" scope="col">Book name</th>
                             <th width="170px" scope="col">Real-time Status</th>
@@ -92,8 +93,9 @@
                                             <% } %>
                     </tbody>
                 </table>
-
-                <table id="borrowHistory" class="table" style="display: none;">
+                </div>
+                <div class="table-responsive">
+                <table id="borrowHistory" class="table table-hover" style="display: none;">
                     <thead class="text-dark">
                         <tr>
                             <th width="250px" scope="col"></th>
@@ -145,8 +147,9 @@
 
                     </tbody>
                 </table>
-
-                <table id="reserveHistory" class="table" style="display: none;">
+                </div>
+                <div class="table-responsive">
+                <table id="reserveHistory" class="table table-hover" style="display: none;">
                     <thead class="text-dark">
                         <tr>
                             <th width="250px" scope="col"></th>
@@ -202,7 +205,7 @@
 
                     </tbody>
                 </table>
-
+                </div>
 
             </div>
         </main>

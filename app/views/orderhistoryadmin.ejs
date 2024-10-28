@@ -1,0 +1,106 @@
+<%- include('header') %>
+<%- include('navbar') %>
+
+<main class="card ms-3 me-3 mt-3 bg-white shadow" style="height: 100%;">
+  <div class="card-body">
+    <h2 class="mt-2 ms-2">Order History</h2>
+
+    <!-- Filter Form -->
+<!-- Filter Form -->
+<form method="get" action="/orderhistoryadmin" class="row g-3 mb-3">
+    <div class="col-md-2">
+    <label for="user_id" class="form-label">User ID</label>
+    <input type="number" id="user_id" name="user_id" class="form-control w-75" value="<%= query.user_id || '' %>">
+  </div>  
+  <div class="col-md-2">
+    <label for="day" class="form-label">Day</label>
+    <input type="number" id="day" name="day" class="form-control w-75" min="1" max="31" value="<%= query.day || '' %>">
+  </div>
+  <div class="col-md-2">
+    <label for="month" class="form-label">Month</label>
+    <input type="number" id="month" name="month" class="form-control w-75" min="1" max="12" value="<%= query.month || '' %>">
+  </div>
+  <div class="col-md-2">
+    <label for="year" class="form-label">Year</label>
+    <input type="number" id="year" name="year" class="form-control w-75" min="1900" max="2100" value="<%= query.year || '' %>">
+  </div>
+  <div class="col-md-2 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-25">Filter</button>
+  </div>
+</form>
+
+
+    <!-- Display message if no orders found -->
+    <% if (message) { %>
+      <div class="alert alert-warning"><%= message %></div>
+    <% } %>
+
+    <!-- Order History Table -->
+    <div class="table-responsive">
+      <table id="orderHistory" class="table table-hover">
+        <thead class="text-dark">
+          <tr class="text-success">
+            <th>Order ID</th>
+            <th>User ID</th>
+            <th>User Name</th>
+            <th>Order Date</th>
+            <th>Status</th>
+            <th>Total Amount</th>
+            <th>Items</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (orders && orders.length > 0) { %>
+            <% orders.forEach(order => { %>
+              <tr>
+                <td><%= order.id %></td>
+                <td><%= order.user_id %></td>
+                <td><%= order.user_name %></td>
+                <td><%= new Date(order.order_date).toLocaleString() %></td>
+                <td><%= order.status %></td>
+                <td>THB <%= order.total_amount %></td>
+                <td>
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th width="300px">Book</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    <% if (order.items && order.items.length > 0) { %>    
+                      <% order.items.forEach(item => { %>
+                        <tr>
+                          <td >
+                            <img src="/images/books/<%= item.img %>" width="50px" class="rounded shadow-sm border border-2 border-white me-2">
+                            <%= item.book_name %>
+                          </td>
+                          <td><%= item.quantity %></td>
+                          <td>THB <%= item.unit_price %></td>
+                          <td>THB <%= item.quantity * item.unit_price %></td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4" class="text-center">No items found in the order.</td>
+                        </tr>
+                    <% } %>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="7">No order history available</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<%- include('footer') %>
