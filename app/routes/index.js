@@ -592,7 +592,7 @@ router.get("/book", (req, res) => {
 
   conn.query(sql, sqlParams, (err, result) => {
     if (err) throw err;
-
+    
     //ส่งผลลัพธ์ไปที่หน้า "book" พร้อมกับข้อมูลกลุ่มหนังสือทั้งหมด
     res.render("book", { books: result });
   });
@@ -1509,7 +1509,7 @@ router.get("/orderhistory", async (req, res) => {
       query += " WHERE " + conditions.join(" AND ");
     }
 
-    query += " ORDER BY o.order_date ASC";
+    query += " ORDER BY o.order_date DESC";
 
     // Query to get all orders for the user
     const [orders] = await conn.query(query, values);
@@ -1585,7 +1585,7 @@ router.get("/orderhistoryadmin", async (req, res) => {
       query += " WHERE " + conditions.join(" AND ");
     }
 
-    query += " ORDER BY o.order_date ASC";
+    query += " ORDER BY o.order_date DESC";
 
     const [orders] = await conn.query(query, values);
 

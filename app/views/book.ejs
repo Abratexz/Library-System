@@ -37,8 +37,8 @@
                                         <th WIDTH="150px">Author</th>
                                         <th>Book Name</th>
                                         <th WIDTH="450px" >Book Detail</th>
-                                        <th>Book InStock</th>
                                         <th>Book Price</th>
+                                        <th>Book InStock</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -67,7 +67,7 @@
                                                 <%= book.detail %>
                                             </td>
                                             <td>
-                                                <%= book.price %>
+                                                <%= book.price.toFixed(2) %>
                                             </td>
                                             <td>
                                                 <%= book.stock %>
