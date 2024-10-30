@@ -1649,12 +1649,6 @@ router.get("/addPromotion", (req, res) => {
 });
 
 router.post("/addPromotion", (req, res) => {
-  let discount = req.body.discount;
-  let book_id = req.body.book_id;
-  if (discount && book_id) {
-    req.flash("error", "Only one of Discount or FreeBook ID can be provided.");
-    return res.redirect("/addPromotion");
-  }
   let sql = "INSERT INTO tb_promotion SET ?";
   let params = req.body;
   conn.query(sql, params, (err, result) => {
@@ -1679,12 +1673,6 @@ router.get("/editPromotion/:id", (req, res) => {
 
 
 router.post("/editPromotion/:id", (req, res) => {
-  let discount = req.body.discount;
-  let book_id = req.body.book_id;
-  if (discount && book_id) {
-    req.flash("error", "Only one of Discount or FreeBook ID can be provided.");
-    return res.redirect(`/editPromotion/${req.params.id}`);
-  }
   let sql =
     "UPDATE tb_promotion SET ? WHERE id = ?";
     
