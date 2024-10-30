@@ -1240,8 +1240,8 @@ router.post("/create-checkout-session", async (req, res) => {
       let unitAmount = Math.round(parseFloat(book.price) * 100);
 
       // Apply discount if promotion is valid and is a discount type
-      if (promotion && promotion.type === "discount") {
-        unitAmount = Math.round(unitAmount - unitAmount * (promotion.discount / 100));
+      if (promotion[0] && promotion[0].type === "discount") {
+        unitAmount = Math.round(unitAmount - unitAmount * (promotion[0].discount / 100));
         totalDiscount += (parseFloat(book.price) - unitAmount / 100) * cartItem.quantity;
       }
       return {
