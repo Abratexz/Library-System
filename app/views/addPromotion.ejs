@@ -1,0 +1,82 @@
+<%- include('header') %>
+<%- include('navbar') %>
+<%- include('messages') %>
+<div class="container mt-5">
+    <form method="post">
+        <div class="card shadow">
+            <div class="card-body fs-5">
+                <div class="">
+                    <label class="form-label">Promotion Name</label>
+                    <input type="text" class="form-control" name="name" value="<%= promotions.name %>" required>
+                </div>
+                <div class="">
+                    <label class="form-label mt-3">Detailed</label>
+                    <input type="text" class="form-control" name="detail" value="<%= promotions.detail %>" required>
+                </div>
+                <div class="">
+                    <label class="form-label mt-3">Type of Coupon</label>
+                    <select class="form-control" id="couponType" name="type" required onchange="toggleFields()">
+                        <option value="" disabled selected>Select coupon type</option>
+                        <option value="discount" <%= promotions.type === 'discount' ? 'selected' : '' %>>Discount</option>
+                        <option value="free_book" <%= promotions.type === 'free_book' ? 'selected' : '' %>>Free Book</option>
+                    </select>
+                </div>
+                <div class="">
+                    <label class="form-label mt-3">Start Date</label>
+                    <input type="date" class="form-control" name="startdate" value="<%= promotions.startdate ? new Date(promotions.startdate).toISOString().split('T')[0] : '' %>" required>
+                </div>
+                <div class="">
+                    <label class="form-label mt-3">End Date</label>
+                    <input type="date" class="form-control" name="enddate" value="<%= promotions.enddate ? new Date(promotions.enddate).toISOString().split('T')[0] : '' %>" required>
+                </div>
+                <div class="">
+                    <label class="form-label mt-3">Quantity of Coupon:</label>
+                    <input type="text" class="form-control" name="quantity" value="<%= promotions.quantity %>" placeholder="Ex. 0-9999" required>
+                </div>
+                <div class="">
+                    <label class="form-label mt-3">Code of Coupon:</label>
+                    <input type="text" class="form-control" name="coupon_code" value="<%= promotions.coupon_code %>" placeholder="Ex. CODE12" required>
+                </div>
+                <div class="" id="discountField" style="display: none;">
+                    <label class="form-label mt-3">Discount (e.g., "20 for 20%"):</label>
+                    <input type="text" class="form-control" pattern="^(100|[1-9][0-9]?)$" title="Please enter a number between 1 and 100" name="discount" value="<%= promotions.discount || '' %>">
+                </div>
+                <div class="" id="freeBookField" style="display: none;">
+                    <label class="form-label mt-3">FreeBook ID :</label>
+                    <input type="text" class="form-control" name="book_id" value="<%= promotions.book_id || '' %>">
+                </div>
+                <div class="text-end">
+                    <a type="button" class="btn btn-md btn-neutral mt-3 me-2" href="/promotion">Cancel</a>
+                    <button type="submit" class="btn btn-md btn-primary mt-3" onclick="return confirm('Confirm ?')">Save</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    // JavaScript function to toggle visibility based on coupon type selection
+    function toggleFields() {
+        const couponType = document.getElementById("couponType").value;
+        const discountField = document.getElementById("discountField");
+        const freeBookField = document.getElementById("freeBookField");
+
+        if (couponType === "discount") {
+            discountField.style.display = "block";
+            freeBookField.style.display = "none";
+            freeBookField.querySelector('input').value = ""; // Clear FreeBook ID if Discount is selected
+        } else if (couponType === "free_book") {
+            discountField.style.display = "none";
+            freeBookField.style.display = "block";
+            discountField.querySelector('input').value = ""; // Clear Discount if FreeBook is selected
+        } else {
+            discountField.style.display = "none";
+            freeBookField.style.display = "none";
+        }
+    }
+
+    // Call the function on page load to set initial state based on selected type
+    toggleFields();
+</script>
+
+<%- include('footer') %>
+

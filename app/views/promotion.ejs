@@ -1,0 +1,75 @@
+<%- include('header') %>
+    <%- include('navbar') %>
+    <%- include('messages') %>  
+        <div class="card mt-3 shadow ms-3 me-3">
+            <div class="card-body">
+                <div class="card-title fs-3 special-elite-regular text-success">User</div>
+                <a class="btn btn-outline-primary mt-3 " href="/addPromotion">+Add</a>
+                <div class="table-responsive">
+                <table class="table table-hover mt-3">
+                    <thead>
+                        <tr class="text-success">
+                            <th width="170px"></th>
+                            <th width="">ID</th>
+                            <th>Name</th>
+                            <th width="">Detail</th>
+                            <th width="">Type</th>
+                            <th>Start Date</th>
+                            <th width="">End Date</th>
+                            <th width="">Quantity</th>
+                            <th>Coupon Code</th>
+                            <th width="">Discount</th>
+                            <th width="">FreeBook ID</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <% promotions.forEach((promotion)=> { %>
+                                <td>
+                                    <a class="btn btn-primary" href="/editPromotion/<%= promotion.id %>">Edit</a>
+                                    <a class="btn btn-danger" href="/deletePromotion/<%= promotion.id %>"
+                                        onclick="return confirm('Are you sure to delete ?')">Delete</a>
+                                </td>
+                                <td>
+                                    <%= promotion.id %>
+                                </td>
+                                <td>
+                                    <%= promotion.name %>
+                                </td>
+                                <td>
+                                    <%= promotion.detail %>
+                                </td>
+                                <td>
+                                    <%= promotion.type %>
+                                </td>
+                                <td>
+                                    <%= new Date(promotion.startdate).toLocaleString() %>
+                                </td>
+                                <td>
+                                    <%= new Date(promotion.enddate).toLocaleString() %>
+                                </td>
+                                <td>
+                                    <%= promotion.quantity %>
+                                </td>
+                                <td>
+                                    <%= promotion.coupon_code %>
+                                </td>
+                                <td>
+                                    <%= promotion.discount %>
+                                </td>
+                                <td>
+                                    <% if (promotion.book_id != null) { %>
+                                        <%= promotion.book_id %>
+                                    <% } else { %>
+                                        No free book
+                                    <% } %>
+                                </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        <%- include('footer') %>

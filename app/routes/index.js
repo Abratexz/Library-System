@@ -1628,7 +1628,84 @@ router.get("/orderhistoryadmin", async (req, res) => {
 });
 
 
+router.get("/promotion", (req, res) => {
+  let sql =
+    "SELECT tb_promotion.* FROM tb_promotion " +
+    "LEFT JOIN tb_book ON tb_book.id = tb_promotion.book_id " +
+    "ORDER BY tb_promotion.id DESC"; 
 
+
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+
+    //ส่งผลลัพธ์ไปที่หน้า "book" พร้อมกับข้อมูลกลุ่มหนังสือทั้งหมด
+    res.render("promotion", { promotions: result });
+  });
+});
+
+
+router.get("/addPromotion", (req, res) => {
+  res.render("addPromotion", { promotions: {} });
+});
+
+router.post("/addPromotion", (req, res) => {
+  let discount = req.body.discount;
+  let book_id = req.body.book_id;
+  if (discount && book_id) {
+    req.flash("error", "Only one of Discount or FreeBook ID can be provided.");
+    return res.redirect("/addPromotion");
+  }
+  let sql = "INSERT INTO tb_promotion SET ?";
+  let params = req.body;
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/promotion");
+  });
+});
+
+
+
+router.get("/editPromotion/:id", (req, res) => {
+  let sql = "SELECT * FROM tb_promotion WHERE id = ?";
+  let params = req.params.id;
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    
+    //ส่งข้อมูลผู้ใช้ที่ดึงมาและข้อมูลกลุ่มหนังสือไปที่ "addUser" เพื่อให้ผู้ใช้ทำการแก้ไขข้อมูล
+    res.render("addPromotion", { promotions: result[0] });
+  });
+});
+
+
+
+router.post("/editPromotion/:id", (req, res) => {
+  let discount = req.body.discount;
+  let book_id = req.body.book_id;
+  if (discount && book_id) {
+    req.flash("error", "Only one of Discount or FreeBook ID can be provided.");
+    return res.redirect(`/editPromotion/${req.params.id}`);
+  }
+  let sql =
+    "UPDATE tb_promotion SET ? WHERE id = ?";
+    
+ let params = [req.body, req.params.id];
+  conn.query(sql, params, (err, result) => {
+    console.log(result);
+    if (err) throw err;
+    res.redirect("/promotion");
+  });
+});
+
+//ลบข้อมูลผู้ใช้ใน database โดยใช้ id ที่ระบุในพารามิเตอร์ของ URL และแสดงผลหน้า user
+router.get("/deletePromotion/:id", (req, res) => {
+  let sql = "DELETE FROM tb_promotion WHERE id = ?";
+  let params = req.params.id;
+
+  conn.query(sql, params, (err, result) => {
+    if (err) throw err;
+    res.redirect("/promotion");
+  });
+});
 
 
 
