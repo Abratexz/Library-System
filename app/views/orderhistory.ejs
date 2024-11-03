@@ -19,7 +19,7 @@
     <input type="number" id="year" name="year" class="form-control" min="1900" max="2100" value="<%= query.year || '' %>">
   </div>
   <div class="col-md-3 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary w-25">Filter</button>
+    <button type="submit" class="btn btn-primary w-75">Filter</button>
   </div>
 </form>
 
@@ -57,7 +57,7 @@
                       <% order.items.forEach(item => { %>
                         <tr>
                           <td>
-                            <img src="/images/books/<%= item.img %>" width="50px" class="rounded shadow-sm border border-2 border-white me-2">
+                            <img src="/images/books/<%= item.img %>" width="50px" class="rounded shadow-sm border border-2 border-white me-2 img-fluid">
                             <%= item.book_name %>
                           </td>
                           <td><%= item.quantity %></td>

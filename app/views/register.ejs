@@ -17,9 +17,10 @@
 
                         <div class="form-group" style="margin-top: 20px;">
                             <label class="text-success">Username</label>
-                            <input type="text" name="usr" class="form-control rounded-pill padding-left"
+                            <input type="text" id="username" name="usr" class="form-control rounded-pill padding-left"
                                 style="margin-top: 10px;" placeholder="Enter Username" required 
-                                pattern="[A-Za-z0-9_]{5,15}" title="Username should be 5-15 characters long and contain only letters, numbers, or underscores.">
+                                pattern="[A-Za-z0-9_]{5,15}" title="Username should be 5-15 characters long and contain only letters(A-Za-z), numbers(0-9), or underscores(_).">
+                                <span id="username-feedback" style="font-size: 0.9em; margin-top: 5px;"></span>
                         </div>
 
                         <div class="form-group" style="margin-top: 20px;">
@@ -56,9 +57,8 @@
             </div>
         </div>
 <script>
-  // Automatically add hyphens for phone number format: xxx-xxx-xxxx
   function formatPhone(input) {
-    const value = input.value.replace(/\D/g, ''); // Remove any non-digit characters
+    const value = input.value.replace(/\D/g, ''); 
     let formatted = '';
     
     if (value.length > 3) {
@@ -76,13 +76,9 @@
     
     input.value = formatted;
   }
-
-  // Automatically add hyphens for citizen ID format: x-xxxx-xxxxx-xx-x
 function formatCitizenID(input) {
-    // Remove any non-digit characters
     const value = input.value.replace(/\D/g, '');
     let formatted = '';
-
     // Build the formatted string according to the pattern x-xxxx-xxxxx-xx-x
     if (value.length > 0) {
         formatted += value.substring(0, 1); // First digit
@@ -104,6 +100,36 @@ function formatCitizenID(input) {
     input.value = formatted;
 }
 
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const usernameInput = document.querySelector('#username');
+    const feedbackElement = document.querySelector('#username-feedback');
+
+    usernameInput.addEventListener('input', function() {
+      const username = usernameInput.value;
+
+      if (username.length > 2) {  // Start checking after 3 characters
+        fetch(`/check-username?usr=${encodeURIComponent(username)}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.available) {
+              feedbackElement.textContent = 'Username available!';
+              feedbackElement.style.color = 'green';
+            } else {
+              feedbackElement.textContent = 'Username already taken!';
+              feedbackElement.style.color = 'red';
+            }
+          })
+          .catch(error => {
+            feedbackElement.textContent = 'Error checking username';
+            feedbackElement.style.color = 'orange';
+          });
+      } else {
+        feedbackElement.textContent = '';  // Clear feedback for short usernames
+      }
+    });
+  });
 </script>
 
 

@@ -49,3 +49,10 @@
   color: white;
 }
 
+
+@media (max-width: 600px) {
+  .custom-search-bar {
+    width: 100%;
+    padding-left: 10px;
+  }
+}

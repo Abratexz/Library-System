@@ -48,13 +48,13 @@ router.use((req, res, next) => {
   next();
 });
 
-const cartMiddleware = (req, res, next) => {
+const cartService = (req, res, next) => {
   const cartItems = req.session.cart || [];
   res.locals.cartCount = cartItems.length;
-  res.locals.cart = cartItems; // Optional: Store the cart itself if needed
+  res.locals.cart = cartItems; 
   next();
 };
-router.use(cartMiddleware);
+router.use(cartService);
 
 /*Function fetchGroupBooks ทำหน้าที่ดึงข้อมูลกลุ่มหนังสือจาก database เพื่อส่งข้อมูลให้ router อื่นใช้ 
 เพราะว่า ทุก page ที่มี Navbar มี Function Search และ Function Search ต้องการใช้ข้อมูลของกลุ่มหนังสือจึงต้องทำการสร้าง method นี้ไว้เพื่อให้ใช้งานใน Route อื่นๆ
@@ -88,6 +88,7 @@ router.use((req, res, next) => {
       "/forgotPassword",
       "/passwordReset",
       "/passwordResetLink",
+      "/check-username",
     ].some((route) => req.path.startsWith(route))
   ) {
     return next(); // Skip authentication for these routes
@@ -121,6 +122,23 @@ router.get("/", function (req, res, next) {
 การค้นหา การคัดข้อมูลหนังสือเพื่อนำมาเเสดงที่หน้า home
 
 */
+
+
+router.get('/check-username', (req, res) => {
+  const username = req.query.usr;
+
+  const sql = "SELECT * FROM tb_user WHERE usr = ?";
+  conn.query(sql, [username], (err, result) => {
+    if (err) throw err;
+    
+    if (result.length > 0) {
+
+      res.json({ available: false });
+    } else {
+      res.json({ available: true });
+    }
+  });
+});
 
 router.get("/home", async (req, res) => {
   try {
@@ -1074,7 +1092,7 @@ router.get("/deleteReserveHistory", (req, res) => {
     res.redirect("/reserveHistory");
   });
 });
-//isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
+
 //ลบข้อมูลรายการจองหนังสือที่มี id ที่ระบุจากพารามิเตอร์ url และแสดงผลหน้า "reserveHistory"
 router.get("/deleteReserveHistory/:id", (req, res) => {
   let sql = "DELETE FROM tb_reserve WHERE id = ?";

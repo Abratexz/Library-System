@@ -5,9 +5,9 @@
   <div class="card-body">
     <h2 class="mt-2 ms-2">Order History</h2>
 
-    <!-- Filter Form -->
+    <!-- Filter Form col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 -->
 <!-- Filter Form -->
-<form method="get" action="/orderhistoryadmin" class="row g-3 mb-3">
+<form method="get" action="/orderhistoryadmin" class="row mb-3">
     <div class="col-md-2">
     <label for="user_id" class="form-label">User ID</label>
     <input type="number" id="user_id" name="user_id" class="form-control w-75" value="<%= query.user_id || '' %>">
@@ -25,7 +25,7 @@
     <input type="number" id="year" name="year" class="form-control w-75" min="1900" max="2100" value="<%= query.year || '' %>">
   </div>
   <div class="col-md-2 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary w-25">Filter</button>
+    <button type="submit" class="btn btn-primary w-75">Filter</button>
   </div>
 </form>
 
@@ -74,7 +74,7 @@
                       <% order.items.forEach(item => { %>
                         <tr>
                           <td >
-                            <img src="/images/books/<%= item.img %>" width="50px" class="rounded shadow-sm border border-2 border-white me-2">
+                            <img src="/images/books/<%= item.img %>" width="50px" class="rounded shadow-sm border border-2 border-white me-2 img-fluid">
                             <%= item.book_name %>
                           </td>
                           <td><%= item.quantity %></td>
