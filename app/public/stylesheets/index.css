@@ -11,7 +11,22 @@
 }
 
 /* Main Home Page CSS Code*/
+/* Attribute*/
+h2[title="login"] {
+  color: black;
+  font-size: 30px;
+}
+/* Type Selector*/
+h2 {
+  color: green;
+  font-size: 30px;
+  text-align: center;
+}
+/* Psuedo Element Selector*/
+h2::first-line {
+  text-decoration: underline;
 
+}
 .custom-search-bar {
   width: 500px; /* กำหนดความยาวของ Search bar */
   padding-left: 20px; /* กำหนดระยะห่างระหว่างตัวหนังสือและขอบของ Search bar (ข้างใน Search bar)*/
@@ -36,6 +51,7 @@
   border-color: green;
   color: green;
 }
+/*Pseudo-Class selector*/
 
 .page-link:hover {
   background-color: #dcf3de;
