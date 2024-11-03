@@ -1251,7 +1251,6 @@ router.post("/create-checkout-session", async (req, res) => {
         "SELECT * FROM tb_promotion WHERE coupon_code = ? AND startdate <= NOW() AND enddate >= NOW() AND quantity > 0",
         [couponCode]
       );
-
       if (promotionResults.length > 0) {
         req.session.couponCode = couponCode;
         promotions = promotionResults; // Store promotions as an array
