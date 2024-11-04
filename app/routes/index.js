@@ -51,7 +51,6 @@ router.use((req, res, next) => {
 const cartService = (req, res, next) => {
   const cartItems = req.session.cart || [];
   res.locals.cartCount = cartItems.length;
-  res.locals.cart = cartItems; 
   next();
 };
 router.use(cartService);
@@ -104,6 +103,9 @@ router.use((req, res, next) => {
     usr: req.session.usr,
     img: req.session.img,
     level: req.session.level,
+    phone: req.session.phone,
+    citizencard: req.session.citizencard,
+    address: req.session.address,
   };
 
   next();
@@ -234,6 +236,9 @@ router.post("/login", (req, res) => {
       req.session.img = result[0].img;
       req.session.level = result[0].level;
       req.session.userid = result[0].id;
+      req.session.phone = result[0].phone;
+      req.session.citizencard = result[0].citizencard;
+      req.session.address = result[0].address;
       res.redirect("/home"); //ไปหน้า home
     } else {
       //ถ้าไม่มีข้อมูล แสดงว่า รหัสผ่านผิดหรือไม่มีข้อมูลในระบบ
@@ -258,7 +263,8 @@ router.post("/register", (req, res) => {
     !req.body["pwd"] ||
     !req.body["level"] ||
     !req.body["phone"] ||
-    !req.body["citizencard"]
+    !req.body["citizencard"],
+    !req.body["address"]
   ) {
     // ถ้าไม่ได้กรอกทั้งหมดให้สร้างข้อความแจ้งเตือน และแสดงผลหน้า Register
 
@@ -273,7 +279,7 @@ router.post("/register", (req, res) => {
     req.body["phone"],
     req.body["citizencard"],
   ];
-  //ตรวจสอบว่ามีชื่อผู้ใช้งานหรือหมายเลขโทรศัพท์ หรือหมายเลขบัตรประชาชนที่ผู้ใช้ป้อนมาว่า มีอยู่ใน database อยู่เเล้วหรือไม่
+ 
   conn.query(checkUsrSql, checkParam, (err, ExistResult) => {
     if (err) throw err;
     //ถ้ามีข้อมูลแสดงว่าซ้ำ
@@ -288,7 +294,7 @@ router.post("/register", (req, res) => {
     }
 
     let sql =
-      "INSERT INTO tb_user SET name = ?, usr =?, pwd = ?, level = ?, phone = ? ,citizencard = ?";
+      "INSERT INTO tb_user SET name = ?, usr =?, pwd = ?, level = ?, phone = ? ,citizencard = ? , address = ? ";
 
     let params = [
       req.body["name"],
@@ -297,6 +303,7 @@ router.post("/register", (req, res) => {
       req.body["level"],
       req.body["phone"],
       req.body["citizencard"],
+      req.body["address"],
     ];
     //ถ้ากไม่มีข้อมูลซ้ำก็เพิ่มข้อมูลผู้ใช้ใหม่เข้าใน database
     conn.query(sql, params);
@@ -369,7 +376,9 @@ router.post("/passwordReset/:token", (req, res) => {
 //isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
 
 router.get("/profile", (req, res) => {
+  console.log(res.locals.user); 
   res.render("profile", { user: res.locals.user });
+  
 });
 
 //isLogin เพื่อตรวจสอบว่าผู้ใช้เข้าสู่ระบบอยู่หรือไม่ และ fetchGroupBooks เพื่อดึงข้อมูลกลุ่มหนังสือจาก database
@@ -419,12 +428,13 @@ router.post("/editProfile/:id", (req, res) => {
       }
       //อัพเดตข้อมูลผู้ใช้ใน database ตามที่ได้ป้อน
       let sql =
-        "UPDATE tb_user SET name = ? , pwd = ? ,phone = ?,citizencard = ?, img = ? WHERE id = ?";
+        "UPDATE tb_user SET name = ? , pwd = ? ,phone = ?,citizencard = ?, address = ?, img = ? WHERE id = ?";
       let params = [
         fields["name"],
         fields["pwd"],
         fields["phone"],
         fields["citizencard"],
+        fields["address"],
         imgFileName,
         req.params.id,
       ];
@@ -436,6 +446,10 @@ router.post("/editProfile/:id", (req, res) => {
         conn.query(sqlFetchUser, paramSelect, (err, updatedUser) => {
           req.session.img = updatedUser[0].img;
           req.session.name = updatedUser[0].name;
+          req.session.phone = updatedUser[0].phone;
+          req.session.citizencard = updatedUser[0].citizencard;
+          req.session.address = updatedUser[0].address;
+
           req.flash("profilepass", "Edit Profile Successfully!!");
           res.redirect("/profile");
         });
@@ -1107,14 +1121,11 @@ router.post("/add-to-cart", (req, res) => {
   const bookId = parseInt(req.body.bookId);
   const cart = req.session.cart || [];
 
-  // Check if the book already exists in the cart
   const existingItem = cart.find((item) => item.bookId === bookId);
 
   if (existingItem) {
-    // If book is already in the cart, increase its quantity
     existingItem.quantity += 1;
   } else {
-    // If book is not in the cart, add it with a default quantity of 1
     cart.push({ bookId: bookId, quantity: 1 });
   }
   let totalQuantity = 0;
@@ -1122,7 +1133,6 @@ router.post("/add-to-cart", (req, res) => {
     totalQuantity += item.quantity;
   });
   req.session.totalQuantity = totalQuantity;
-  // Update the session cart
   req.session.cart = cart;
 
   res.redirect("/home");
@@ -1136,7 +1146,6 @@ router.get("/cart", async (req, res) => {
     let totalPrice = 0;
 
     if (carts.length > 0) {
-      // Extract only bookId values for the SQL query
       let bookIds = carts.map((item) => item.bookId);
       let sql = "SELECT * FROM tb_book WHERE id IN (?)";
       let [results] = await conn.query(sql, [bookIds]);
@@ -1374,6 +1383,7 @@ router.get("/success", async (req, res) => {
     const conn = require("./connect2");
     const sessionId = req.query.session_id;
     const cart = req.session.cart || [];
+    
 
     const bookIds = cart.map((item) => item.bookId);
     const [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [bookIds,]);
@@ -1526,17 +1536,23 @@ router.get("/orderhistory", async (req, res) => {
   try {
     const conn = require("./connect2");
 
+    const [useraddress] = await conn.query(
+      "SELECT u.address FROM tb_user as u WHERE u.id = ?",
+      req.session.userid
+    );
+
     const { day, month, year } = req.query;
     
-    let query = `
-      SELECT o.*, u.id AS user_id, u.name AS user_name 
-      FROM tb_order AS o
-      LEFT JOIN tb_user AS u ON o.user_id = u.id
-    `;
+    let query =
+      "SELECT o.*, u.id AS user_id, u.name AS user_name "+
+      "FROM tb_order AS o " +
+      "LEFT JOIN tb_user AS u ON o.user_id = u.id "+
+      "WHERE o.user_id = ? " 
+    ;
 
     const conditions = [];
-    const values = [];
-
+    const values = [req.session.userid];
+    
     if (day) {
       conditions.push("DAY(o.order_date) = ?");
       values.push(day);
@@ -1550,13 +1566,14 @@ router.get("/orderhistory", async (req, res) => {
       values.push(year);
     }
     if (conditions.length > 0) {
-      query += " WHERE " + conditions.join(" AND ");
+      query += " AND " + conditions.join(" AND ");
     }
 
     query += " ORDER BY o.order_date DESC";
 
     // Query to get all orders for the user
     const [orders] = await conn.query(query, values);
+    console.log(query);
 
         if (orders.length === 0) {
           return res.render("orderhistory", {
@@ -1581,11 +1598,14 @@ router.get("/orderhistory", async (req, res) => {
       return {
         ...order,
         items: orderItems.filter((item) => item.order_id === order.id),
+        address: useraddress[0].address
       };
     });
+  
+    console.log(orderMap);
    // console.log(JSON.stringify(orderMap, null, 2));
     // Render the order history page with organized data
-    res.render("orderhistory", { orders: orderMap, query: req.query });
+    res.render("orderhistory", { orders: orderMap, query: req.query  });
   } catch (error) {
     console.error("Error fetching order history:", error);
     res.status(500).send("An error occurred while fetching order history.");
@@ -1651,11 +1671,25 @@ router.get("/orderhistoryadmin", async (req, res) => {
       [orderIds]
     );
 
-    // Organize order items under their respective orders
+    const userIds = orders.map((order) => order.user_id);
+
+    const [userAddresses] = await conn.query(
+      "SELECT id, address FROM tb_user WHERE id IN (?)",
+      [userIds]
+    );
+
+    // Create a map of user addresses for easy lookup
+    const addressMap = userAddresses.reduce((acc, user) => {
+      acc[user.id] = user.address;
+      return acc;
+    }, {});
+
+    // Organize order items under their respective orders and add address
     const orderMap = orders.map((order) => {
       return {
         ...order,
         items: orderItems.filter((item) => item.order_id === order.id),
+        address: addressMap[order.user_id], // Add address based on user_id
       };
     });
 

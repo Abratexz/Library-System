@@ -31,19 +31,19 @@
                 </div>
                 <div class="">
                     <label class="form-label mt-3">Quantity of Coupon:</label>
-                    <input type="number" class="form-control" min="1" max="9999" name="quantity" value="<%= promotions.quantity %>" placeholder="Ex. 0-9999" required>
+                    <input type="text" class="form-control" pattern="[0-9]{4}" maxlength="4" name="quantity" value="<%= promotions.quantity %>" placeholder="Ex. 0-9999" required>
                 </div>
                 <div class="">
                     <label class="form-label mt-3">Code of Coupon:</label>
-                    <input type="text" class="form-control" name="coupon_code" value="<%= promotions.coupon_code %>" placeholder="Ex. CODE12" required>
+                    <input type="text" class="form-control" name="coupon_code" pattern="[A-Za-z0-9]{4,8}" maxlength="8" value="<%= promotions.coupon_code %>" placeholder="Ex. CODE12" required>
                 </div>
                 <div class="" id="discountField" style="display: none;">
                     <label class="form-label mt-3">Discount (e.g., "20 for 20%"):</label>
-                    <input type="number" class="form-control" pattern="^(100|[1-9][0-9]?)$" title="Please enter a number between 1 and 100" name="discount" value="<%= promotions.discount || '' %>">
+                    <input type="text" class="form-control"  pattern="[0-9]{3}" maxlength="3" name="discount" value="<%= promotions.discount || '' %>">
                 </div>
                 <div class="" id="freeBookField" style="display: none;">
                     <label class="form-label mt-3">FreeBook ID :</label>
-                    <input type="text" class="form-control" name="book_id" value="<%= promotions.book_id || '' %>">
+                    <input type="text" class="form-control" name="book_id" pattern="[0-9]{5}" maxlength="5" value="<%= promotions.book_id || '' %>">
                 </div>
                 <div class="text-end">
                     <a type="button" class="btn btn-md btn-neutral mt-3 me-2" href="/promotion">Cancel</a>

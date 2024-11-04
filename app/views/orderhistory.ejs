@@ -19,7 +19,7 @@
     <input type="number" id="year" name="year" class="form-control" min="1900" max="2100" value="<%= query.year || '' %>">
   </div>
   <div class="col-md-3 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary w-75">Filter</button>
+    <button type="submit" class="btn btn-success w-75">Filter</button>
   </div>
 </form>
 
@@ -29,6 +29,7 @@
           <tr class="text-success">
             <th>Order ID</th>
             <th>Order Date</th>
+            <th>Address</th>
             <th>Status</th>
             <th>Total Amount</th>
             <th>Items</th>
@@ -39,7 +40,8 @@
             <% orders.forEach(order => { %>
               <tr>
                 <td><%= order.id %></td>
-                <td><%= new Date(order.order_date).toLocaleString() %></td>
+                <td><%= dayjs(order.order_date).format('YYYY-MM-DD HH:mm:ss') %></td>
+                <td><%= order.address %></td>
                 <td><%= order.status %></td>
                 <td>THB <%= order.total_amount %></td>
                 <td>
