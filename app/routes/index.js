@@ -1492,15 +1492,22 @@ router.get("/cancel", async (req, res) => {
      const cart = req.session.cart || [];
      
     const bookIds = cart.map((item) => item.bookId);
-    const [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [
-      bookIds,
-    ]);
 
-    const bookPriceMap = books.reduce((acc, book) => {
-      acc[book.id] = parseFloat(book.price);
-      return acc;
-    }, {});
+    // Check if `bookIds` is empty
+    let books = [];
+    const bookPriceMap = {};
 
+    if (bookIds.length > 0) {
+      [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [
+        bookIds,
+      ]);
+
+      // Create the book price map if books were found
+      books.forEach((book) => {
+        bookPriceMap[book.id] = parseFloat(book.price);
+      });
+    }
+     
      if (!sessionId) {
            return res.redirect("/cancel");
      }
@@ -1573,7 +1580,7 @@ router.get("/orderhistory", async (req, res) => {
 
     // Query to get all orders for the user
     const [orders] = await conn.query(query, values);
-    console.log(query);
+    
 
         if (orders.length === 0) {
           return res.render("orderhistory", {
@@ -1602,7 +1609,7 @@ router.get("/orderhistory", async (req, res) => {
       };
     });
   
-    console.log(orderMap);
+    
    // console.log(JSON.stringify(orderMap, null, 2));
     // Render the order history page with organized data
     res.render("orderhistory", { orders: orderMap, query: req.query  });
@@ -1672,7 +1679,6 @@ router.get("/orderhistoryadmin", async (req, res) => {
     );
 
     const userIds = orders.map((order) => order.user_id);
-
     const [userAddresses] = await conn.query(
       "SELECT id, address FROM tb_user WHERE id IN (?)",
       [userIds]
@@ -1756,7 +1762,7 @@ router.post("/editPromotion/:id", (req, res) => {
     
  let params = [req.body, req.params.id];
   conn.query(sql, params, (err, result) => {
-    console.log(result);
+   
     if (err) throw err;
     res.redirect("/promotion");
   });
