@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 28, 2024 at 12:55 PM
+-- Generation Time: Nov 04, 2024 at 08:50 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,16 +45,15 @@ CREATE TABLE `tb_book` (
 --
 
 INSERT INTO `tb_book` (`id`, `group_book_id`, `isbn`, `book_name`, `detail`, `img`, `author`, `status`, `price`, `stock`) VALUES
-(24, 2, '111111', 'Algebra', 'Algebra', '51YCr-JaTwL._AC_UF1000,1000_QL80_.jpg', 'Unknown', 'Available', 199.00, 16),
-(25, 2, '111112', 'MATH', 'MATH', 'images (1).jpg', 'Unknown', 'Available', 150.00, 30),
+(24, 2, '111111', 'Algebra', 'Algebra', '51YCr-JaTwL._AC_UF1000,1000_QL80_.jpg', 'Unknown', 'Available', 199.00, 15),
+(25, 2, '111112', 'MATH', 'MATH', 'images (1).jpg', 'Unknown', 'Available', 150.00, 28),
 (26, 3, '111113', 'MATH2', 'MATH2', 'images (2).jpg', 'Unknown', 'Available', 189.00, 0),
-(27, 7, '111114', 'Python', 'Python', 'images (3).jpg', 'Unknown', 'Available', 219.00, 6),
-(28, 7, '111115', 'Python For Beginner', 'Are you looking to learn more about Machine Learning with Python?  Then Python Programming: The Ultimate Intermediate Guide to Learn Python Machine Learning Step-by-Step is the book for you!  The knowledge you learned in beginner-level programming will he', 'Python-Programming-for-Beginners-cover.jpg', 'Unknown', 'Available', 349.00, 73),
-(29, 6, '111116', 'JAVA ฉบับสมบูรณ์', 'การทำความเข้าใจกับหลักการของ OOP จะช่วยให้เรียนรู้การเขียนโปรแกรมภาษาจาวาได้ไม่ยาก หนังสือเล่มนี้จึงมุ่งเน้นอธิบายให้เข้าใจหลักการของ OPP ก่อน คุณจะรู้สึกได้ว่าการเขียนโปรแกรมด้วยภาษาจาวาไม่ใช่เรื่องยากเลยแม้แต่นิดเดียว', '1000203773_front_XXL.jpg', 'Unknown', 'Available', 499.00, 1),
+(27, 7, '111114', 'Python', 'Python', 'images (3).jpg', 'Unknown', 'Available', 219.00, 4),
+(28, 7, '111115', 'Python For Beginner', 'Are you looking to learn more about Machine Learning with Python?  Then Python Programming: The Ultimate Intermediate Guide to Learn Python Machine Learning Step-by-Step is the book for you!  The knowledge you learned in beginner-level programming will he', 'Python-Programming-for-Beginners-cover.jpg', 'Unknown', 'Available', 349.00, 69),
+(29, 6, '111116', 'JAVA ฉบับสมบูรณ์', 'การทำความเข้าใจกับหลักการของ OOP จะช่วยให้เรียนรู้การเขียนโปรแกรมภาษาจาวาได้ไม่ยาก หนังสือเล่มนี้จึงมุ่งเน้นอธิบายให้เข้าใจหลักการของ OPP ก่อน คุณจะรู้สึกได้ว่าการเขียนโปรแกรมด้วยภาษาจาวาไม่ใช่เรื่องยากเลยแม้แต่นิดเดียว', '1000203773_front_XXL.jpg', 'Unknown', 'Available', 499.00, 0),
 (31, 6, '111118', 'JAVA III', 'JAVA III', 'book_detail_large.gif', 'Unknown', 'Available', 149.00, 48),
-(32, 2, '111119', 'CALCULUS', 'Application-oriented introduction relates the subject as closely as possible to science. In-depth explorations of the derivative, the differentiation and integration of the powers of x, and theorems on differentiation and antidifferentiation lead to a def', 'images.jpg', 'Unknown', 'Available', 590.00, 0),
-(33, 7, '111120', 'PYTHON TH', 'Python', 'images.png', 'Unknown', 'Available', 1290.00, 57),
-(38, 6, 'a', 'a', 'a', '9786162044632l.jpg', 'a', 'Available', 129.00, 7);
+(32, 2, '111119', 'CALCULUS', 'Application-oriented introduction relates the subject as closely as possible to science. In-depth explorations of the derivative, the differentiation and integration of the powers of x, and theorems on differentiation and antidifferentiation lead to a def', 'images.jpg', 'Unknown', 'Available', 590.00, 20),
+(33, 7, '111120', 'PYTHON TH', 'Python', 'images.png', 'Unknown', 'Available', 1290.00, 53);
 
 -- --------------------------------------------------------
 
@@ -163,7 +162,27 @@ CREATE TABLE `tb_order` (
 --
 
 INSERT INTO `tb_order` (`id`, `user_id`, `order_date`, `total_amount`, `status`) VALUES
-(18, 1, '2024-10-28 18:53:04', 349.00, 'Completed');
+(18, 1, '2024-10-28 18:53:04', 349.00, 'Completed'),
+(19, 1, '2024-10-28 18:59:55', 135.00, 'Completed'),
+(20, 1, '2024-10-29 01:05:59', 499.00, 'Failed'),
+(21, 1, '2024-10-29 01:08:43', 499.00, 'Failed'),
+(22, 1, '2024-10-29 01:11:31', 499.00, 'Failed'),
+(23, 1, '2024-10-29 01:16:19', 499.00, 'Failed'),
+(27, 1, '2024-11-03 02:11:03', 299.40, 'Completed'),
+(28, 1, '2024-11-04 12:21:50', 349.00, 'Completed'),
+(29, 40, '2024-11-04 13:02:51', 199.00, 'Completed'),
+(30, 40, '2024-11-04 13:07:02', 150.00, 'Completed'),
+(31, 40, '2024-11-04 14:25:21', 1290.00, 'Completed'),
+(32, 40, '2024-11-04 14:25:33', 1290.00, 'Failed'),
+(33, 40, '2024-11-04 14:27:00', 1062.00, 'Completed'),
+(34, 40, '2024-11-04 14:28:53', 2580.00, 'Failed'),
+(35, 40, '2024-11-04 14:29:50', 1290.00, 'Failed'),
+(36, 40, '2024-11-04 14:30:39', 3870.00, 'Completed'),
+(37, 40, '2024-11-04 14:31:56', 590.00, 'Failed'),
+(38, 40, '2024-11-04 14:37:19', 590.00, 'Failed'),
+(39, 40, '2024-11-04 14:37:59', 1290.00, 'Failed'),
+(40, 40, '2024-11-04 14:39:22', 1290.00, 'Failed'),
+(41, 40, '2024-11-04 14:39:50', 349.00, 'Completed');
 
 -- --------------------------------------------------------
 
@@ -187,7 +206,34 @@ CREATE TABLE `tb_order_items` (
 INSERT INTO `tb_order_items` (`id`, `order_id`, `book_id`, `quantity`, `unit_price`) VALUES
 (23, 18, 28, 1, 349.00),
 (24, 18, 27, 1, 0.00),
-(25, 18, 28, 1, 0.00);
+(25, 18, 28, 1, 0.00),
+(26, 19, 25, 1, 150.00),
+(27, 20, 29, 1, 499.00),
+(28, 21, 29, 1, 499.00),
+(29, 22, 29, 1, 499.00),
+(30, 23, 29, 1, 499.00),
+(31, 24, 38, 2, 129.00),
+(32, 25, 38, 1, 129.00),
+(33, 26, 38, 1, 129.00),
+(34, 27, 29, 1, 499.00),
+(35, 28, 28, 1, 349.00),
+(36, 29, 24, 1, 199.00),
+(37, 30, 25, 1, 150.00),
+(38, 31, 33, 1, 1290.00),
+(39, 32, 33, 1, 1290.00),
+(40, 33, 32, 3, 590.00),
+(41, 34, 33, 2, 1290.00),
+(42, 35, 33, 1, 1290.00),
+(43, 36, 33, 3, 1290.00),
+(44, 36, 27, 1, 0.00),
+(45, 36, 28, 1, 0.00),
+(46, 37, 32, 1, 590.00),
+(47, 38, 32, 1, 590.00),
+(48, 39, 33, 1, 1290.00),
+(49, 40, 33, 1, 1290.00),
+(50, 41, 28, 1, 349.00),
+(51, 41, 27, 1, 0.00),
+(52, 41, 28, 1, 0.00);
 
 -- --------------------------------------------------------
 
@@ -213,9 +259,10 @@ CREATE TABLE `tb_promotion` (
 --
 
 INSERT INTO `tb_promotion` (`id`, `name`, `detail`, `type`, `startdate`, `enddate`, `quantity`, `coupon_code`, `discount`, `book_id`) VALUES
-(2, 'DISCOUNT10% FOR 1 MONTH', 'DISCOUNT10% FOR 1 MONTH FOR FIRST CUSTOMER', 'discount', '2024-10-01', '2024-10-31', 5, 'FIRST10', 10.00, 0),
-(4, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-10-31', 4, 'PYTHONFR', 0.00, 27),
-(5, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-10-31', 5, 'PYTHONFR', 0.00, 28);
+(2, 'DISCOUNT10% FOR 1 MONTH', 'DISCOUNT10% FOR 1 MONTH FOR FIRST CUSTOMER', 'discount', '2024-10-01', '2024-10-31', 4, 'FIRST10', 10.00, 0),
+(4, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-11-28', 2, 'PYTHONFR', 0.00, 27),
+(5, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-11-28', 3, 'PYTHONFR', 0.00, 28),
+(12, 'ASD', 'DAD', 'discount', '2024-11-02', '2024-11-06', 9998, 'SECOND10', 40.00, 0);
 
 -- --------------------------------------------------------
 
@@ -256,19 +303,22 @@ CREATE TABLE `tb_user` (
   `level` varchar(50) NOT NULL,
   `phone` varchar(50) NOT NULL,
   `img` varchar(255) DEFAULT NULL,
-  `citizencard` varchar(50) NOT NULL
+  `citizencard` varchar(50) NOT NULL,
+  `address` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tb_user`
 --
 
-INSERT INTO `tb_user` (`id`, `name`, `usr`, `pwd`, `level`, `phone`, `img`, `citizencard`) VALUES
-(1, 'PANNAWAT KHOOKAEW', 'admin', '1', 'admin', '02555555', '103985836_p0.png', '43214312'),
-(7, 'test', 'test1', '1', 'user', '0255555555', 'a14b87bfd1d5c37f6b1354f7d3d2a685.jpg', '3421312312'),
-(9, 'LibrarianTest', 'test', '2', 'librarian', '00000001', '587491718883049481.webp', '412341233'),
-(36, 'PANNAWAT ', 'user1', '123', 'user', '0222222222', '197535993b10e7ea5f40763f3c185c4214a985ceadafb859ed74864a3103a67f.png', '11111111111'),
-(38, 'admin2', 'admin2', '2', 'user', '0', NULL, '0');
+INSERT INTO `tb_user` (`id`, `name`, `usr`, `pwd`, `level`, `phone`, `img`, `citizencard`, `address`) VALUES
+(1, 'PANNAWAT KHOOKAEW', 'admin', '1 ', 'admin', '02555555', '103985836_p0.png', '43214312', '102/241 ,Soi-35, Moo-6 ,Village Chonlada Bangbuathong Street Bangkruay - Sainoi'),
+(7, 'test', 'test1', '1', 'user', '0255555555', 'a14b87bfd1d5c37f6b1354f7d3d2a685.jpg', '3421312312', NULL),
+(9, 'LibrarianTest', 'test', '2', 'librarian', '00000001', '587491718883049481.webp', '412341233', NULL),
+(36, 'PANNAWAT ', 'user1', '123', 'user', '0222222222', '197535993b10e7ea5f40763f3c185c4214a985ceadafb859ed74864a3103a67f.png', '11111111111', NULL),
+(38, 'admin2', 'admin2', '2', 'user', '0', NULL, '0', NULL),
+(40, 'test', 'test2', '1', 'user', '111-111-1111', '51ea5ba48ca7a3a2c44a9a119a90b574d1cdacb2.png', '1-1111-11111-11-1', 'Chonlada12'),
+(41, 'test', 'test3', '11111111', 'user', '000-000-0000', NULL, '0-0000-00000-00-0', 'Bangkok');
 
 --
 -- Indexes for dumped tables
@@ -361,19 +411,19 @@ ALTER TABLE `tb_history`
 -- AUTO_INCREMENT for table `tb_order`
 --
 ALTER TABLE `tb_order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `tb_order_items`
 --
 ALTER TABLE `tb_order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `tb_promotion`
 --
 ALTER TABLE `tb_promotion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `tb_reserve`
@@ -385,7 +435,7 @@ ALTER TABLE `tb_reserve`
 -- AUTO_INCREMENT for table `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- Constraints for dumped tables
