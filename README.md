@@ -14,5 +14,5 @@ numeral
 
 To run project this you also must have node js in your pc. You can either use node cmd or visual code in terminal cd at Our Library-system and cd into app then npm start or npx nodemon 
 
-NOTED that Your must have db_library of sql database and In index.js there will be newPath variable that you need to change into ur own path Ex. D://Library-System/app/public/images/books/ 
+NOTED that Your must have db_library of sql database
 
