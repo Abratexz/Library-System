@@ -1,49 +1,50 @@
 <script>
  document.addEventListener('DOMContentLoaded', function() {
 
+    // ฟังก์ชันที่การเพิ่มบรรทัดใหม่หลังจุด (.) ด้วย <br> และลบ (,) ออกจากข้อความ
     function addLineBreaksAfterPeriods(text) {
-        text = text.replace(/,/g, '');
-        return text.replace(/\./g, '.<br>');
+        text = text.replace(/,/g, ''); // ใช้เพื่อลบเ (,) ออกจากข้อความทั้งหมด
+        return text.replace(/\./g, '.<br>'); // ใช้แทนที่จุด (.) ทุกจุดด้วย . <br> เพื่อเพิ่มบรรทัดใหม่
     }
-    // Function to show message in modal
+
     function showModal(message, type) {
-        // Get modal elements
-        const modalBody = document.getElementById('modalMessage');
-        const modalTitle = document.getElementById('messageModalLabel');
+
+        const modalBody = document.getElementById('modalMessage');// เข้าถึง element ที่ใช้แสดงเนื้อหาข้อความ
+        const modalTitle = document.getElementById('messageModalLabel'); // เข้าถึง element ที่ใช้แสดงหัวข้อ modal
         
-        // Create alert div for the message
-        const alertDiv = document.createElement('div');
-        alertDiv.className = ` text-center alert alert-${type} mb-0`; // mb-0 removes bottom margin
-        alertDiv.innerHTML =  addLineBreaksAfterPeriods(message);
+
+        const alertDiv = document.createElement('div');  // สร้าง div เพื่อใส่ข้อความเตือน โดยกำหนดสีตามประเภทข้อความ
+        alertDiv.className = ` text-center alert alert-${type}`; 
+        alertDiv.innerHTML =  addLineBreaksAfterPeriods(message); // เรียกใช้ฟังก์ชัน addLineBreaksAfterPeriods เพื่อจัดรูปแบบข้อความ
+         
         
-        // Clear previous content and add new alert
-        modalBody.innerHTML = '';
-        modalBody.appendChild(alertDiv);
+        modalBody.innerHTML = ''; // ล้างข้อความเก่าภายใน modal
+        modalBody.appendChild(alertDiv);  // เพิ่ม alert ใหม่เข้าไปใน modal
         
         
-        // Set title based on message type
+        // ตั้งค่าหัวข้อ modal โดยเปลี่ยนข้อความตามประเภทข้อความ
         modalTitle.textContent = type === 'danger' ? 'Error' : 'Success';
         
-        // Initialize and show Bootstrap modal
+        // เริ่มต้นใช้งาน Bootstrap modal และแสดง modal
         const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
         messageModal.show();
-        
-        // Auto-close after 5 seconds
+
+        // ตั้งเวลาให้ modal ปิดโดยอัตโนมัติหลังจาก 5 วินาที
         setTimeout(() => {
             messageModal.hide();
         }, 5000);
     }
+       // เก็บข้อความ error และ success ที่ได้จาก server ไว้ในตัวแปร messages
         const messages = {
-        error: '<%= messages.error %>',
-        success: '<%= messages.success %>',
+        error: '<%= messages.error %>', //กำหนดข้อความ error ที่ได้จาก server
+        success: '<%= messages.success %>', //กำหนดข้อความ success ที่ได้จาก server
 
     }
-
-    // Check and show messages if they exist
+    // ถ้ามีข้อความ error ให้แสดง modal แสดงข้อความ error และกำหนดประเภทข้อความเป็น 'danger'
     if (messages.error && messages.error.length > 0) {
         showModal(messages.error, 'danger');
     }
-    
+    // ถ้ามีข้อความ success ให้แสดง modal แสดงข้อความ success และกำหนดประเภทข้อความเป็น 'success'
     if (messages.success && messages.success.length > 0) {
         showModal(messages.success, 'success');
     }

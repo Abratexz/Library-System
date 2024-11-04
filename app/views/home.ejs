@@ -1,52 +1,51 @@
 <%- include('header') %>
-
 <%- include('navbar') %>
-
 <%- include('messages') %>  
 
 <div class="container mt-2">
   <main>
-  <section class="card m-4 mt-10 bg-white shadow rounded" style="height: 100%;">
-    <div class="card-body">
-      <h2 class="mt-2 text-success text-center special-elite-regular">- BOOKS -</h2>
-      <div class="container mt-5">
-        <div class="row">
-          <% books.forEach((book) => { %>
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-4 d-flex align-items-stretch">
-              <div class="card shadow w-100">
-                <img src="./images/books/<%= book.img %>" class="card-img-top img-fluid" alt="<%= book.book_name %>" />
-                <div class="card-body d-flex flex-column">
-                  <h5 class="fs-6 text-center card-title fw-bold">
-                    <%= book.book_name %>
-                  </h5>
-                  <p class="text-center text-secondary mb-1" style="font-size: 14px;">
-                    Author: <%= book.author %>
-                  </p>
-                  <p class="text-center text-primary mb-1" style="font-size: 14px;">
-                    <%= book.price %> THB
-                  </p>
-                  <p class="text-center <%= book.status === 'Available' ? 'text-success' : (book.status === 'Reserved' ? 'text-warning' : 'text-danger') %>" style="font-size: 14px;">
-                    Status: <%= book.status %>
-                  </p>
-                  <div class="mt-auto text-center">
-                    <a class="btn btn-primary btn-sm mt-2" href="/borrow/<%= book.id %>">Borrow</a>
-                    <a class="btn btn-warning btn-sm mt-2" href="/reserve/<%= book.id %>">Reserve</a>
-                    <form action="/add-to-cart" method="POST" class="d-inline">
-                      <input type="hidden" name="bookId" value="<%= book.id %>">
-                      <button type="submit" class="btn btn-success btn-sm mt-2">Add to Cart</button>
-                    </form>
+    <section class="card bg-white shadow rounded"> <!-- สร้าง card สำหรับแสดงข้อมูลหนังสือ-->
+      <div class="card-body">
+        <h2 class="mt-2 text-success text-center special-elite-regular">- BOOKS -</h2>
+        <div class="mt-5">
+          <div class="row g-3">
+            <% books.forEach((book) => { %>
+<!--แบ่งหน้าเว็บเป็น 6 ส่วน โดย col-12 คือ น้อยกว่า 576px col-sm-6 คือ 576px ขึ้นไป col-md-4 คือ 768px ขึ้นไป col-lg-3 คือ 992px ขึ้นไป col-xl-2 คือ 1200px ขึ้นไป -->
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2"> 
+                <div class="card h-100"> <!-- สร้าง card และกำหนดความสูงของ card ให้เต็มหน้าจอ   -->
+                  <img src="./images/books/<%= book.img %>" class="card-img-top img-fluid" alt="<%= book.book_name %>" />
+                  <div class="card-body d-flex flex-column"> <!-- d-flex และ flex-column ใช้ในการจัดการตำแหน่งของข้อมูลใน card -->
+                    <h5 class="fs-6 text-center card-title fw-bold text-truncate">
+                      <%= book.book_name %>
+                    </h5>
+                    <p class="text-center text-secondary mb-1" style="font-size: 14px;">
+                      Author: <%= book.author %>
+                    </p>
+                    <p class="text-center text-primary mb-1" style="font-size: 14px;">
+                      <%= book.price %> THB
+                    </p>
+                    <!-- ถ้า status ของหนังสือเป็น Available ให้แสดงสีเขียว ถ้าเป็น Reserved ให้แสดงสีเหลือง ถ้าเป็น Borrowed ให้แสดงสีแดง -->
+                    <p class="text-center <%= book.status === 'Available' ? 'text-success' : (book.status === 'Reserved' ? 'text-warning' : 'text-danger') %>" style="font-size: 14px;">
+                      Status: <%= book.status %>
+                    </p>
+                    <div class="mt-auto text-center">
+                      <a class="btn btn-primary btn-sm mt-2" href="/borrow/<%= book.id %>">Borrow</a>
+                      <a class="btn btn-warning btn-sm mt-2" href="/reserve/<%= book.id %>">Reserve</a>
+                      <form action="/add-to-cart" method="POST" class="d-inline">
+                        <input type="hidden" name="bookId" value="<%= book.id %>">
+                        <button type="submit" class="btn btn-success btn-sm mt-2">Add to Cart</button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          <% }); %>
+            <% }); %>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   </main>
 </div>
-
 <!-- Pagination -->
 <div class="container mt-3">
   <nav aria-label="Page navigation">

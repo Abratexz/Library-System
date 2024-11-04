@@ -7,7 +7,7 @@
                     <h2 >REGISTER</h2>
                     <h4>Don't have an Account?</h4>
                 </div>
-                    <form method="post" action="/register" style="margin-top: 20px;" onsubmit="return validateForm()">
+                    <form method="post" action="/register" style="margin-top: 20px;">
                         <div class="form-group">
                             <label class="text-success">Full Name</label>
                             <input type="text" name="name" class="form-control rounded-pill padding-left"
@@ -54,7 +54,8 @@
                         <%- include('normalms') %>
                         <input type="hidden" name="level" value="user" />
                         <button type="submit" class="btn btn-outline-success rounded-pill"
-                            onsubmit="return validateForm()" style="width: 100%; margin-top: 20px;">Sign-up</button>
+                            style="width: 100%; margin-top: 20px;">Sign-up</button> 
+                            
                     </form>
                 <div class="text-center" style="margin-top: 5px;"> - or - </div>
                 <a href="/login" type="login" class="btn btn-outline-secondary rounded-pill"
@@ -62,42 +63,43 @@
             </div>
         </div>
 <script>
+  // ฟังก์ชันสำหรับตรวจสอบข้อมูลที่กรอกในฟอร์มโทรศัพท์
   function formatPhone(input) {
-    const value = input.value.replace(/\D/g, ''); 
-    let formatted = '';
+    const value = input.value.replace(/\D/g, '');  // ลบทุกอย่างที่ไม่ใช่ตัวเลขออกจากข้อความ
+    let formatted = ''; // สร้างตัวแปรสำหรับเก็บข้อความที่จะจัดรูปแบบ
     
-    if (value.length > 3) {
+    if (value.length > 3) { // ถ้าความยาวของข้อความมากกว่า 3 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 3
       formatted += value.substring(0, 3) + '-';
     } else {
       formatted += value;
     }
     
-    if (value.length > 6) {
+    if (value.length > 6) { // ถ้าความยาวของข้อความมากกว่า 6 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 6
       formatted += value.substring(3, 6) + '-';
       formatted += value.substring(6, 10);
-    } else if (value.length > 3) {
+    } else if (value.length > 3) { // ถ้าความยาวของข้อความมากกว่า 3 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 3
       formatted += value.substring(3);
     }
     
-    input.value = formatted;
+    input.value = formatted;// รวมค่าที่จัดรูปแบบกลับเข้าไปใน input
   }
-function formatCitizenID(input) {
-    const value = input.value.replace(/\D/g, '');
-    let formatted = '';
-    if (value.length > 0) {
-        formatted += value.substring(0, 1); // First digit
+function formatCitizenID(input) { // ฟังก์ชันสำหรับตรวจสอบข้อมูลที่กรอกในฟอร์มเลขบัตรประชาชน
+    const value = input.value.replace(/\D/g, ''); // ลบทุกอย่างที่ไม่ใช่ตัวเลขออกจากข้อความ
+    let formatted = ''; 
+    if (value.length > 0) { // ถ้าความยาวของข้อความมากกว่า 0 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 0
+        formatted += value.substring(0, 1); 
     }
-    if (value.length > 1) {
-        formatted += '-' + value.substring(1, 5); // Next four digits
+    if (value.length > 1) { // ถ้าความยาวของข้อความมากกว่า 1 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 1
+        formatted += '-' + value.substring(1, 5); //
     }
-    if (value.length > 5) {
-        formatted += '-' + value.substring(5, 10); // Next five digits
+    if (value.length > 5) { // ถ้าความยาวของข้อความมากกว่า 5 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 5
+        formatted += '-' + value.substring(5, 10); 
     }
-    if (value.length > 10) {
-        formatted += '-' + value.substring(10, 12); // Next two digits
+    if (value.length > 10) { // ถ้าความยาวของข้อความมากกว่า 10 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 10
+        formatted += '-' + value.substring(10, 12); 
     }
-    if (value.length > 12) {
-        formatted += '-' + value.substring(12, 13); // Last digit
+    if (value.length > 12) { // ถ้าความยาวของข้อความมากกว่า 12 ตัวอักษร และเพิ่ม - หลังจากตัวเลขที่ 12
+        formatted += '-' + value.substring(12, 13); 
     }
 
     input.value = formatted;
@@ -105,17 +107,21 @@ function formatCitizenID(input) {
 
 </script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const usernameInput = document.querySelector('#username');
-    const feedbackElement = document.querySelector('#username-feedback');
+  // ฟังก์ชันสำหรับตรวจสอบข้อมูลที่กรอกในฟอร์มโดยใช้ AJAX
+  document.addEventListener('DOMContentLoaded', function() { 
+    const usernameInput = document.querySelector('#username');// เข้าถึง element id ที่มีชื่อว่า username
+    const feedbackElement = document.querySelector('#username-feedback'); // เข้าถึง element id ที่มีชื่อว่า username-feedback
 
     usernameInput.addEventListener('input', function() {
       const username = usernameInput.value;
 
-      if (username.length > 2) {  // Start checking after 3 characters
+      if (username.length > 2) {  
+        // ส่ง request ไปที่ path /check-username พร้อมกับส่งข้อมูล username โดยencode ด้วย encodeURIComponent เพื่อป้องกันการใส่ข้อความที่อาจจะทำให้เกิดปัญหาในการส่ง request
         fetch(`/check-username?usr=${encodeURIComponent(username)}`)
+        // รับ response และแปลงข้อมูลใน response ให้เป็น JSON
           .then(response => response.json())
           .then(data => {
+            // ตรวจสอบค่าใน data ว่ามีค่า available หรือไม่ ถ้ามีให้แสดงข้อความว่า Username available! ถ้าไม่ให้แสดงข้อความว่า Username already taken!
             if (data.available) {
               feedbackElement.textContent = 'Username available!';
               feedbackElement.style.color = 'green';
@@ -124,12 +130,12 @@ function formatCitizenID(input) {
               feedbackElement.style.color = 'red';
             }
           })
-          .catch(error => {
+          .catch(error => { // ถ้าเกิดข้อผิดพลาดในการส่ง request หรือรับ response ให้แสดงข้อความว่า Error checking username
             feedbackElement.textContent = 'Error checking username';
             feedbackElement.style.color = 'orange';
           });
       } else {
-        feedbackElement.textContent = '';  // Clear feedback for short usernames
+        feedbackElement.textContent = '';  // ถ้าความยาวของ username น้อยกว่า 2 ตัวอักษร ให้ลบข้อความที่แสดงออก
       }
     });
   });

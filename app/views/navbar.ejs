@@ -1,22 +1,22 @@
 <header>
 <nav class="navbar navbar-expand-lg navbar-light shadow light-green">
   <div class="container-fluid">
-    <!-- Brand and Toggle -->
+    <!-- สร้าง Navbar ด้วย Bootstrap 5 --> 
     <a class="navbar-brand special-elite-regular ps-2 text-success" href="/home">LIBRARY</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
       aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- Navbar Content -->
+    <!-- เนื้อหาของ Navbar --> 
     <div class="collapse navbar-collapse" id="navbarContent">
-      <!-- Left Side: Navigation Links -->
+      <!-- สร้างเมนูนำทางด้านซ้าย --> 
       <ul class=" text-center navbar-nav me-auto mb-2 mb-lg-0">
-        <!-- HOME Link -->
+        <!-- สร้างเมนู HOME --> 
         <li class="nav-item">
           <a class="nav-link text-success" href="/home">HOME</a>
         </li>
-        <!-- CATEGORY Dropdown -->
+        <!--  Dropdown สำหรับแสดงหมวดหมู่หนังสือ -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-success" href="#" id="navbarDropdownCategory" role="button"
             data-bs-toggle="dropdown" aria-expanded="false">
@@ -32,8 +32,9 @@
             <% }) %>
           </ul>
         </li>
-        <!-- ADMIN COMMAND Dropdown (Conditional) -->
-        <% if (session.level == "admin" || session.level == "librarian") { %>
+      <!--เช็คว่าเป็น admin หรือ librarian -->
+        <% if (session.level == "admin" || session.level == "librarian") { %> 
+          <!-- สร้างเมนู ADMIN COMMAND สำหรับ admin และ librarian  -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle text-success" href="#" id="navbarDropdownAdmin" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
@@ -55,9 +56,9 @@
         <% } %>
       </ul>
 
-      <!-- Right Side: Search Form and User Actions -->
+      <!--  เมนูนำทางด้านขวา -->
       <ul class="navbar-nav mb-2 mb-lg-0 d-flex align-items-center">
-        <!-- Search Form (Hidden on Small Screens) -->
+        <!-- สร้าง Search Bar สำหรับค้นหาหนังสือ -->
         <li class="nav-item me-3">
           <form id="searchbar" class="d-flex" action="/home" method="GET">
             <div class="input-group">
@@ -77,7 +78,7 @@
           </form>
         </li>
 
-        <!-- Cart Icon -->
+        <!-- Cart -->
         <li class="nav-item">
           <a href="/cart" class="nav-link text-success position-relative">
             <span class="material-symbols-outlined">shopping_cart</span>
@@ -89,9 +90,8 @@
           </a>
         </li>
 
-        <!-- User Profile or Login/Register -->
         <% if (session.token != undefined) { %>
-          <!-- User Profile Dropdown -->
+          <!-- User Dropdown -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle text-success" href="#" id="navbarScrollingDropdown" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
@@ -111,7 +111,7 @@
               style="width: 40px; height: 40px;">
           </li>
         <% } else { %>
-          <!-- Login/Register Links for Guests -->
+          <!-- Login -->
           <li class="nav-item">
             <a class="nav-link text-success" href="/login">Login</a>
           </li>

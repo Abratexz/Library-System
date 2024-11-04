@@ -12,18 +12,18 @@
 
 /* Main Home Page CSS Code*/
 /* Attribute*/
-h2[title="login"] {
+h2[title="login"] { /* กำหนดให้ h2 ที่มี title เป็น login มีสีดำ และ font ขนาด 30px */
   color: black;
   font-size: 30px;
 }
 /* Type Selector*/
-h2 {
+h2 { /* กำหนดให้ h2 มีสีเขียว และ font ขนาด 30px และจัดตำแหน่งข้อความตรงกลาง */
   color: green;
   font-size: 30px;
   text-align: center;
 }
 /* Psuedo Element Selector*/
-h2::first-line {
+h2::first-line { /* กำหนดให้บรรทัดแรกของ h2 มีเส้นใต้*/
   text-decoration: underline;
 
 }
@@ -66,7 +66,7 @@ h2::first-line {
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 600px) { 
   .custom-search-bar {
     width: 100%;
     padding-left: 10px;

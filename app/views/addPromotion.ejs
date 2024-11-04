@@ -1,6 +1,7 @@
 <%- include('header') %>
 <%- include('navbar') %>
 <%- include('messages') %>
+
 <div class="container mt-5">
     <form method="post">
         <div class="card shadow">
@@ -54,27 +55,27 @@
     </form>
 </div>
 <script>
-    // JavaScript function to toggle visibility based on coupon type selection
-    function toggleFields() {
+    
+    function toggleFields() { // ฟังก์ชันสำหรับเปิด/ปิดฟิลด์ข้อมูลของโปรโมชั่น
         const couponType = document.getElementById("couponType").value;
         const discountField = document.getElementById("discountField");
         const freeBookField = document.getElementById("freeBookField");
 
-        if (couponType === "discount") {
+        if (couponType === "discount") { // ถ้าเลือกประเภทโปรโมชั่นเป็น discount ให้แสดงฟิลด์ข้อมูลส่วนลด
             discountField.style.display = "block";
             freeBookField.style.display = "none";
-            freeBookField.querySelector('input').value = ""; // Clear FreeBook ID if Discount is selected
-        } else if (couponType === "free_book") {
+            freeBookField.querySelector('input').value = ""; 
+        } else if (couponType === "free_book") { // ถ้าเลือกประเภทโปรโมชั่นเป็น free_book ให้แสดงฟิลด์ข้อมูลหนังสือฟรี
             discountField.style.display = "none";
             freeBookField.style.display = "block";
-            discountField.querySelector('input').value = ""; // Clear Discount if FreeBook is selected
-        } else {
+            discountField.querySelector('input').value = ""; 
+        } else { // ถ้าไม่เลือกประเภทโปรโมชั่นให้ซ่อนทั้งสองฟิลด์
             discountField.style.display = "none";
             freeBookField.style.display = "none";
         }
     }
 
-    // Call the function on page load to set initial state based on selected type
+
     toggleFields();
 </script>
 
