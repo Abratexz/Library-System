@@ -1288,7 +1288,7 @@ router.post("/create-checkout-session", async (req, res) => {
       );
       // ถ้า promotionResults มีค่า
       if (promotionResults.length > 0) {
-        req.session.couponCode = couponCode; //เก็บค่า couponCode ใน session ไปใช้ใน page success 
+        req.session.couponCode = couponCode; //เก็บค่า couponCode ใน session ไปใช้ใน page success
         promotions = promotionResults; // ให้ promotions เก็บค่า promotionResults
       } else {
         req.flash("error", "Invalid or expired coupon code or quantity is 0");
@@ -1302,6 +1302,8 @@ router.post("/create-checkout-session", async (req, res) => {
         ถ้ามีโปรโมชั่นที่เป็นประเภท discount ให้คำนวณราคาใหม่โดยการลดราคาจาก unitAmount ด้วย discount เป็น % ที่ได้จากโปรโมชั่น
         totalDiscount คำนวณเฉพาะส่วนที่ลดราคา
         จากนั้น return ค่า lineItems ออกไป
+        ค่าใน cartItem ก็จะมีค่า [{bookId: bookId, quantity: 1}] 
+        ค่าใน lineitems ก็จะมี [{price_data: {currency: "thb", product_data: {name: book.book_name}, unit_amount: unitAmount}, quantity: cartItem.quantity}]
     */
 
     const lineItems = books.map((book) => {
@@ -1312,8 +1314,11 @@ router.post("/create-checkout-session", async (req, res) => {
         (promo) => promo.type === "discount"
       );
       if (discountPromo) {
-        unitAmount = Math.round(unitAmount - (unitAmount * (discountPromo.discount / 100)));
-        totalDiscount += (parseFloat(book.price) - unitAmount / 100) * cartItem.quantity;
+        unitAmount = Math.round(
+          unitAmount - unitAmount * (discountPromo.discount / 100)
+        );
+        totalDiscount +=
+          (parseFloat(book.price) - unitAmount / 100) * cartItem.quantity;
       }
 
       return {
@@ -1326,28 +1331,28 @@ router.post("/create-checkout-session", async (req, res) => {
       };
     });
 
-
-    
     //วนลูปใช้ promo เป็น parameter ในการวนลูปหาโปรโมชั่นที่เป็นประเภท free_book ใน promotion ที่วนลูปเพราะอาจมีหลายโปรโมชั่น
     // ให้ freeBookResults เป็นค่าที่ได้จากการ query หาข้อมูลหนังสือที่มีอยู่ในโปรโมชั่นที่แถมฟรีเเละมี stock มากกว่า 0
     for (const promo of promotions) {
       if (promo.book_id && promo.type === "free_book") {
-          const [freeBookResults] = await conn.query(
-            `SELECT tb_book.*, tb_promotion.quantity AS promo_quantity 
+        const [freeBookResults] = await conn.query(
+          `SELECT tb_book.*, tb_promotion.quantity AS promo_quantity 
                 FROM tb_book 
                 JOIN tb_promotion ON tb_book.id = tb_promotion.book_id 
-                WHERE tb_book.id = ? AND tb_book.stock > 0 AND tb_promotion.quantity > 0`,[promo.book_id]);
+                WHERE tb_book.id = ? AND tb_book.stock > 0 AND tb_promotion.quantity > 0`,
+          [promo.book_id]
+        );
 
         //ถ้าม freeBookResults มีค่า
         if (freeBookResults.length > 0) {
-          const freeBook = freeBookResults[0]; //เอาค่า freebookResults ที่ได้มาเก็บไว้ใน freeBook 
-          
+          const freeBook = freeBookResults[0]; //เอาค่า freebookResults ที่ได้มาเก็บไว้ใน freeBook
+
           //เพิ่มข้อมูลของหนังสือที่ฟรีเข้าไปใน lineItems
           lineItems.push({
             price_data: {
               currency: "thb",
               product_data: { name: freeBook.book_name },
-              unit_amount: 0, 
+              unit_amount: 0,
             },
             quantity: 1,
           });
@@ -1364,15 +1369,18 @@ router.post("/create-checkout-session", async (req, res) => {
     // สร้าง checkout session สำหรับการชำระเงินกับ Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "promptpay"], // รองรับการชำระเงินด้วยบัตรเครดิตหรือ PromptPay
-      line_items: lineItems, 
+      line_items: lineItems,
       mode: "payment",
-      success_url: `${req.protocol}://${req.get("host")}/success?session_id={CHECKOUT_SESSION_ID}`,
-      // ถ้า success ให้ redirect ไปยังหน้า success พร้อมกับส่ง session_id 
-      cancel_url: `${req.protocol}://${req.get("host")}/cancel?session_id={CHECKOUT_SESSION_ID}`,
-      // ถ้า cancel ให้ redirect ไปยังหน้า cancel พร้อมกับส่ง session_id 
+      success_url: `${req.protocol}://${req.get(
+        "host"
+      )}/success?session_id={CHECKOUT_SESSION_ID}`,
+      // ถ้า success ให้ redirect ไปยังหน้า success พร้อมกับส่ง session_id
+      cancel_url: `${req.protocol}://${req.get(
+        "host"
+      )}/cancel?session_id={CHECKOUT_SESSION_ID}`,
+      // ถ้า cancel ให้ redirect ไปยังหน้า cancel พร้อมกับส่ง session_id
     });
 
-    
     res.redirect(303, session.url);
   } catch (error) {
     console.error("Error creating checkout session:", error);
@@ -1704,8 +1712,11 @@ router.get("/orderhistory", async (req, res) => {
     );
 
     // รวมข้อมูล address ของ user กับ order และ order_items ให้เป็นข้อมูลเดียวกันใน orderMap
-    // โดยใช้ order_id ใน order และ order_id ใน order_items ในการเชื่อมข้อมูล เทียบ order_id 
-    // ส่วน address ใช้ข้อมูล address จาก useraddress ที่ได้จากการ query ข้อมูล address ของ user
+    // โดยใช้ order_id ใน order และ order_id ใน order_items ในการเชื่อมข้อมูล เทียบ order_id
+    // ส่วน address ใช้ข้อมูล address จาก useraddress ที่ได้จากการ query ข้อมูล address ของ user\
+    // ใน ordermap ก็จะมีข้อมูล [id, user_id, order_date, total_amount, status, items, address]
+    // เช่น orderMap = [{id: 1, user_id: 1, order_date: "2022-01-01", total_amount: 100, status: "Completed",
+    //items: [{ book_id: 1, quantity: 1, unit_price: 100, book_name: "Book1", img: "book1.jpg" }], address: "123 ถ.สุขุมวิท"}]
     const orderMap = orders.map((order) => {
       return {
         ...order,
@@ -1808,6 +1819,7 @@ router.get("/orderhistoryadmin", async (req, res) => {
 
     // สร้าง addressMap ใช้ function reduce กำหนดให้ acc เป็น parameter ในการวนลูปหา user_id 
     //ที่อยู่ใน userAddresses และเก็บค่า address ที่ได้ไว้ใน addressMap
+    //ค่าของ addressMap ก็จะมีเป็น {user_id: address} เช่น {1: "123 ถ. สุขุมวิท 71"}
     const addressMap = userAddresses.reduce((acc, user) => {
       acc[user.id] = user.address;
       return acc;
@@ -1816,6 +1828,9 @@ router.get("/orderhistoryadmin", async (req, res) => {
     // จากนั้นก็รวมข้อมูล address ของ user กับ order และ order_items ให้เป็นข้อมูลเดียวกันใน orderMap
     // โดยใช้ order_id ใน order และ order_id ใน order_items ในการเชื่อมข้อมูล เทียบ order_id
     // ส่วน address ใช้ข้อมูล address จาก addressMap ที่ได้จากการ query ข้อมูล address ของ user
+    //ข้อมูลใน map ก็จะมีข้อมูล [order_id, user_id, user_name, order_date, total_amount, status, items, address]
+    //เช่น {order_id: 1, user_id: 1, user_name: "John Doe", order_date: "2022-01-01", total_amount: 100, status: "Completed", 
+    //items: [{ book_id: 1, quantity: 1, unit_price: 100, book_name: "Book 1", img: "book1.jpg" }], address: "123 ถ. สุขุมวิท 71"}
     const orderMap = orders.map((order) => {
       return {
         ...order,
