@@ -1297,9 +1297,8 @@ router.post("/create-checkout-session", async (req, res) => {
     }
 
     /*  lineItems ใช้ map เพื่อวนลูปผ่านทุกๆ หนังสือใน array books
-        ให้ cartItem เป็น parameter ในการวนลูปหา bookId ที่ตรงกับ bookId ที่อยู่ใน books 
-        ใน lineItems {} หาค่า book id ที่มีอยู่ใน cart และ book 
-        โดย unitAmount เป็นค่าราคาที่จะใช้กับ stripe
+        ให้ item ใน carts เป็น parameter ในการวนลูปหา bookId ที่ตรงกับ bookId ที่อยู่ใน books 
+        โดย unitAmount เป็นค่าราคาที่จะใช้กับ stripe จาก book.price
         ถ้ามีโปรโมชั่นที่เป็นประเภท discount ให้คำนวณราคาใหม่โดยการลดราคาจาก unitAmount ด้วย discount เป็น % ที่ได้จากโปรโมชั่น
         totalDiscount คำนวณเฉพาะส่วนที่ลดราคา
         จากนั้น return ค่า lineItems ออกไป

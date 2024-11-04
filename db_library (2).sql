@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 04, 2024 at 08:50 AM
+-- Generation Time: Nov 04, 2024 at 08:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,15 +45,15 @@ CREATE TABLE `tb_book` (
 --
 
 INSERT INTO `tb_book` (`id`, `group_book_id`, `isbn`, `book_name`, `detail`, `img`, `author`, `status`, `price`, `stock`) VALUES
-(24, 2, '111111', 'Algebra', 'Algebra', '51YCr-JaTwL._AC_UF1000,1000_QL80_.jpg', 'Unknown', 'Available', 199.00, 15),
+(24, 2, '111111', 'Algebra', 'Algebra', '51YCr-JaTwL._AC_UF1000,1000_QL80_.jpg', 'Unknown', 'Available', 199.00, 13),
 (25, 2, '111112', 'MATH', 'MATH', 'images (1).jpg', 'Unknown', 'Available', 150.00, 28),
 (26, 3, '111113', 'MATH2', 'MATH2', 'images (2).jpg', 'Unknown', 'Available', 189.00, 0),
-(27, 7, '111114', 'Python', 'Python', 'images (3).jpg', 'Unknown', 'Available', 219.00, 4),
-(28, 7, '111115', 'Python For Beginner', 'Are you looking to learn more about Machine Learning with Python?  Then Python Programming: The Ultimate Intermediate Guide to Learn Python Machine Learning Step-by-Step is the book for you!  The knowledge you learned in beginner-level programming will he', 'Python-Programming-for-Beginners-cover.jpg', 'Unknown', 'Available', 349.00, 69),
+(27, 7, '111114', 'Python', 'Python', 'images (3).jpg', 'Unknown', 'Available', 219.00, 0),
+(28, 7, '111115', 'Python For Beginner', 'Are you looking to learn more about Machine Learning with Python?  Then Python Programming: The Ultimate Intermediate Guide to Learn Python Machine Learning Step-by-Step is the book for you!  The knowledge you learned in beginner-level programming will he', 'Python-Programming-for-Beginners-cover.jpg', 'Unknown', 'Available', 349.00, 61),
 (29, 6, '111116', 'JAVA ฉบับสมบูรณ์', 'การทำความเข้าใจกับหลักการของ OOP จะช่วยให้เรียนรู้การเขียนโปรแกรมภาษาจาวาได้ไม่ยาก หนังสือเล่มนี้จึงมุ่งเน้นอธิบายให้เข้าใจหลักการของ OPP ก่อน คุณจะรู้สึกได้ว่าการเขียนโปรแกรมด้วยภาษาจาวาไม่ใช่เรื่องยากเลยแม้แต่นิดเดียว', '1000203773_front_XXL.jpg', 'Unknown', 'Available', 499.00, 0),
 (31, 6, '111118', 'JAVA III', 'JAVA III', 'book_detail_large.gif', 'Unknown', 'Available', 149.00, 48),
-(32, 2, '111119', 'CALCULUS', 'Application-oriented introduction relates the subject as closely as possible to science. In-depth explorations of the derivative, the differentiation and integration of the powers of x, and theorems on differentiation and antidifferentiation lead to a def', 'images.jpg', 'Unknown', 'Available', 590.00, 20),
-(33, 7, '111120', 'PYTHON TH', 'Python', 'images.png', 'Unknown', 'Available', 1290.00, 53);
+(32, 2, '111119', 'CALCULUS', 'Application-oriented introduction relates the subject as closely as possible to science. In-depth explorations of the derivative, the differentiation and integration of the powers of x, and theorems on differentiation and antidifferentiation lead to a def', 'images.jpg', 'Unknown', 'Available', 590.00, 13),
+(33, 7, '111120', 'PYTHON TH', 'Python', 'images.png', 'Unknown', 'Borrowed', 1290.00, 53);
 
 -- --------------------------------------------------------
 
@@ -84,7 +84,8 @@ INSERT INTO `tb_borrow` (`id`, `user_id`, `book_id`, `borrow_date`, `duration`, 
 (75, 1, 32, '25/10/2024 23:47:17', '1', '26/10/2024 23:47:17', 'Borrowed'),
 (76, 1, 38, '26/10/2024 00:17:43', '1', '27/10/2024 00:17:43', 'Borrowed'),
 (77, 1, 33, '28/10/2024 02:14:26', '1', '29/10/2024 02:14:26', 'Borrowed'),
-(78, 1, 29, '28/10/2024 02:15:12', '1', '29/10/2024 02:15:12', 'Borrowed');
+(78, 1, 29, '28/10/2024 02:15:12', '1', '29/10/2024 02:15:12', 'Borrowed'),
+(79, 1, 33, '04/11/2024 19:47:17', '1', '05/11/2024 19:47:17', 'Borrowed');
 
 -- --------------------------------------------------------
 
@@ -141,7 +142,8 @@ INSERT INTO `tb_history` (`id`, `user_id`, `book_id`, `borrow_history_date`, `re
 (85, 1, 32, '25/10/2024 23:47:17', '26/10/2024 23:47:17', 75, 0, '', ''),
 (86, 1, 38, '26/10/2024 00:17:43', '27/10/2024 00:17:43', 76, 0, '', ''),
 (87, 1, 33, '28/10/2024 02:14:26', '29/10/2024 02:14:26', 77, 0, '', ''),
-(88, 1, 29, '28/10/2024 02:15:12', '29/10/2024 02:15:12', 78, 0, '', '');
+(88, 1, 29, '28/10/2024 02:15:12', '29/10/2024 02:15:12', 78, 0, '', ''),
+(89, 1, 33, '04/11/2024 19:47:17', '05/11/2024 19:47:17', 79, 0, '', '');
 
 -- --------------------------------------------------------
 
@@ -182,7 +184,18 @@ INSERT INTO `tb_order` (`id`, `user_id`, `order_date`, `total_amount`, `status`)
 (38, 40, '2024-11-04 14:37:19', 590.00, 'Failed'),
 (39, 40, '2024-11-04 14:37:59', 1290.00, 'Failed'),
 (40, 40, '2024-11-04 14:39:22', 1290.00, 'Failed'),
-(41, 40, '2024-11-04 14:39:50', 349.00, 'Completed');
+(41, 40, '2024-11-04 14:39:50', 349.00, 'Completed'),
+(42, 1, '2024-11-05 01:06:07', 349.00, 'Completed'),
+(43, 1, '2024-11-05 01:07:52', 199.00, 'Completed'),
+(44, 1, '2024-11-05 01:12:10', 590.00, 'Completed'),
+(45, 1, '2024-11-05 01:20:34', 590.00, 'Completed'),
+(46, 1, '2024-11-05 01:24:46', 590.00, 'Completed'),
+(47, 1, '2024-11-05 01:35:48', 590.00, 'Completed'),
+(48, 1, '2024-11-05 01:36:32', 590.00, 'Completed'),
+(49, 1, '2024-11-05 01:39:40', 354.00, 'Completed'),
+(50, 1, '2024-11-05 02:23:43', 199.00, 'Completed'),
+(51, 1, '2024-11-05 02:27:25', 590.00, 'Completed'),
+(52, 1, '2024-11-05 02:27:54', 199.00, 'Failed');
 
 -- --------------------------------------------------------
 
@@ -233,7 +246,29 @@ INSERT INTO `tb_order_items` (`id`, `order_id`, `book_id`, `quantity`, `unit_pri
 (49, 40, 33, 1, 1290.00),
 (50, 41, 28, 1, 349.00),
 (51, 41, 27, 1, 0.00),
-(52, 41, 28, 1, 0.00);
+(52, 41, 28, 1, 0.00),
+(53, 42, 28, 1, 349.00),
+(54, 42, 28, 1, 0.00),
+(55, 42, 27, 1, 0.00),
+(56, 43, 24, 1, 199.00),
+(57, 43, 28, 1, 0.00),
+(58, 43, 27, 1, 0.00),
+(59, 44, 32, 1, 590.00),
+(60, 44, 28, 1, 0.00),
+(61, 44, 27, 1, 0.00),
+(62, 45, 32, 1, 590.00),
+(63, 45, 28, 1, 0.00),
+(64, 46, 32, 1, 590.00),
+(65, 46, 28, 1, 0.00),
+(66, 47, 32, 1, 590.00),
+(67, 47, 28, 1, 0.00),
+(68, 48, 32, 1, 590.00),
+(69, 48, 28, 1, 0.00),
+(70, 48, 27, 1, 0.00),
+(71, 49, 32, 1, 590.00),
+(72, 50, 24, 1, 199.00),
+(73, 51, 32, 1, 590.00),
+(74, 52, 24, 1, 199.00);
 
 -- --------------------------------------------------------
 
@@ -260,9 +295,10 @@ CREATE TABLE `tb_promotion` (
 
 INSERT INTO `tb_promotion` (`id`, `name`, `detail`, `type`, `startdate`, `enddate`, `quantity`, `coupon_code`, `discount`, `book_id`) VALUES
 (2, 'DISCOUNT10% FOR 1 MONTH', 'DISCOUNT10% FOR 1 MONTH FOR FIRST CUSTOMER', 'discount', '2024-10-01', '2024-10-31', 4, 'FIRST10', 10.00, 0),
-(4, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-11-28', 2, 'PYTHONFR', 0.00, 27),
-(5, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-10-01', '2024-11-28', 3, 'PYTHONFR', 0.00, 28),
-(12, 'ASD', 'DAD', 'discount', '2024-11-02', '2024-11-06', 9998, 'SECOND10', 40.00, 0);
+(4, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-09-24', '2024-11-21', 0, 'PYTHONFR', 0.00, 28),
+(5, 'FREE PYTHON', 'FREE PYTHON ', 'free_book', '2024-09-27', '2024-11-24', 0, 'PYTHONFR', 0.00, 27),
+(12, 'ASD', 'DAD', 'discount', '2024-11-02', '2024-11-06', 9997, 'SECOND10', 40.00, 0),
+(13, 'ASDA', 'ASDSA', 'discount', '2024-11-04', '2024-11-06', 111, 'COD4343', 10.00, 0);
 
 -- --------------------------------------------------------
 
@@ -317,8 +353,7 @@ INSERT INTO `tb_user` (`id`, `name`, `usr`, `pwd`, `level`, `phone`, `img`, `cit
 (9, 'LibrarianTest', 'test', '2', 'librarian', '00000001', '587491718883049481.webp', '412341233', NULL),
 (36, 'PANNAWAT ', 'user1', '123', 'user', '0222222222', '197535993b10e7ea5f40763f3c185c4214a985ceadafb859ed74864a3103a67f.png', '11111111111', NULL),
 (38, 'admin2', 'admin2', '2', 'user', '0', NULL, '0', NULL),
-(40, 'test', 'test2', '1', 'user', '111-111-1111', '51ea5ba48ca7a3a2c44a9a119a90b574d1cdacb2.png', '1-1111-11111-11-1', 'Chonlada12'),
-(41, 'test', 'test3', '11111111', 'user', '000-000-0000', NULL, '0-0000-00000-00-0', 'Bangkok');
+(42, 'test', 'test3', '11111111', 'user', '333-333-3333', NULL, '3-3333-33333-33-3', 'Bangkok');
 
 --
 -- Indexes for dumped tables
@@ -393,7 +428,7 @@ ALTER TABLE `tb_book`
 -- AUTO_INCREMENT for table `tb_borrow`
 --
 ALTER TABLE `tb_borrow`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `tb_group_book`
@@ -405,25 +440,25 @@ ALTER TABLE `tb_group_book`
 -- AUTO_INCREMENT for table `tb_history`
 --
 ALTER TABLE `tb_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT for table `tb_order`
 --
 ALTER TABLE `tb_order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `tb_order_items`
 --
 ALTER TABLE `tb_order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
 
 --
 -- AUTO_INCREMENT for table `tb_promotion`
 --
 ALTER TABLE `tb_promotion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `tb_reserve`
@@ -435,17 +470,7 @@ ALTER TABLE `tb_reserve`
 -- AUTO_INCREMENT for table `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `tb_order`
---
-ALTER TABLE `tb_order`
-  ADD CONSTRAINT `tb_order_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tb_user` (`id`);
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
