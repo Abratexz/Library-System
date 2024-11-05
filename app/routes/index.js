@@ -143,33 +143,42 @@ router.get("/home", async (req, res) => {
   try {
     let conn = require("./connect2");
     let page = parseInt(req.query.page) || 1; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้า เช่น ถ้า url page=2 ค่า page ก็ = 2
-    let BooksPerPage = parseInt(req.query.BooksPerPage) || 12; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้าโดย ให้ Default = 10
-    let offset = (page - 1) * BooksPerPage; // ใช้ในการคำนวณข้อมูลที่ต้องการแสดงในแต่ละหน้า มี 2 หน้าก็อาจจะมีถึง 11 ข้อมูล เป็นต้น
+    let BooksPerPage = parseInt(req.query.BooksPerPage) || 12; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้าโดย ให้ Default = 12
+    let offset = (page - 1) * BooksPerPage; // ใช้ในการคำนวณข้อมูลที่ต้องการแสดงในแต่ละหน้า มี 2 หน้าก็อาจจะมีถึง 13 ข้อมูล เป็นต้น
     let sql = "SELECT COUNT(*) AS total FROM tb_book";
 
-    //เงื่อนไขสำหรับการใช้หาหนังสือ
+    // ใส่เงื่อนไขในการค้นหาหนังสือ โดยใช้ query string ที่ส่งมาจากหน้า home 
     let params = [];
     let whereClause = "";
-    if (req.query.search) {
+    if (req.query.search) { // ถ้า search มีค่า ให้เพิ่มเงื่อนไขในการค้นหา
       whereClause += "book_name LIKE(?)";
       params.push("%" + req.query.search + "%");
     }
-    if (req.query.groupBookId) {
-      if (whereClause) whereClause += " AND ";
-      if (req.query.groupBookId === "All") {
+    if (req.query.groupBookId) { // ถ้า groupBookId มีค่า ให้เพิ่มเงื่อนไขในการค้นหา
+      if (whereClause) whereClause += " AND "; 
+      if (req.query.groupBookId === "All") { // ถ้า groupBookId เป็น "All" ให้เพิ่มเงื่อนไขที่ไม่มีเงื่อนไข
         whereClause += "1";
-      } else {
+      } else { // ถ้าไม่ใช่ "All" ให้เพิ่มเงื่อนไขในการค้นหา
         whereClause += "group_book_id = ?";
         params.push(req.query.groupBookId);
       }
     }
-    if (whereClause) {
+    if (whereClause) { // ถ้ามีเงื่อนไขในการค้นหา ให้เพิ่มเงื่อนไขใน query ที่ใช้ในการนับจำนวนหนังสือทั้งหมด
       sql += " WHERE " + whereClause;
     }
+    // โดยผลลัพลำดับคร่าวๆ จะเป็นดังนี้
+    // SELECT COUNT(*) AS total FROM tb_book WHERE book_name LIKE(?) AND group_book_id = ?
+    // SELECT COUNT(*) AS total FROM tb_book WHERE book_name LIKE(?) AND 1
+    
 
     let [countResult] = await conn.query(sql, params); // นับจำนวนทั้งหมดของหนังสือ
-    let totalBooks = countResult[0].total;
-    let totalPages = Math.ceil(totalBooks / BooksPerPage);
+    let totalBooks = countResult[0].total; // จำนวนหนังสือทั้งหมด
+    let totalPages = Math.ceil(totalBooks / BooksPerPage); // คำนวณหน้าทั้งหมดที่ต้องการแสดง
+
+    // ดึงข้อมูลหนังสือทั้งหมดที่ตรงกับเงื่อนไขและจำนวนหนังสือที่ต้องการแสดง
+    // SELECT * FROM tb_book WHERE book_name LIKE(?) AND group_book_id = ? ORDER BY id DESC LIMIT ? OFFSET ?
+    // SELECT * FROM tb_book WHERE book_name LIKE(?) AND 1 ORDER BY id DESC LIMIT ? OFFSET ?
+  
     sql = "SELECT * FROM tb_book";
     if (whereClause) {
       sql += " WHERE " + whereClause;
@@ -1142,6 +1151,10 @@ router.post("/add-to-cart", (req, res) => {
 });
 
 router.get("/cart", async (req, res) => {
+  //1. ดึงข้อมูลหนังสือที่อยู่ในตะกร้าสินค้าจาก session หรือสร้างตะกร้าใหม่ถ้าไม่มี
+  //2. ดึงข้อมูลหนังสือที่อยู่ในตะกร้าสินค้าจาก database
+  //3. นำข้อมูลหนังสือที่อยู่ในตะกร้าสินค้ามาคำนวณราคาทั้งหมดของหนังสือที่อยู่ในตะกร้าสินค้า
+  //4. แสดงผลหน้า "cart" โดยส่งข้อมูลตะกร้าสินค้า จำนวนหนังสือทั้งหมดในตะกร้าสินค้า และราคาทั้งหมดของหนังสือที่อยู่ในตะกร้าสินค้า
   try {
     let conn = require("./connect2");
     let carts = req.session.cart || []; // ดึงข้อมูลตะกร้าสินค้าจาก session หรือสร้างตะกร้าใหม่ถ้าไม่มี
@@ -1234,6 +1247,13 @@ router.post("/remove-cart", (req, res) => {
 
 router.post("/create-checkout-session", async (req, res) => {
   // สร้าง checkout session สำหรับการชำระเงินกับ Stripe
+  //1. ตรวจสอบว่าตะกร้าสินค้าว่างหรือไม่
+  //2. ดึงข้อมูลหนังสือที่อยู่ในตะกร้าสินค้า
+  //3. ตรวจสอบว่าหนังสือมีใน stock หรือไม่
+  //4. ตรวจสอบว่ามีคูปองหรือไม่
+  //5. หาค่าส่วนลดจากคูปอง
+  //6. สร้าง checkout session สำหรับการชำระเงินกับ Stripe
+  //7. ส่ง checkout session ไปที่หน้า success หรือ cancel ตามเงื่อนไข
   try {
     const conn = require("./connect2");
     const cart = req.session.cart || []; // ดึงข้อมูลตะกร้าสินค้าจาก session หรือสร้างตะกร้าใหม่ถ้าไม่มี
@@ -1421,6 +1441,16 @@ router.post("/webhook", bodyParser.raw({ type: "application/json" }),async (req,
 
 
 router.get("/success", async (req, res) => {
+  //1. ตรวจสอบว่า session_id มีค่าหรือไม่
+  //2. ดึงข้อมูล session จาก Stripe
+  //3. ถ้า session.payment_status เป็น paid
+  //4. สร้าง order ใน tb_order
+  //5. สร้าง order_items ใน tb_order_items
+  //6. อัพเดท stock ใน tb_book
+  //7. ลบข้อมูลในตะกร้าสินค้า
+  //8. ลบข้อมูลใน session
+  //9. ส่งข้อมูลไปยังหน้า success
+  
   try {
     const conn = require("./connect2");
     const sessionId = req.query.session_id; // รับค่า session_id จาก query string
@@ -1571,11 +1601,16 @@ router.get("/success", async (req, res) => {
 });
 
 router.get("/cancel", async (req, res) => {
-   try {
-     const conn = require("./connect2");
-     const sessionId = req.query.session_id; // รับค่า session_id จาก query string 
-     const cart = req.session.cart || []; // ดึงข้อมูลตะกร้าสินค้าจาก session หรือสร้างตะกร้าใหม่ถ้าไม่มี
-     
+  //1. ตรวจสอบว่า session_id มีค่าหรือไม่
+  //2. ดึงข้อมูล session จาก Stripe
+  //3. ถ้า session.payment_status เป็น unpaid
+  //4. ลบข้อมูลใน session
+  //5. ส่งข้อมูลไปยังหน้า cancel
+  try {
+    const conn = require("./connect2");
+    const sessionId = req.query.session_id; // รับค่า session_id จาก query string
+    const cart = req.session.cart || []; // ดึงข้อมูลตะกร้าสินค้าจาก session หรือสร้างตะกร้าใหม่ถ้าไม่มี
+
     // ใช้ function map กำหนดให้ item เป็น parameter ในการวนลูปหา bookId ที่อยู่ในตะกร้าสินค้า และเก็บค่า bookId ที่ได้ไว้ใน bookIds
     const bookIds = cart.map((item) => item.bookId);
 
@@ -1583,53 +1618,52 @@ router.get("/cancel", async (req, res) => {
     const bookPriceMap = {};
 
     // ถ้า bookIds มีค่า
-     if (bookIds.length > 0) {
+    if (bookIds.length > 0) {
       // ให้ books เก็บค่า query ที่ข้อมูลหนังสือที่มีอยู่ในตะกร้าสินค้า จาก bookIds ที่ได้จากการวนลูป
       [books] = await conn.query("SELECT * FROM tb_book WHERE id IN (?)", [
         bookIds,
       ]);
 
-      // สร้าง bookPriceMap ใช้ function forEach กำหนดให้ book เป็น parameter 
+      // สร้าง bookPriceMap ใช้ function forEach กำหนดให้ book เป็น parameter
       //ในการวนลูปหา bookId ที่อยู่ใน books และเก็บค่า price ที่ได้ไว้ใน bookPriceMap
       books.forEach((book) => {
         bookPriceMap[book.id] = parseFloat(book.price);
       });
     }
-     
-     if (!sessionId) {
-           return res.redirect("/cancel");
-     }
-     const session = await stripe.checkout.sessions.retrieve(sessionId);
-     // ถ้า session.payment_status เป็น unpaid
-     if (session.payment_status === "unpaid") {
-       // orderResult เก็บค่า query ที่เพิ่มข้อมูลในตาราง tb_order 
+
+    if (!sessionId) {
+      return res.redirect("/cancel");
+    }
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // ถ้า session.payment_status เป็น unpaid
+    if (session.payment_status === "unpaid") {
+      // orderResult เก็บค่า query ที่เพิ่มข้อมูลในตาราง tb_order
       const [orderResult] = await conn.query(
         "INSERT INTO tb_order (user_id, order_date, total_amount, status) VALUES (?, NOW(), ?, ?)",
         [res.locals.user.id, session.amount_total / 100, "Failed"]
       );
-       
-       const orderId = orderResult.insertId; //เอาค่า id ที่พึ่งเพิ่มเข้าไปในตาราง tb_order มาเก็บไว้ใน orderId
-       
 
-       // วนลูปใช้ bookId และ quantity จาก cart
-       //ให้ unitPrice เป็นค่าราคาของหนังสือที่อยู่ใน bookPriceMap[bookId]
-       //และใส่ข้อมูลใน query orderId จาก  orderResult.insertId ที่ใส่ล่าสุด เพื่อให้ tb_order_items รู้ว่าข้อมูลอยู่ใน order ไหน
-       for (const { bookId, quantity } of cart) {
-         const unitPrice = bookPriceMap[bookId];
-         
-         await conn.query(
-           "INSERT INTO tb_order_items (order_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
-           [orderId, bookId, quantity, unitPrice]
-         );
-       }
-     }
-     req.session.cart = []; // reset ลบข้อมูลในตะกร้าสินค้า
-     req.session.totalQuantity = 0; // reset ลบข้อมูลจำนวนหนังสือทั้งหมดในตะกร้าสินค้า
-     res.render("cancel");
-   } catch (error) {
-     console.error("Error finalizing order:", error);
-     res.status(500).send("An error occurred while finalizing the order.");
-   }
+      const orderId = orderResult.insertId; //เอาค่า id ที่พึ่งเพิ่มเข้าไปในตาราง tb_order มาเก็บไว้ใน orderId
+
+      // วนลูปใช้ bookId และ quantity จาก cart
+      //ให้ unitPrice เป็นค่าราคาของหนังสือที่อยู่ใน bookPriceMap[bookId]
+      //และใส่ข้อมูลใน query orderId จาก  orderResult.insertId ที่ใส่ล่าสุด เพื่อให้ tb_order_items รู้ว่าข้อมูลอยู่ใน order ไหน
+      for (const { bookId, quantity } of cart) {
+        const unitPrice = bookPriceMap[bookId];
+
+        await conn.query(
+          "INSERT INTO tb_order_items (order_id, book_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
+          [orderId, bookId, quantity, unitPrice]
+        );
+      }
+    }
+    req.session.cart = []; // reset ลบข้อมูลในตะกร้าสินค้า
+    req.session.totalQuantity = 0; // reset ลบข้อมูลจำนวนหนังสือทั้งหมดในตะกร้าสินค้า
+    res.render("cancel");
+  } catch (error) {
+    console.error("Error finalizing order:", error);
+    res.status(500).send("An error occurred while finalizing the order.");
+  }
 });
 
 router.get("/orderhistory", async (req, res) => {
