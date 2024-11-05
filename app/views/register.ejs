@@ -141,5 +141,22 @@ function formatCitizenID(input) { // ฟังก์ชันสำหรับ�
   });
 </script>
 
+<!-- ถ้าเป็น Xhtml  
+  const xhr = new XMLHttpRequest();  
+
+  <xhr.onreadystatechange = function() { 
+  if(xhr.readyState === 4 && xhr.status === 200) { 
+   const data = JSON.parse(xhr.responseText); 
+
+   โค๊ดปรับ textcontent ต่างๆ if(data.available) 
+    else if (xhr.readyState === 4)
+            โค๊ดปรับ textcontent ต่างๆ 
+          } ปิดของ xhr.readystate
+    } ปิดของ xhr.onreadystatechange function()
+    xhr.open("GET", `/check-username?usr=${encodeURIComponent(username)}`, true);
+    xhr.send();
+        }; 
+-->
 
         <%- include('footerindex') %> 
+
