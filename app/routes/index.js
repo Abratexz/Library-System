@@ -143,7 +143,7 @@ router.get("/home", async (req, res) => {
   try {
     let conn = require("./connect2");
     let page = parseInt(req.query.page) || 1; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้า เช่น ถ้า url page=2 ค่า page ก็ = 2
-    let BooksPerPage = parseInt(req.query.BooksPerPage) || 10; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้าโดย ให้ Default = 10
+    let BooksPerPage = parseInt(req.query.BooksPerPage) || 12; // ใช้ในการกำหนดหน้าปัจจุบันและจำนวนหนังสือต่อหน้าโดย ให้ Default = 10
     let offset = (page - 1) * BooksPerPage; // ใช้ในการคำนวณข้อมูลที่ต้องการแสดงในแต่ละหน้า มี 2 หน้าก็อาจจะมีถึง 11 ข้อมูล เป็นต้น
     let sql = "SELECT COUNT(*) AS total FROM tb_book";
 
