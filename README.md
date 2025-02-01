@@ -24,9 +24,13 @@ The inclusion of a file named stripe.exe hints at possible integration with paym
 
 
 Installation and Setup
+
 1.Clone the Repository: git clone https://github.com/Abratexz/Library-System.git
+
 2.Install Dependencies: cd Library-System , npm install
+
 3.Database Setup: Use the provided SQL script (db_library (2).sql) to create and initialize the database.
+
 4.Run the Application: npm start
 
 
