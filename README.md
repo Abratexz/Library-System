@@ -1,7 +1,9 @@
+**PART OR SOFTWARE ENGINEER AND WEB DEVELOPMENT PROJECT**
+
 **Library System**
 
 Overview
-The Library System project is a web-based application designed to manage and streamline library operations. Built with a combination of JavaScript, EJS, HTML, and CSS, the project offers a user-friendly interface for managing books, members, and lending transactions. It also includes SQL scripts to help set up the required database schema.
+The Library System project is a web-based application designed to manage and streamline library operations. Built with a combination of JavaScript, EJS, HTML, and CSS, for managing books, members, and lending transactions. It also includes SQL scripts to help set up the required database schema.
 
 **Features**
 Book and Member Management:
